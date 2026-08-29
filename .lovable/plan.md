@@ -2,11 +2,22 @@
 
 Rebuild the beer review site in this Lovable project as a mobile-first app with three screens, keeping the dark theme of the current site, and moving the data from Google Sheets into Lovable Cloud with an in-app "Add beer" form.
 
-## Theme (carried over from the repo)
+## Theme (refreshed)
 
-- Dark background (near-black `#0f0f11`), warm amber/gold accent, green/red for good/bad ratings
-- Plus Jakarta Sans typography
-- Rounded cards, subtle borders, generous spacing — but far fewer widgets per screen than today
+Same family as today — dark, calm, beer-warm — but modernised now that you've given permission to change it:
+
+- Deep charcoal/espresso background with a warmer tone than the current flat near-black, layered card surfaces
+- Amber/gold accent for ratings and highlights, muted green and clay-red for good/bad
+- New type pairing: a characterful display face for headings and numbers, clean sans for body (replacing Plus Jakarta Sans everywhere)
+- Softer radii, bigger touch targets, one clear focal element per screen
+
+## Beer logos
+
+- Each beer/brewery gets its real logo shown on the list rows, detail sheet, and top-rated cards
+- Logos sourced from official brand marks for the ~39 breweries in your data (Heineken, Guinness, Duvel, Estrella Damm, Sapporo, Żywiec, etc.), stored in Lovable Cloud storage with a `logo_url` on the brewery record
+- Any brewery without a usable logo falls back to a styled monogram tile so the layout never breaks
+- New beers added through the form can have a logo uploaded or pasted by URL
+
 
 ## Screens
 
