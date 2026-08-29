@@ -14,7 +14,138 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      beers: {
+        Row: {
+          abv: number | null
+          brewery: string | null
+          cc: string | null
+          city: string | null
+          country: string | null
+          created_at: string
+          created_by: string | null
+          drank_on: string
+          id: string
+          is_new: boolean
+          logo_url: string | null
+          method: string | null
+          name: string
+          notes: string | null
+          origin_cc: string | null
+          rating: number
+          region: string | null
+          style: string
+        }
+        Insert: {
+          abv?: number | null
+          brewery?: string | null
+          cc?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          drank_on?: string
+          id?: string
+          is_new?: boolean
+          logo_url?: string | null
+          method?: string | null
+          name: string
+          notes?: string | null
+          origin_cc?: string | null
+          rating: number
+          region?: string | null
+          style: string
+        }
+        Update: {
+          abv?: number | null
+          brewery?: string | null
+          cc?: string | null
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          drank_on?: string
+          id?: string
+          is_new?: boolean
+          logo_url?: string | null
+          method?: string | null
+          name?: string
+          notes?: string | null
+          origin_cc?: string | null
+          rating?: number
+          region?: string | null
+          style?: string
+        }
+        Relationships: []
+      }
+      breweries: {
+        Row: {
+          cc: string | null
+          country: string | null
+          created_at: string
+          id: string
+          lat: number | null
+          lng: number | null
+          location: string | null
+          logo_url: string | null
+          name: string
+        }
+        Insert: {
+          cc?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location?: string | null
+          logo_url?: string | null
+          name: string
+        }
+        Update: {
+          cc?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          location?: string | null
+          logo_url?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      locations: {
+        Row: {
+          cc: string | null
+          city: string
+          country: string
+          created_at: string
+          id: string
+          lat: number | null
+          lng: number | null
+          region: string | null
+        }
+        Insert: {
+          cc?: string | null
+          city: string
+          country: string
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          region?: string | null
+        }
+        Update: {
+          cc?: string | null
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          region?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
