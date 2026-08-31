@@ -191,6 +191,26 @@ function BeersPage() {
           )}
         </SheetContent>
       </Sheet>
+
+      {isSignedIn && (
+        <button
+          onClick={() => {
+            setEditingBeer(null);
+            setFormOpen(true);
+          }}
+          aria-label="Add a beer"
+          className="fixed bottom-24 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
+        >
+          <Plus size={26} />
+        </button>
+      )}
+
+      <BeerForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        beer={editingBeer}
+        onDeleted={() => setEditingBeer(null)}
+      />
     </Shell>
   );
 }
