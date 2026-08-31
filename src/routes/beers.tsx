@@ -14,7 +14,10 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { flagEmoji, formatMonth, useBeers, type Beer } from "@/lib/beer-data";
-import { Search } from "lucide-react";
+import { Search, Plus, Pencil } from "lucide-react";
+import { useSession } from "@/lib/use-session";
+import { BeerForm } from "@/components/BeerForm";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/beers")({
   head: () => ({
