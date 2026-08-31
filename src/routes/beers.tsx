@@ -152,6 +152,20 @@ function BeersPage() {
               </SheetHeader>
               <div className="mt-4 space-y-3 pb-6">
                 <Rating value={Number(selected.rating)} size={20} />
+                {isSignedIn && (
+                  <Button
+                    variant="secondary"
+                    className="h-10 w-full rounded-xl"
+                    onClick={() => {
+                      setEditingBeer(selected);
+                      setSelected(null);
+                      setFormOpen(true);
+                    }}
+                  >
+                    <Pencil size={14} className="mr-1.5" />
+                    Edit this beer
+                  </Button>
+                )}
                 <dl className="grid grid-cols-2 gap-3 text-sm">
                   {[
                     ["Style", selected.style],
