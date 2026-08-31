@@ -39,9 +39,12 @@ export const Route = createFileRoute("/beers")({
 
 function BeersPage() {
   const { data: beers, isLoading } = useBeers();
+  const { isSignedIn } = useSession();
   const [query, setQuery] = useState("");
   const [style, setStyle] = useState("All");
   const [selected, setSelected] = useState<Beer | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingBeer, setEditingBeer] = useState<Beer | null>(null);
 
   const styles = useMemo(
     () => ["All", ...Array.from(new Set((beers ?? []).map((b) => b.style))).sort()],
