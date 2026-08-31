@@ -14,7 +14,10 @@ import {
   SheetDescription,
 } from "@/components/ui/sheet";
 import { flagEmoji, formatMonth, useBeers, type Beer } from "@/lib/beer-data";
-import { Search } from "lucide-react";
+import { Search, Plus, Pencil } from "lucide-react";
+import { useSession } from "@/lib/use-session";
+import { BeerForm } from "@/components/BeerForm";
+import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/beers")({
   head: () => ({
@@ -36,9 +39,12 @@ export const Route = createFileRoute("/beers")({
 
 function BeersPage() {
   const { data: beers, isLoading } = useBeers();
+  const { isSignedIn } = useSession();
   const [query, setQuery] = useState("");
   const [style, setStyle] = useState("All");
   const [selected, setSelected] = useState<Beer | null>(null);
+  const [formOpen, setFormOpen] = useState(false);
+  const [editingBeer, setEditingBeer] = useState<Beer | null>(null);
 
   const styles = useMemo(
     () => ["All", ...Array.from(new Set((beers ?? []).map((b) => b.style))).sort()],
@@ -146,6 +152,20 @@ function BeersPage() {
               </SheetHeader>
               <div className="mt-4 space-y-3 pb-6">
                 <Rating value={Number(selected.rating)} size={20} />
+                {isSignedIn && (
+                  <Button
+                    variant="secondary"
+                    className="h-10 w-full rounded-xl"
+                    onClick={() => {
+                      setEditingBeer(selected);
+                      setSelected(null);
+                      setFormOpen(true);
+                    }}
+                  >
+                    <Pencil size={14} className="mr-1.5" />
+                    Edit this beer
+                  </Button>
+                )}
                 <dl className="grid grid-cols-2 gap-3 text-sm">
                   {[
                     ["Style", selected.style],
@@ -171,6 +191,26 @@ function BeersPage() {
           )}
         </SheetContent>
       </Sheet>
+
+      {isSignedIn && (
+        <button
+          onClick={() => {
+            setEditingBeer(null);
+            setFormOpen(true);
+          }}
+          aria-label="Add a beer"
+          className="fixed bottom-24 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
+        >
+          <Plus size={26} />
+        </button>
+      )}
+
+      <BeerForm
+        open={formOpen}
+        onOpenChange={setFormOpen}
+        beer={editingBeer}
+        onDeleted={() => setEditingBeer(null)}
+      />
     </Shell>
   );
 }
