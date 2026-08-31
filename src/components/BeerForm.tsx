@@ -58,8 +58,14 @@ export function BeerForm({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     const rating = Number(form.rating);
-    if (!form.name.trim()) return toast.error("Beer name is required");
-    if (!(rating >= 0 && rating <= 5)) return toast.error("Rating must be between 0 and 5");
+    if (!form.name.trim()) {
+      toast.error("Beer name is required");
+      return;
+    }
+    if (!(rating >= 0 && rating <= 5)) {
+      toast.error("Rating must be between 0 and 5");
+      return;
+    }
 
     setBusy(true);
     const payload = {
