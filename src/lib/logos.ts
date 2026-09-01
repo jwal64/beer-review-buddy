@@ -1,93 +1,49 @@
-// Brand domains used to fetch real brewery logos.
-const BEER_DOMAINS: Record<string, string> = {
-  "1664": "kronenbourg1664.com",
-  "Affligem Tripel": "affligembeer.com",
-  "Bolleke De Koninck": "dekoninck.be",
-  "Bud Light": "budlight.com",
-  Budweiser: "budweiser.com",
-  Carlsberg: "carlsberg.com",
-  "Coors Light": "coorslight.com",
-  "Corona Extra": "coronausa.com",
-  Duvel: "duvel.com",
-  "Erdinger Weissbier": "erdinger.de",
-  "Estrella Damm": "estrelladamm.com",
-  "Estrella Galicia": "estrellagalicia.es",
-  Grolsch: "grolsch.com",
-  "Grolsch Puur Weizen": "grolsch.com",
-  Guinness: "guinness.com",
-  Harp: "harp.ie",
-  Heineken: "heineken.com",
-  "Hertog Jan": "hertogjan.nl",
-  IJwit: "brouwerijhetij.nl",
-  Ichiban: "kirin.co.jp",
-  "La Chouffe Blonde": "achouffe.be",
-  "La Fin Du Monde": "unibroue.com",
-  "Leffe Blonde": "leffe.com",
-  "Michelob Ultra": "michelobultra.com",
-  Modelo: "modelousa.com",
-  "Modelo Negra": "modelousa.com",
-  Moretti: "birramoretti.com",
-  "Munchen Dunkel": "weihenstephaner.de",
-  "Münchner Weisse": "hofbraeu-muenchen.de",
-  Peroni: "peroniitaly.com",
-  "Pilsner Urquell": "pilsnerurquell.com",
-  "Red Stripe": "redstripebeer.com",
-  Sapporo: "sapporobeer.com",
-  "Stella Artois": "stellaartois.com",
-  "Stiegl Goldbräu": "stiegl.at",
-  "Texels Skuumkoppe": "texelsebierbrouwerij.nl",
-  Weihenstephaner: "weihenstephaner.de",
-  Wrench: "industrialartsbrewing.com",
-  Żywiec: "zywiec.com.pl",
-};
+// Where a beer's logo is looked up.
+//
+// These used to be two hardcoded maps in this file. They were keyed on the beer
+// names of the first import — "Sapporo", "Ichiban", "Modelo", "1664" — and the
+// names in the database are now the full ones the log actually uses: "Sapporo
+// Premium", "Kirin Ichiban", "Modelo Especial", "Kronenbourg 1664". Every one
+// of those had quietly stopped resolving.
+//
+// So the domains come from the brand_domains table instead, which is the same
+// place the static site reads them from. One list, one set of names, and a beer
+// added here carries its logo to both.
+import type { BreweryRow } from "@/lib/beer-data";
 
-const BREWERY_DOMAINS: Record<string, string> = {
-  Weihenstephaner: "weihenstephaner.de",
-  "Guinness (St. James's Gate)": "guinness.com",
-  "Harp / Diageo": "harp.ie",
-  "Duvel Moortgat": "duvel.com",
-  "AB InBev (Stella)": "stellaartois.com",
-  Heineken: "heineken.com",
-  Grolsch: "grolsch.com",
-  "Bavaria NV (Hertog Jan)": "hertogjan.nl",
-  "Anheuser-Busch": "anheuser-busch.com",
-  "Molson Coors": "molsoncoors.com",
-  "Grupo Modelo": "modelousa.com",
-  Carlsberg: "carlsberg.com",
-  Unibroue: "unibroue.com",
-  Kronenbourg: "kronenbourg1664.com",
-  "Sapporo Brewery": "sapporobeer.com",
-  "Kirin Brewery": "kirin.co.jp",
-  "Red Stripe (D&G)": "redstripebeer.com",
-  "Estrella Galicia": "estrellagalicia.es",
-  "Pilsner Urquell": "pilsnerurquell.com",
-  "Birra Moretti (Heineken Italia)": "birramoretti.com",
-  "Erdinger Weissbräu": "erdinger.de",
-  "Industrial Arts Brewing": "industrialartsbrewing.com",
-  "Żywiec Brewery (Grupa Żywiec)": "zywiec.com.pl",
-  "Birra Peroni": "peroniitaly.com",
-  "S.A. Damm": "estrelladamm.com",
-  "Abbaye de Leffe (AB InBev)": "leffe.com",
-  "Texelse Bierbrouwerij": "texelsebierbrouwerij.nl",
-  "Affligem Brewery (Heineken)": "affligembeer.com",
-  "De Koninck Brewery": "dekoninck.be",
-  "Brouwerij 't IJ": "brouwerijhetij.nl",
-  "Brasserie d'Achouffe": "achouffe.be",
-  "Stieglbrauerei zu Salzburg": "stiegl.at",
-};
+export type DomainMap = Map<string, string[]>;
 
 function favicon(domain: string, size = 128) {
   return `https://www.google.com/s2/favicons?domain=${domain}&sz=${size}`;
 }
 
-export function beerLogo(beerName: string, brewery?: string | null) {
-  const domain =
-    BEER_DOMAINS[beerName] ??
-    (brewery ? (BREWERY_DOMAINS[brewery] ?? BEER_DOMAINS[brewery]) : undefined);
+/** The logo for a beer, by its exact name. */
+export function beerLogo(beerName: string, domains?: DomainMap) {
+  const domain = domains?.get(beerName)?.[0];
   return domain ? favicon(domain) : null;
 }
 
-export function breweryLogo(name: string) {
-  const domain = BREWERY_DOMAINS[name];
+/**
+ * The logo for a brewery. Brand domains are keyed by beer, not by brewery, so
+ * this borrows the domain of a beer that brewery makes — which is the right
+ * answer for the many breweries named after their one beer, and a reasonable
+ * one for the rest.
+ */
+export function breweryLogo(
+  name: string,
+  beers?: { name: string; brewery: string | null }[],
+  domains?: DomainMap,
+) {
+  const mine = beers?.find((b) => b.brewery === name);
+  const domain = mine ? domains?.get(mine.name)?.[0] : undefined;
   return domain ? favicon(domain) : null;
+}
+
+/** Breweries that have no beer with a known domain — nothing to draw for them. */
+export function breweriesWithoutLogos(
+  breweries: BreweryRow[],
+  beers: { name: string; brewery: string | null }[],
+  domains: DomainMap,
+) {
+  return breweries.filter((br) => !breweryLogo(br.name, beers, domains));
 }
