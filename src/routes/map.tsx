@@ -14,7 +14,7 @@ import {
   type Beer,
   type CountryRow,
 } from "@/lib/beer-data";
-import { breweryLogo, type DomainMap } from "@/lib/logos";
+import { beerLogo, breweryLogo, type DomainMap } from "@/lib/logos";
 import { ClientOnly } from "@tanstack/react-router";
 // Bundled with the app — the map's layout breaks entirely without this
 // stylesheet, so it must not depend on a third-party CDN being up.
@@ -205,6 +205,88 @@ function MapPage() {
   );
 }
 
+// ── What a pin says when you click it ────────────────────────
+// The popup is the answer to the click: where this is, its flag, and every
+// beer that belongs to it with its own flag, style, serving and score. It is
+// built as an HTML string because Leaflet parses one — which is exactly why
+// every value below goes through esc() first.
+
+const rating2 = (r: number) => Number(r).toFixed(2);
+
+const avgOf = (list: Beer[]) =>
+  list.length ? list.reduce((sum, b) => sum + Number(b.rating), 0) / list.length : 0;
+
+/** "3 beers · 3.42 avg", or an honest sentence when the pin has nothing yet. */
+const tally = (list: Beer[], nothingWord: string) =>
+  list.length
+    ? `${list.length} beer${list.length === 1 ? "" : "s"} · ${rating2(avgOf(list))} avg`
+    : `nothing logged ${nothingWord}`;
+
+/** A beer's logo tile: monogram underneath, image over it, letter uncovered
+ *  again if the image fails. */
+function logoCell(beer: Beer, domains: DomainMap | undefined) {
+  const src = beerLogo(beer.name, domains, beer.logo);
+  const img = src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()" />` : "";
+  return `<span class="bm-pop-logo"><span>${esc(beer.name.charAt(0))}</span>${img}</span>`;
+}
+
+/** One line per pour: logo, name, where it is from, what it is, what it got. */
+function beerRows(list: Beer[], domains: DomainMap | undefined, countries: CountryRow[]) {
+  if (!list.length) return "";
+  return `<div class="bm-pop-list">${list
+    .map((b) => {
+      const meta = [b.style, b.method].filter(Boolean).join(" · ");
+      return `<div class="bm-pop-row">
+          ${logoCell(b, domains)}
+          <div style="min-width:0">
+            <div class="bm-pop-name">${esc(b.name)}</div>
+            <div class="bm-pop-meta">${flagEmoji(b.origin_cc, countries)} ${esc(meta)}</div>
+          </div>
+          <div class="bm-pop-rating">${esc(rating2(b.rating))}</div>
+        </div>`;
+    })
+    .join("")}</div>`;
+}
+
+/** A city pin: where it was drunk, and what was drunk there. */
+function cityPopup(
+  loc: { city: string; region: string | null; country: string; cc: string | null },
+  poured: Beer[],
+  domains: DomainMap | undefined,
+  countries: CountryRow[],
+) {
+  // "Antwerp, Antwerp" — several cities share their region's name, and saying
+  // it twice reads like a mistake.
+  const where = [loc.city, loc.region === loc.city ? null : loc.region].filter(Boolean).join(", ");
+  return `<div class="bm-pop">
+      <div class="bm-pop-title">${flagEmoji(loc.cc, countries)} ${esc(where)}</div>
+      <div class="bm-pop-sub">${esc(loc.country)}</div>
+      <div class="bm-pop-sub">${esc(tally(poured, "here"))}</div>
+      ${beerRows(poured, domains, countries)}
+    </div>`;
+}
+
+/** A brewery pin: who brews there, and which of their beers are in the log. */
+function breweryPopup(
+  brewery: { name: string; location: string | null; country: string | null; cc: string | null },
+  made: Beer[],
+  domains: DomainMap | undefined,
+  countries: CountryRow[],
+  logo: string | null,
+) {
+  const mark = logo
+    ? `<span class="bm-pop-logo"><span>${esc(brewery.name.charAt(0))}</span><img src="${esc(logo)}" alt="" loading="lazy" onerror="this.remove()" /></span>`
+    : "";
+  return `<div class="bm-pop">
+      <div class="bm-pop-title">${mark}<span>${flagEmoji(brewery.cc, countries)} ${esc(brewery.name)}</span></div>
+      <div class="bm-pop-sub">${esc(
+        [brewery.location, brewery.country].filter(Boolean).join(" · "),
+      )}</div>
+      <div class="bm-pop-sub">${esc(tally(made, "yet"))}</div>
+      ${beerRows(made, domains, countries)}
+    </div>`;
+}
+
 function LeafletMap({
   mode,
   breweries,
@@ -304,14 +386,16 @@ function LeafletMap({
       breweries
         .filter((b) => b.lat != null && b.lng != null)
         .forEach((b) => {
-          const logo = breweryLogo(b.name, beers, domains);
-          const flag = flagEmoji(b.cc, countries);
           const marker = L.marker([b.lat!, b.lng!], { icon: breweryIcon }).addTo(layer);
           marker.bindPopup(
-            `<div style="font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;color:#0a0f1c">
-                ${logo ? `<img src="${esc(logo)}" width="20" height="20" style="object-fit:contain" alt="" onerror="this.style.display='none'" />` : ""}
-                <strong>${esc(b.name)}</strong> ${flag}
-              </div>`,
+            breweryPopup(
+              b,
+              beers.filter((x) => x.brewery === b.name),
+              domains,
+              countries,
+              breweryLogo(b.name, beers, domains),
+            ),
+            { maxWidth: 260, minWidth: 208 },
           );
           marker.on("click", () => pickRef.current({ kind: "brewery", label: b.name }));
         });
@@ -319,10 +403,15 @@ function LeafletMap({
       locations
         .filter((l) => l.lat != null && l.lng != null)
         .forEach((l) => {
-          const flag = flagEmoji(l.cc, countries);
           const marker = L.marker([l.lat!, l.lng!], { icon: cityIcon }).addTo(layer);
           marker.bindPopup(
-            `<div style="font-family:Manrope,sans-serif;color:#0a0f1c"><strong>${esc(l.city)}</strong>, ${esc(l.country)} ${flag}</div>`,
+            cityPopup(
+              l,
+              beers.filter((x) => x.city === l.city && x.cc === l.cc),
+              domains,
+              countries,
+            ),
+            { maxWidth: 260, minWidth: 208 },
           );
           marker.on("click", () => pickRef.current({ kind: "city", label: l.city }));
         });
