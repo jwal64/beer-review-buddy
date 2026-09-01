@@ -594,16 +594,18 @@ function showInsightsSubtab(name){
   document.querySelectorAll('#insights > .subpanel').forEach(p=>{
     p.classList.toggle('active',p.id===name);
   });
-  // Lazy-render the active sub-section (each draw fn sets its own guard flag)
-  if(name==='geo'){
-    if(!window._cD) drawCountry();
-    if(!window._ciD) drawCity();
-    if(!window._langD) drawLanguage();
-  } else if(name==='temporal'){
-    if(!window._tmpD) drawTemporal();
-  } else if(name==='markets'){
-    if(!window._ciX) drawContrarian();
-    if(!window._wtD) drawWantToTry();
+  // Lazy-render the active sub-section (each draw fn sets its own guard flag).
+  // Each draw is guarded on its own: this runs inside the click handler, and an
+  // unguarded throw here (Chart.js failing to load is enough) would kill the
+  // tab switch halfway and leave the navigation looking dead.
+  const lazyDraws={
+    geo:      [['_cD',drawCountry],['_ciD',drawCity],['_langD',drawLanguage]],
+    temporal: [['_tmpD',drawTemporal]],
+    markets:  [['_ciX',drawContrarian],['_wtD',drawWantToTry]]
+  };
+  for(const [flag,fn] of lazyDraws[name]||[]){
+    if(window[flag]) continue;
+    try{ fn(); }catch(e){ console.error('Insights draw error ('+name+'):',e); }
   }
   resizeChartsIn(document.getElementById(name));
   try{history.replaceState(null,'','#'+name);}catch(e){}

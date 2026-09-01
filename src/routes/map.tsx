@@ -7,6 +7,18 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useBeers, useBrandDomains, useBreweries, useLocations, type Beer } from "@/lib/beer-data";
 import { breweryLogo, type DomainMap } from "@/lib/logos";
 import { ClientOnly } from "@tanstack/react-router";
+// Bundled with the app — the map's layout breaks entirely without this
+// stylesheet, so it must not depend on a third-party CDN being up.
+import "leaflet/dist/leaflet.css";
+
+// Leaflet's bindPopup parses HTML, so every data value interpolated into a
+// popup goes through this first — a brewery with an apostrophe or a "<" in
+// its name would otherwise take the popup markup with it.
+const esc = (s: string) =>
+  s.replace(
+    /[&<>"']/g,
+    (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c] as string,
+  );
 
 export const Route = createFileRoute("/map")({
   head: () => ({
@@ -88,7 +100,7 @@ function MapPage() {
                       key={b.id}
                       className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
                     >
-                      <BeerLogo name={b.name} className="h-11 w-11" />
+                      <BeerLogo name={b.name} logo={b.logo} className="h-11 w-11" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{b.name}</p>
                         <p className="truncate text-xs text-muted-foreground">
@@ -159,8 +171,8 @@ function LeafletMap({
           const marker = L.marker([b.lat!, b.lng!], { icon: breweryIcon }).addTo(map);
           marker.bindPopup(
             `<div style="font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;color:#0a0f1c">
-              ${logo ? `<img src="${logo}" width="20" height="20" style="object-fit:contain" alt="" />` : ""}
-              <strong>${b.name}</strong>
+              ${logo ? `<img src="${esc(logo)}" width="20" height="20" style="object-fit:contain" alt="" onerror="this.style.display='none'" />` : ""}
+              <strong>${esc(b.name)}</strong>
             </div>`,
           );
           marker.on("click", () => onPick({ kind: "brewery", label: b.name }));
@@ -171,7 +183,7 @@ function LeafletMap({
         .forEach((l) => {
           const marker = L.marker([l.lat!, l.lng!], { icon: cityIcon }).addTo(map);
           marker.bindPopup(
-            `<div style="font-family:Manrope,sans-serif;color:#0a0f1c"><strong>${l.city}</strong>, ${l.country}</div>`,
+            `<div style="font-family:Manrope,sans-serif;color:#0a0f1c"><strong>${esc(l.city)}</strong>, ${esc(l.country)}</div>`,
           );
           marker.on("click", () => onPick({ kind: "city", label: l.city }));
         });
@@ -179,6 +191,13 @@ function LeafletMap({
 
     return () => {
       cancelled = true;
+      // Tear the map down so navigating away doesn't leak it, and so a data
+      // change (brand domains often arrive after the first paint) rebuilds
+      // the markers instead of being ignored by the init guard.
+      if (mapRef.current) {
+        (mapRef.current as { remove: () => void }).remove();
+        mapRef.current = null;
+      }
     };
   }, [breweries, locations, beers, domains, onPick]);
 
