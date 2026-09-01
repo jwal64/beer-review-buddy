@@ -121,7 +121,145 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  h1, h2, h3, .font-display {
+  h1,
+  h2,
+  h3,
+  .font-display {
     font-family: var(--font-display);
   }
+}
+
+/* ── Map popups ───────────────────────────────────────────────
+   A pin's popup is the answer to the click: where this is, which beers
+   belong to it, and how they scored. Leaflet builds it from an HTML string
+   outside React, but it still lives in this document, so every colour here
+   is the same token the rest of the app reads — nothing is hardcoded.
+
+   Leaflet's own default is a white card, which reads as a hole punched in a
+   dark map. */
+.leaflet-container .leaflet-popup-content-wrapper,
+.leaflet-container .leaflet-popup-tip {
+  background: var(--color-card);
+  color: var(--color-foreground);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 10px 30px rgb(0 0 0 / 45%);
+}
+
+.leaflet-container .leaflet-popup-content-wrapper {
+  border-radius: var(--radius-xl);
+}
+
+.leaflet-container .leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+  font-family: var(--font-sans);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  color: var(--color-muted-foreground);
+  padding: 6px 6px 0 0;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  color: var(--color-foreground);
+  background: transparent;
+}
+
+.bm-pop {
+  padding: 12px 13px 11px;
+  min-width: 208px;
+  max-width: 244px;
+}
+
+.bm-pop-title {
+  font-family: var(--font-display);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.25;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bm-pop-sub {
+  margin-top: 2px;
+  font-size: 11px;
+  color: var(--color-muted-foreground);
+}
+
+/* The scroll only bites where a market has more pours than the card can
+   show — New Rochelle has fifteen, Capri has one. */
+.bm-pop-list {
+  margin-top: 9px;
+  padding-top: 8px;
+  border-top: 1px solid var(--color-border);
+  max-height: 168px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bm-pop-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bm-pop-name {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bm-pop-meta {
+  font-size: 10.5px;
+  color: var(--color-muted-foreground);
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bm-pop-rating {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* The logo tile: a monogram sits underneath, and the image covers it once it
+   loads. A source that fails removes itself, which uncovers the letter —
+   the same last resort the React BeerLogo falls back to. */
+.bm-pop-logo {
+  position: relative;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: var(--color-secondary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.bm-pop-logo span {
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.bm-pop-logo img {
+  position: absolute;
+  inset: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  object-fit: contain;
 }
