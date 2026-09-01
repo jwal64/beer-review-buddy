@@ -25,13 +25,70 @@ never touched by a migration; run `npm run sync` to pull those into the file.
 Never log the same pour both ways: the file writes it as the first of its
 month, the form with a real date, and the two would land as two rows.
 
-## Git rules (Lovable)
+## Making Changes with Claude
 
-This repo is connected to Lovable, which deploys `main` and syncs commits both
-ways. **Never rewrite pushed history** — no force-push, rebase, amend or squash
-of anything already pushed (see AGENTS.md). Merge commits only. A change is
-live once it lands on `main`: Lovable applies any new file in
-`supabase/migrations/` and redeploys the site.
+Any edit — a feature in the app, a tweak to the stats site, a schema change —
+follows the same loop, and the loop is what makes it land on Lovable:
+
+1. **Start from the latest `main`.** Lovable commits its own edits straight to
+   `main`, so fetch and merge it into the working branch first — the tree on
+   disk may be behind what Lovable has already changed.
+2. **Make the edit**, respecting the rules in this file.
+3. **Validate before pushing** — Lovable deploys `main`, so `main` stays green:
+
+   ```sh
+   npm run check          # the data rules + projection round-trip (always)
+   npx tsc --noEmit       # if src/ changed
+   npx eslint <files>     # if src/ or tools/ changed; prettier --write first
+   npx vite build         # if src/, vite.config.ts or package.json changed
+   npm run smoke          # if public/stats/ changed (needs a browser)
+   ```
+
+4. **Merge to `main`.** That is the publish button: Lovable syncs the commit,
+   applies any new file in `supabase/migrations/`, and redeploys. A branch that
+   is only pushed exists on GitHub and nowhere else.
+
+A remote Claude session gets its dependencies automatically — the
+`SessionStart` hook in `.claude/hooks/session-start.sh` runs `npm install` when
+the container starts, so all of the commands above work from the first turn.
+The data tools in `tools/` need nothing installed at all.
+
+### Git rules (Lovable)
+
+**Never rewrite pushed history** — no force-push, rebase, amend or squash of
+anything already pushed (see AGENTS.md): Lovable mirrors this repository, and
+rewriting it rewrites Lovable's copy of the project history. Merge commits
+only.
+
+### Rules that keep an edit Lovable-safe
+
+- **`vite.config.ts` is Lovable's.** `@lovable.dev/vite-tanstack-config`
+  already bundles the TanStack, React, Tailwind, nitro and path-alias plugins —
+  adding any of them again breaks the build with duplicate plugins. Pass extra
+  config through its `defineConfig({ vite: { … } })`, and only when necessary.
+- **`package.json` changes need `bun.lock` updated too** (`bun install`).
+  Lovable builds with bun; a manifest the lockfile disagrees with fails its
+  install. CI and the session hook use npm, which is fine — just keep both
+  files in the same commit.
+- **Schema changes are new migration files, never edits to applied ones.** A
+  file in `supabase/migrations/` that has run is history; changing it does
+  nothing to the database and desynchronises the migration record. Add a new
+  `<YYYYMMDDHHMMSS>_name.sql`, written to be safe on replay and against a
+  database already in use — backfill before a `NOT NULL`, add-and-update
+  rather than delete, `if not exists` on DDL. The existing migrations are the
+  worked example.
+- **`src/integrations/supabase/types.ts` follows every schema change, by
+  hand.** There is no CLI regeneration here; the file mirrors the tables, and
+  the app's type-safety is only as truthful as it is.
+- **The stats site stays dependency-free.** `public/stats/` is plain browser
+  JavaScript served as-is — no imports in `data.js`/`app.js`, no build step,
+  CDN scripts pinned with SRI hashes (`npm run sri` re-derives them; never
+  hand-write one). `live-data.js` and `supabase-rows.mjs` are the only module
+  code, and `supabase-rows.mjs` is shared with the node tools — a change to
+  what a column means happens there and nowhere else.
+- **Secrets stay out.** The only key in the tree is Supabase's publishable
+  key, which is public by design. The service-role key never appears in code,
+  migrations, or workflows.
 
 ## Standard Operating Procedure: Adding a Beer
 
