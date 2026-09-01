@@ -146,12 +146,20 @@ function LeafletMap({
       const L = await import("leaflet");
       if (cancelled || !ref.current || mapRef.current) return;
 
-      const map = L.map(ref.current, { attributionControl: false }).setView([41, -30], 2.2);
+      const map = L.map(ref.current).setView([41, -30], 2.2);
       mapRef.current = map;
 
-      L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-        maxZoom: 19,
+      // Esri's World Dark Gray canvas — keyless, unlike Carto's basemaps,
+      // which now stamp "API KEY REQUIRED" across anonymous requests. Base
+      // paints the ground, Reference adds the place labels; native tiles stop
+      // at zoom 16. The stats site's maps use the same provider.
+      const esri = (v: string) =>
+        `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_${v}/MapServer/tile/{z}/{y}/{x}`;
+      L.tileLayer(esri("Base"), {
+        maxZoom: 16,
+        attribution: "Powered by Esri · © OpenStreetMap contributors",
       }).addTo(map);
+      L.tileLayer(esri("Reference"), { maxZoom: 16 }).addTo(map);
 
       const dot = (color: string) =>
         L.divIcon({
