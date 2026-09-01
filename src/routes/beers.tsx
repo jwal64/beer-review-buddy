@@ -206,6 +206,7 @@ function BeersPage() {
       )}
 
       <BeerForm
+        key={editingBeer?.id ?? "new"}
         open={formOpen}
         onOpenChange={setFormOpen}
         beer={editingBeer}
