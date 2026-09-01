@@ -1,0 +1,140 @@
+name: Untappd Ratings Refresh Reminder
+
+# Fires every 2 weeks (1st and 15th of every month at 09:00 UTC).
+# Opens a GitHub issue if the untappd_last_refreshed stamp is
+# older than UNTAPPD_REFRESH_INTERVAL_DAYS (default 14).
+on:
+  schedule:
+    - cron: '0 9 1,15 * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  remind:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Untappd data freshness
+        id: check
+        run: |
+          # Read the values by loading data.js, not by grepping it.
+          STAMP=$(node -e "import('./tools/load-data.mjs').then(m=>console.log(m.loadData().UNTAPPD_LAST_REFRESHED))")
+          INTERVAL=$(node -e "import('./tools/load-data.mjs').then(m=>console.log(m.loadData().UNTAPPD_REFRESH_INTERVAL_DAYS))")
+          INTERVAL=${INTERVAL:-14}
+
+          if [ -z "$STAMP" ]; then
+            echo "Could not read UNTAPPD_LAST_REFRESHED from data.js" >&2
+            exit 1
+          fi
+
+          STAMP_TS=$(date -d "$STAMP" +%s)
+          NOW_TS=$(date +%s)
+          AGE_DAYS=$(( (NOW_TS - STAMP_TS) / 86400 ))
+
+          echo "stamp=$STAMP" >> "$GITHUB_OUTPUT"
+          echo "age_days=$AGE_DAYS" >> "$GITHUB_OUTPUT"
+          echo "interval=$INTERVAL" >> "$GITHUB_OUTPUT"
+
+          if [ "$AGE_DAYS" -ge "$INTERVAL" ]; then
+            echo "stale=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "stale=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Extract beer list to verify
+        if: steps.check.outputs.stale == 'true'
+        id: beers
+        run: |
+          # Every beer with a stored world average, straight from the data.
+          node -e "import('./tools/load-data.mjs').then(m=>{
+            const a=m.loadData().UNTAPPD_GLOBAL_AVGS;
+            console.log(Object.entries(a).map(([n,v])=>\`- [ ] **\${n}** — current: \${v.toFixed(2)}\`).join('\n'));
+          })" > beers.md
+          {
+            echo "list<<EOF"
+            cat beers.md
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open or update reminder issue
+        if: steps.check.outputs.stale == 'true'
+        uses: actions/github-script@v7
+        env:
+          STAMP: ${{ steps.check.outputs.stamp }}
+          AGE_DAYS: ${{ steps.check.outputs.age_days }}
+          INTERVAL: ${{ steps.check.outputs.interval }}
+          BEER_LIST: ${{ steps.beers.outputs.list }}
+        with:
+          script: |
+            const title = `Refresh Untappd ratings (last verified ${process.env.STAMP})`;
+            const body = [
+              `The Untappd consensus values were last verified on **${process.env.STAMP}**`,
+              `(${process.env.AGE_DAYS} days ago, threshold ${process.env.INTERVAL}d).`,
+              ``,
+              `## How to refresh`,
+              `1. For each beer below, look up its current global average on untappd.com.`,
+              `2. Update its value in \`UNTAPPD_GLOBAL_AVGS\` in \`public/stats/data.js\`.`,
+              `3. Also re-check the \`untappd:\` field on each entry of \`WANT_TO_TRY\`.`,
+              `4. Bump \`UNTAPPD_LAST_REFRESHED\` to today's date.`,
+              `5. Run \`npm run check && npm run migration\`, commit both files, and merge — this issue auto-closes on the next scheduled run.`,
+              ``,
+              `## Beers to verify`,
+              process.env.BEER_LIST || '_(extraction failed — check `public/stats/data.js` manually)_',
+            ].join('\n');
+
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'untappd-refresh',
+            });
+
+            if (existing.length > 0) {
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existing[0].number,
+                title,
+                body,
+              });
+              core.info(`Updated existing issue #${existing[0].number}`);
+            } else {
+              const { data: created } = await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title,
+                body,
+                labels: ['untappd-refresh'],
+              });
+              core.info(`Opened issue #${created.number}`);
+            }
+
+      - name: Close reminder issues if data is fresh
+        if: steps.check.outputs.stale == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'untappd-refresh',
+            });
+            for (const issue of open) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                body: 'Untappd ratings have been refreshed — closing.',
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: issue.number,
+                state: 'closed',
+              });
+            }

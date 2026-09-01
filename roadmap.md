@@ -15,7 +15,12 @@
 - [x] Serve brand logos from `brand_domains` instead of the hardcoded map, which
       was still keyed on the beer names of the first import and had stopped
       resolving
-- [ ] Add the `SUPABASE_URL` and `SUPABASE_KEY` secrets to JWAL-BEER-REVIEW so
-      its **Sync from Supabase** workflow can run (user action)
+- [x] Move the whole stats site here (`public/stats/`, served at `/stats`),
+      with live hydration from Supabase and the committed `data.js` as its
+      instant offline snapshot — one repo, hosted by Lovable
+- [x] The add-a-beer-via-Claude flow: edit `data.js`, `npm run migration`,
+      merge — Lovable applies the migration (SOP in CLAUDE.md)
+- [ ] Archive jwal64/JWAL-BEER-REVIEW and turn off its GitHub Pages once the
+      Lovable URL serves `/stats` (user action)
 - [ ] Editing screens for the shortlist, brand domains and Untappd averages —
-      they are the source of truth now but are still edited in the table editor
+      still edited via Claude or the table editor for now

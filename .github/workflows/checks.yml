@@ -1,0 +1,36 @@
+name: Data check
+
+# The stats site has no build step, so nothing else would notice a beer added
+# with a country code that has no flag, a brewery that was never registered or
+# a missing brand domain. This runs the same checks CLAUDE.md asks for, on
+# every push — including the pushes Lovable makes when the app is edited there.
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # No dependencies to install — the tools are plain Node.
+      - name: Validate the data
+        run: node tools/validate-data.mjs
+
+      # data.js goes out through the database columns and back; a value that
+      # does not survive is what a migration would quietly write wrong.
+      - name: Check the Supabase projection round-trips
+        run: node tools/roundtrip-supabase.mjs
+
+      - name: Syntax-check the site scripts
+        run: node --check public/stats/data.js && node --check public/stats/app.js && node --check public/stats/live-data.js

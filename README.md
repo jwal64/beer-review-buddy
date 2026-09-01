@@ -1,43 +1,41 @@
 # Beer Review Buddy
 
-Add a beer in seconds, from a phone. **This app, and the Supabase database
-behind it, is the source of truth for the whole beer log.**
+The whole beer log, in one place, hosted by Lovable:
 
-The static site at
-[jwal64/JWAL-BEER-REVIEW](https://github.com/jwal64/JWAL-BEER-REVIEW) — the
-charts, the maps, the passport, the want-to-try scorecard — is generated from
-these tables. It used to be the other way round: the reviews lived in a
-`data.js` file there and this app held a partial copy. The
-`beer_buddy_source_of_truth` migration reversed it.
+- **The app** (`/`) — add a beer in seconds, from a phone. Home, Beers, Map.
+- **The stats site** (`/stats`) — the full analytics: charts, maps, the
+  passport, the want-to-try scorecard. Static files in `public/stats/`, moved
+  intact from [jwal64/JWAL-BEER-REVIEW](https://github.com/jwal64/JWAL-BEER-REVIEW),
+  which this repo supersedes.
+- **Supabase** — the runtime store both of them read.
 
-```
-  this app                     Supabase              JWAL-BEER-REVIEW
-  (add a beer, on a phone) ──> beers, breweries, ──> data.js ──> the site
-                               locations, brand
-                               domains, want-to-try
-                                     │
-                                     └── npm run sync, nightly in CI
-```
+## How a beer gets in
 
-## What that means when changing things here
+Two doors, one log:
 
-The site cannot render what this database does not store, and it will not
-render a review that is missing a piece. So:
+1. **Through Claude** (the usual way): describe the beer, and the session edits
+   `public/stats/data.js`, runs `npm run check && npm run migration`, and
+   commits the file with the generated migration. Merged to `main`, Lovable
+   applies the migration and redeploys. The SOP lives in [CLAUDE.md](CLAUDE.md).
+2. **Through the app's form**: writes straight to Supabase. The stats page
+   picks it up live; `npm run sync` pulls it back into `data.js` whenever the
+   file should catch up.
 
-- **A beer needs its brewery, its place and a logo domain.** `origin_cc` comes
-  from the brewery; `city`/`region`/`country`/`cc` come from the place. That is
-  why the form's brewery and place fields are pickers that can create what they
-  do not find, rather than free text.
-- **The database enforces most of the site's rules itself** — a rating in
-  quarter steps, a known serving method, a brewery with a language, a bare logo
-  domain. A failed insert is usually one of those, and the message says which.
-- **Don't drop a column because this app does not show it.** `lang`,
-  `native_name`, `seq` and `logo` are all rendered over there.
+The stats page paints instantly from the committed `data.js` snapshot, then
+hydrates from the database (`public/stats/live-data.js`) — so it is current
+without a deploy, and still works offline or if the database is unreachable.
 
-The full set of rules is in that repo's
-[CLAUDE.md](https://github.com/jwal64/JWAL-BEER-REVIEW/blob/main/CLAUDE.md); the
-projection between these tables and `data.js` is written once, in its
-`tools/supabase-rows.mjs`.
+## The commands
+
+| Command | What it does |
+|---------|--------------|
+| `npm run check` | Every data rule CLAUDE.md states, plus the projection round-trip. Runs in CI on every push. |
+| `npm run migration` | Turns the current `data.js` into `supabase/migrations/<stamp>_sync_beer_log.sql` (checks first) |
+| `npm run sync` | Rewrites `data.js` from the database (needs `SUPABASE_URL` + `SUPABASE_KEY`) |
+| `npm run seed` | The migration SQL to stdout, for inspection |
+| `npm run sri` | Re-derives the stats page's CDN `integrity` hashes from npm |
+| `npm run smoke` | Opens the stats page in a real browser and checks it renders (needs `npm i`) |
+| `npm run logos` | Checks every beer actually resolves a logo, against the live CDNs (needs `npm i`) |
 
 ## The tables
 
@@ -54,7 +52,9 @@ projection between these tables and `data.js` is written once, in its
 
 Two things the site shows are **not** columns: which beers a brewery makes, and
 what each scored. Both are derived from the reviews, because a beer row names
-its own brewery.
+its own brewery. The projection between the tables and `data.js` is written
+once, in `public/stats/supabase-rows.mjs`, and shared by the browser and every
+tool.
 
 This project was built with [Lovable](https://lovable.dev).
 
