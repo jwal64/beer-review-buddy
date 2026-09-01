@@ -11,6 +11,8 @@ export type BreweryRow = Tables<"breweries">;
 export type LocationRow = Tables<"locations">;
 export type CountryRow = Tables<"countries">;
 export type BrandDomainRow = Tables<"brand_domains">;
+export type WantToTryRow = Tables<"want_to_try">;
+export type UntappdAverageRow = Tables<"untappd_averages">;
 
 // The ten styles the site has a colour for. A style outside this list renders
 // uncoloured there and fails its data check, so the form offers only these.
@@ -27,6 +29,18 @@ export const STYLES = [
   "Shandy / Radler",
 ] as const;
 
+/**
+ * How long a fetched table is treated as fresh.
+ *
+ * Without this, React Query's default of 0 refetches a table the moment any
+ * new component subscribes to it — and every refetch hands back a new array
+ * or Map. That churn is not free: it is what used to rebuild the map's pins
+ * (and, before that, the whole map) the instant a marker was clicked and the
+ * beer list mounted its logos. Writes call invalidateQueries, which overrides
+ * this, so nothing goes stale after a beer is added or edited.
+ */
+const FRESH_FOR = 5 * 60 * 1000;
+
 export const METHODS = ["Draft", "Bottle", "Can", "Nitro"] as const;
 
 export function useBeers() {
@@ -41,6 +55,7 @@ export function useBeers() {
       if (error) throw error;
       return (data ?? []) as Beer[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -52,6 +67,7 @@ export function useBreweries() {
       if (error) throw error;
       return (data ?? []) as BreweryRow[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -63,6 +79,7 @@ export function useLocations() {
       if (error) throw error;
       return (data ?? []) as LocationRow[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -77,6 +94,7 @@ export function useCountries() {
       if (error) throw error;
       return (data ?? []) as CountryRow[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -93,6 +111,45 @@ export function useBrandDomains() {
       for (const row of (data ?? []) as BrandDomainRow[]) map.set(row.beer_name, row.domains);
       return map;
     },
+    staleTime: FRESH_FOR,
+  });
+}
+
+// The standing shortlist of beers not yet drunk. Nothing is ever deleted from
+// it — an entry with a matching review crosses itself off and is scored
+// against the prediction made beforehand, which is the only thing that makes
+// the scorecard worth having. `seq` is the order it was authored in.
+export function useWantToTry() {
+  return useQuery({
+    queryKey: ["want_to_try"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("want_to_try")
+        .select("*")
+        .order("seq", { ascending: true, nullsFirst: false })
+        .order("beer");
+      if (error) throw error;
+      return (data ?? []) as WantToTryRow[];
+    },
+    staleTime: FRESH_FOR,
+  });
+}
+
+// The world's average for a beer, keyed by the exact name as reviewed. It is
+// what makes the contrarian read possible: my rating is only interesting held
+// against what everyone else thought.
+export function useUntappdAverages() {
+  return useQuery({
+    queryKey: ["untappd_averages"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("untappd_averages").select("*");
+      if (error) throw error;
+      const map = new Map<string, number>();
+      for (const row of (data ?? []) as UntappdAverageRow[])
+        map.set(row.beer_name, Number(row.avg));
+      return map;
+    },
+    staleTime: FRESH_FOR,
   });
 }
 

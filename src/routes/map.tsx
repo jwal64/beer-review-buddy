@@ -67,23 +67,28 @@ function MapPage() {
   const filteredBeers = useMemo(() => {
     const list = beers.data ?? [];
     if (!filter) return [];
-    if (filter.kind === "brewery")
-      return list.filter(
-        (b) => b.brewery && filter.label.toLowerCase().includes(b.brewery.toLowerCase()),
-      );
+    // Exact, not a substring test: a beer row names its brewery in full, and
+    // several breweries carry their owner's name in brackets. Asking whether
+    // "Birra Moretti (Heineken Italia)" contains "Heineken" is true, which
+    // listed Heineken's beers under Moretti's pin.
+    if (filter.kind === "brewery") return list.filter((b) => b.brewery === filter.label);
     if (filter.kind === "city") return list.filter((b) => b.city === filter.label);
     return list;
   }, [beers.data, filter]);
 
   // One flag per country a beer was actually drunk in — deduped by code, not
   // by city, so a country visited in three cities still shows once.
+  //
+  // Read off the reviews rather than the locations table: a location row can
+  // exist with nothing logged against it (npm run check only warns about
+  // those), and this list claims somewhere a beer was drunk.
   const drankCountries = useMemo(() => {
     const byCc = new Map<string, { cc: string; country: string }>();
-    for (const l of locations.data ?? []) {
-      if (l.cc && !byCc.has(l.cc)) byCc.set(l.cc, { cc: l.cc, country: l.country });
+    for (const b of beers.data ?? []) {
+      if (b.cc && b.country && !byCc.has(b.cc)) byCc.set(b.cc, { cc: b.cc, country: b.country });
     }
     return [...byCc.values()].sort((a, b) => a.country.localeCompare(b.country));
-  }, [locations.data]);
+  }, [beers.data]);
 
   return (
     <Shell title="Beer map" subtitle="Where it was brewed, where it was drunk.">
@@ -220,8 +225,23 @@ function LeafletMap({
   onPick: (f: { kind: string; label: string }) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const mapRef = useRef<unknown>(null);
+  const mapRef = useRef<import("leaflet").Map | null>(null);
+  const layerRef = useRef<import("leaflet").LayerGroup | null>(null);
+  const leafletRef = useRef<typeof import("leaflet") | null>(null);
+  const [ready, setReady] = useState(false);
 
+  // Picking is read through a ref so the marker effect never has to depend on
+  // the callback's identity: it changes on every parent render, and a render
+  // is exactly what picking causes.
+  const pickRef = useRef(onPick);
+  pickRef.current = onPick;
+
+  // The map is built once and torn down only on unmount. It used to be rebuilt
+  // whenever any of its data changed, which quietly broke every first click:
+  // picking a marker mounts the beer list, the list's logos re-subscribe to
+  // brand_domains, that query hands back a fresh Map, and the "data changed"
+  // rebuild then destroyed the map — taking the popup the click had just
+  // opened, and the reader's zoom and pan, with it.
   useEffect(() => {
     let cancelled = false;
     (async () => {
@@ -229,7 +249,6 @@ function LeafletMap({
       if (cancelled || !ref.current || mapRef.current) return;
 
       const map = L.map(ref.current).setView([41, -30], 2.2);
-      mapRef.current = map;
 
       // Esri's World Dark Gray canvas — keyless, unlike Carto's basemaps,
       // which now stamp "API KEY REQUIRED" across anonymous requests. Base
@@ -243,59 +262,72 @@ function LeafletMap({
       }).addTo(map);
       L.tileLayer(esri("Reference"), { maxZoom: 16 }).addTo(map);
 
-      const dot = (color: string) =>
-        L.divIcon({
-          className: "",
-          html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:3px solid rgba(255,255,255,.85);box-shadow:0 1px 6px rgba(0,0,0,.5)"></div>`,
-          iconSize: [14, 14],
-          iconAnchor: [7, 7],
-        });
-
-      const breweryIcon = dot("#3b82f6");
-      const cityIcon = dot("#6fb3e0");
-
-      // Only the active toggle's markers go on the map — never both sets at
-      // once, so a brewery pin is never mistaken for a place it was drunk.
-      if (mode === "brewed") {
-        breweries
-          .filter((b) => b.lat != null && b.lng != null)
-          .forEach((b) => {
-            const logo = breweryLogo(b.name, beers, domains);
-            const flag = flagEmoji(b.cc, countries);
-            const marker = L.marker([b.lat!, b.lng!], { icon: breweryIcon }).addTo(map);
-            marker.bindPopup(
-              `<div style="font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;color:#0a0f1c">
-                ${logo ? `<img src="${esc(logo)}" width="20" height="20" style="object-fit:contain" alt="" onerror="this.style.display='none'" />` : ""}
-                <strong>${esc(b.name)}</strong> ${flag}
-              </div>`,
-            );
-            marker.on("click", () => onPick({ kind: "brewery", label: b.name }));
-          });
-      } else {
-        locations
-          .filter((l) => l.lat != null && l.lng != null)
-          .forEach((l) => {
-            const flag = flagEmoji(l.cc, countries);
-            const marker = L.marker([l.lat!, l.lng!], { icon: cityIcon }).addTo(map);
-            marker.bindPopup(
-              `<div style="font-family:Manrope,sans-serif;color:#0a0f1c"><strong>${esc(l.city)}</strong>, ${esc(l.country)} ${flag}</div>`,
-            );
-            marker.on("click", () => onPick({ kind: "city", label: l.city }));
-          });
-      }
+      leafletRef.current = L;
+      mapRef.current = map;
+      layerRef.current = L.layerGroup().addTo(map);
+      setReady(true);
     })();
 
     return () => {
       cancelled = true;
-      // Tear the map down so navigating away doesn't leak it, and so a data
-      // change (brand domains often arrive after the first paint) rebuilds
-      // the markers instead of being ignored by the init guard.
-      if (mapRef.current) {
-        (mapRef.current as { remove: () => void }).remove();
-        mapRef.current = null;
-      }
+      mapRef.current?.remove();
+      mapRef.current = null;
+      layerRef.current = null;
+      leafletRef.current = null;
+      setReady(false);
     };
-  }, [mode, breweries, locations, beers, domains, countries, onPick]);
+  }, []);
+
+  // Only the pins are redrawn when the data behind them changes. They live in
+  // their own layer group, so clearing them leaves the map, its tiles and the
+  // reader's view where they were.
+  useEffect(() => {
+    const L = leafletRef.current;
+    const layer = layerRef.current;
+    if (!L || !layer) return;
+    layer.clearLayers();
+
+    const dot = (color: string) =>
+      L.divIcon({
+        className: "",
+        html: `<div style="width:14px;height:14px;border-radius:50%;background:${color};border:3px solid rgba(255,255,255,.85);box-shadow:0 1px 6px rgba(0,0,0,.5)"></div>`,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+
+    const breweryIcon = dot("#3b82f6");
+    const cityIcon = dot("#6fb3e0");
+
+    // Only the active toggle's markers go on the map — never both sets at
+    // once, so a brewery pin is never mistaken for a place it was drunk.
+    if (mode === "brewed") {
+      breweries
+        .filter((b) => b.lat != null && b.lng != null)
+        .forEach((b) => {
+          const logo = breweryLogo(b.name, beers, domains);
+          const flag = flagEmoji(b.cc, countries);
+          const marker = L.marker([b.lat!, b.lng!], { icon: breweryIcon }).addTo(layer);
+          marker.bindPopup(
+            `<div style="font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;color:#0a0f1c">
+                ${logo ? `<img src="${esc(logo)}" width="20" height="20" style="object-fit:contain" alt="" onerror="this.style.display='none'" />` : ""}
+                <strong>${esc(b.name)}</strong> ${flag}
+              </div>`,
+          );
+          marker.on("click", () => pickRef.current({ kind: "brewery", label: b.name }));
+        });
+    } else {
+      locations
+        .filter((l) => l.lat != null && l.lng != null)
+        .forEach((l) => {
+          const flag = flagEmoji(l.cc, countries);
+          const marker = L.marker([l.lat!, l.lng!], { icon: cityIcon }).addTo(layer);
+          marker.bindPopup(
+            `<div style="font-family:Manrope,sans-serif;color:#0a0f1c"><strong>${esc(l.city)}</strong>, ${esc(l.country)} ${flag}</div>`,
+          );
+          marker.on("click", () => pickRef.current({ kind: "city", label: l.city }));
+        });
+    }
+  }, [ready, mode, breweries, locations, beers, domains, countries]);
 
   return (
     <div ref={ref} className="h-[420px] w-full overflow-hidden rounded-2xl border border-border" />
