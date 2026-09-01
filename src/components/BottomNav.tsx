@@ -5,6 +5,7 @@ const items = [
   { to: "/", label: "Home", icon: Home },
   { to: "/beers", label: "Beers", icon: Beer },
   { to: "/map", label: "Map", icon: Map },
+  { to: "/insights", label: "Insights", icon: BarChart3 },
 ] as const;
 
 export function BottomNav() {
@@ -18,24 +19,13 @@ export function BottomNav() {
               activeOptions={{ exact: to === "/" }}
               activeProps={{ className: "text-primary" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition-colors"
+              className="flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition active:scale-95"
             >
               <Icon size={20} />
               {label}
             </Link>
           </li>
         ))}
-        <li className="flex-1">
-          {/* The full analytics site — a static page, so a document link
-              rather than a router Link. */}
-          <a
-            href="/stats/index.html"
-            className="flex flex-col items-center gap-1 py-3 text-[11px] font-medium text-muted-foreground transition-colors"
-          >
-            <BarChart3 size={20} />
-            Stats
-          </a>
-        </li>
       </ul>
       <div className="h-[env(safe-area-inset-bottom)]" />
     </nav>
