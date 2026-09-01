@@ -106,10 +106,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: "https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Manrope:wght@400;500;600;700&display=swap",
       },
-      {
-        rel: "stylesheet",
-        href: "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css",
-      },
+      // Leaflet's stylesheet is bundled via the import in src/routes/map.tsx —
+      // it used to be hotlinked from unpkg, which took the map down with it
+      // whenever that CDN was slow or blocked.
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),

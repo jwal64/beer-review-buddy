@@ -594,16 +594,18 @@ function showInsightsSubtab(name){
   document.querySelectorAll('#insights > .subpanel').forEach(p=>{
     p.classList.toggle('active',p.id===name);
   });
-  // Lazy-render the active sub-section (each draw fn sets its own guard flag)
-  if(name==='geo'){
-    if(!window._cD) drawCountry();
-    if(!window._ciD) drawCity();
-    if(!window._langD) drawLanguage();
-  } else if(name==='temporal'){
-    if(!window._tmpD) drawTemporal();
-  } else if(name==='markets'){
-    if(!window._ciX) drawContrarian();
-    if(!window._wtD) drawWantToTry();
+  // Lazy-render the active sub-section (each draw fn sets its own guard flag).
+  // Each draw is guarded on its own: this runs inside the click handler, and an
+  // unguarded throw here (Chart.js failing to load is enough) would kill the
+  // tab switch halfway and leave the navigation looking dead.
+  const lazyDraws={
+    geo:      [['_cD',drawCountry],['_ciD',drawCity],['_langD',drawLanguage]],
+    temporal: [['_tmpD',drawTemporal]],
+    markets:  [['_ciX',drawContrarian],['_wtD',drawWantToTry]]
+  };
+  for(const [flag,fn] of lazyDraws[name]||[]){
+    if(window[flag]) continue;
+    try{ fn(); }catch(e){ console.error('Insights draw error ('+name+'):',e); }
   }
   resizeChartsIn(document.getElementById(name));
   try{history.replaceState(null,'','#'+name);}catch(e){}
@@ -1145,7 +1147,16 @@ function drawLanguage(){
 //   brewed  → every brewery's hometown (color = my rating)
 //   journey → an arc from each brewery to the city where I drank its beer
 // ══════════════════════════════════════════════════════════════
-function addTiles(map){L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:20,subdomains:'abcd',detectRetina:true}).addTo(map);}
+// Esri's World Dark Gray canvas — keyless, unlike Carto's basemaps, which now
+// stamp "API KEY REQUIRED" across anonymous requests. Base paints the ground,
+// Reference adds the place labels on top. Native tiles stop at zoom 16, which
+// comfortably covers every view here (nothing zooms past 7). Both maps share
+// this one function so the provider is written in exactly one place.
+function addTiles(map){
+  const esri=v=>`https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_${v}/MapServer/tile/{z}/{y}/{x}`;
+  L.tileLayer(esri('Base'),{attribution:'Powered by Esri · © OpenStreetMap contributors',maxZoom:16}).addTo(map);
+  L.tileLayer(esri('Reference'),{maxZoom:16}).addTo(map);
+}
 function popHtml(h){return `<div style="font-family:var(--mono);font-size:13px;line-height:1.7;-webkit-font-smoothing:antialiased">${h}</div>`;}
 // Overline that tells the reader what KIND of thing they just clicked
 function popKicker(t){return `<div style="font-size:12px;color:var(--text-3);border-bottom:1px solid var(--border);padding-bottom:3px;margin-bottom:4px">${t}</div>`;}
@@ -2506,7 +2517,7 @@ function openBreweryDrawer(name){
       if(!mapEl) return;
       if(!_drawerMap){
         _drawerMap=L.map('drawer-map',{zoomControl:false,attributionControl:false,scrollWheelZoom:false,dragging:false});
-        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{subdomains:'abcd',detectRetina:true}).addTo(_drawerMap);
+        addTiles(_drawerMap);
       }
       _drawerMap.setView([brewery.lat,brewery.lng],7);
       _drawerMap.eachLayer(l=>{if(l instanceof L.CircleMarker)_drawerMap.removeLayer(l);});
