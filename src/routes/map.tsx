@@ -4,7 +4,16 @@ import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBeers, useBrandDomains, useBreweries, useLocations, type Beer } from "@/lib/beer-data";
+import {
+  useBeers,
+  useBrandDomains,
+  useBreweries,
+  useCountries,
+  useLocations,
+  flagEmoji,
+  type Beer,
+  type CountryRow,
+} from "@/lib/beer-data";
 import { breweryLogo, type DomainMap } from "@/lib/logos";
 import { ClientOnly } from "@tanstack/react-router";
 // Bundled with the app — the map's layout breaks entirely without this
@@ -38,13 +47,22 @@ export const Route = createFileRoute("/map")({
   component: MapPage,
 });
 
+type MapMode = "drank" | "brewed";
+
 function MapPage() {
   const beers = useBeers();
   const breweries = useBreweries();
   const locations = useLocations();
+  const countries = useCountries();
   const { data: domains } = useBrandDomains();
   const loading = beers.isLoading || breweries.isLoading || locations.isLoading;
   const [filter, setFilter] = useState<{ kind: string; label: string } | null>(null);
+  const [mode, setMode] = useState<MapMode>("drank");
+
+  const setModeAndClear = (m: MapMode) => {
+    setMode(m);
+    setFilter(null);
+  };
 
   const filteredBeers = useMemo(() => {
     const list = beers.data ?? [];
@@ -57,30 +75,90 @@ function MapPage() {
     return list;
   }, [beers.data, filter]);
 
+  // One flag per country a beer was actually drunk in — deduped by code, not
+  // by city, so a country visited in three cities still shows once.
+  const drankCountries = useMemo(() => {
+    const byCc = new Map<string, { cc: string; country: string }>();
+    for (const l of locations.data ?? []) {
+      if (l.cc && !byCc.has(l.cc)) byCc.set(l.cc, { cc: l.cc, country: l.country });
+    }
+    return [...byCc.values()].sort((a, b) => a.country.localeCompare(b.country));
+  }, [locations.data]);
+
   return (
     <Shell title="Beer map" subtitle="Where it was brewed, where it was drunk.">
       {loading ? (
         <Skeleton className="h-[420px] w-full rounded-2xl" />
       ) : (
         <>
+          <div className="mb-3 flex gap-2">
+            <button
+              onClick={() => setModeAndClear("drank")}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                mode === "drank"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              Where I drank it
+            </button>
+            <button
+              onClick={() => setModeAndClear("brewed")}
+              className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                mode === "brewed"
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              Where it was brewed
+            </button>
+          </div>
+
           <ClientOnly fallback={<Skeleton className="h-[420px] w-full rounded-2xl" />}>
             <LeafletMap
+              mode={mode}
               breweries={breweries.data ?? []}
               beers={beers.data ?? []}
               domains={domains}
               locations={locations.data ?? []}
+              countries={countries.data ?? []}
               onPick={setFilter}
             />
           </ClientOnly>
 
           <div className="mt-4 flex items-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-primary" /> Brewery
-            </span>
-            <span className="flex items-center gap-1.5">
-              <span className="h-2.5 w-2.5 rounded-full bg-chart-3" /> Drank here
-            </span>
+            {mode === "brewed" ? (
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-primary" /> Brewery
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5">
+                <span className="h-2.5 w-2.5 rounded-full bg-chart-3" /> Drank here
+              </span>
+            )}
           </div>
+
+          {drankCountries.length > 0 && (
+            <section className="mt-5">
+              <h2 className="mb-2 font-display text-lg font-semibold">
+                Countries I've had a beer in
+              </h2>
+              <div className="flex flex-wrap gap-2">
+                {drankCountries.map((c) => (
+                  <span
+                    key={c.cc}
+                    title={c.country}
+                    className="flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-medium"
+                  >
+                    <span className="text-base leading-none">
+                      {flagEmoji(c.cc, countries.data)}
+                    </span>
+                    {c.country}
+                  </span>
+                ))}
+              </div>
+            </section>
+          )}
 
           {filter && (
             <section className="mt-5">
@@ -123,18 +201,22 @@ function MapPage() {
 }
 
 function LeafletMap({
+  mode,
   breweries,
   locations,
   beers,
   domains,
+  countries,
   onPick,
 }: {
+  mode: MapMode;
   breweries: ReturnType<typeof useBreweries>["data"] extends infer T ? NonNullable<T> : never;
   locations: NonNullable<ReturnType<typeof useLocations>["data"]>;
   // A brewery's logo is borrowed from a beer it makes — brand domains are
   // keyed by beer, not by brewery.
   beers: Beer[];
   domains: DomainMap | undefined;
+  countries: CountryRow[];
   onPick: (f: { kind: string; label: string }) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -172,29 +254,35 @@ function LeafletMap({
       const breweryIcon = dot("#3b82f6");
       const cityIcon = dot("#6fb3e0");
 
-      breweries
-        .filter((b) => b.lat != null && b.lng != null)
-        .forEach((b) => {
-          const logo = breweryLogo(b.name, beers, domains);
-          const marker = L.marker([b.lat!, b.lng!], { icon: breweryIcon }).addTo(map);
-          marker.bindPopup(
-            `<div style="font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;color:#0a0f1c">
-              ${logo ? `<img src="${esc(logo)}" width="20" height="20" style="object-fit:contain" alt="" onerror="this.style.display='none'" />` : ""}
-              <strong>${esc(b.name)}</strong>
-            </div>`,
-          );
-          marker.on("click", () => onPick({ kind: "brewery", label: b.name }));
-        });
-
-      locations
-        .filter((l) => l.lat != null && l.lng != null)
-        .forEach((l) => {
-          const marker = L.marker([l.lat!, l.lng!], { icon: cityIcon }).addTo(map);
-          marker.bindPopup(
-            `<div style="font-family:Manrope,sans-serif;color:#0a0f1c"><strong>${esc(l.city)}</strong>, ${esc(l.country)}</div>`,
-          );
-          marker.on("click", () => onPick({ kind: "city", label: l.city }));
-        });
+      // Only the active toggle's markers go on the map — never both sets at
+      // once, so a brewery pin is never mistaken for a place it was drunk.
+      if (mode === "brewed") {
+        breweries
+          .filter((b) => b.lat != null && b.lng != null)
+          .forEach((b) => {
+            const logo = breweryLogo(b.name, beers, domains);
+            const flag = flagEmoji(b.cc, countries);
+            const marker = L.marker([b.lat!, b.lng!], { icon: breweryIcon }).addTo(map);
+            marker.bindPopup(
+              `<div style="font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;color:#0a0f1c">
+                ${logo ? `<img src="${esc(logo)}" width="20" height="20" style="object-fit:contain" alt="" onerror="this.style.display='none'" />` : ""}
+                <strong>${esc(b.name)}</strong> ${flag}
+              </div>`,
+            );
+            marker.on("click", () => onPick({ kind: "brewery", label: b.name }));
+          });
+      } else {
+        locations
+          .filter((l) => l.lat != null && l.lng != null)
+          .forEach((l) => {
+            const flag = flagEmoji(l.cc, countries);
+            const marker = L.marker([l.lat!, l.lng!], { icon: cityIcon }).addTo(map);
+            marker.bindPopup(
+              `<div style="font-family:Manrope,sans-serif;color:#0a0f1c"><strong>${esc(l.city)}</strong>, ${esc(l.country)} ${flag}</div>`,
+            );
+            marker.on("click", () => onPick({ kind: "city", label: l.city }));
+          });
+      }
     })();
 
     return () => {
@@ -207,7 +295,7 @@ function LeafletMap({
         mapRef.current = null;
       }
     };
-  }, [breweries, locations, beers, domains, onPick]);
+  }, [mode, breweries, locations, beers, domains, countries, onPick]);
 
   return (
     <div ref={ref} className="h-[420px] w-full overflow-hidden rounded-2xl border border-border" />
