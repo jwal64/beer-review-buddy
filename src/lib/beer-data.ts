@@ -11,6 +11,8 @@ export type BreweryRow = Tables<"breweries">;
 export type LocationRow = Tables<"locations">;
 export type CountryRow = Tables<"countries">;
 export type BrandDomainRow = Tables<"brand_domains">;
+export type WantToTryRow = Tables<"want_to_try">;
+export type UntappdAverageRow = Tables<"untappd_averages">;
 
 // The ten styles the site has a colour for. A style outside this list renders
 // uncoloured there and fails its data check, so the form offers only these.
@@ -91,6 +93,42 @@ export function useBrandDomains() {
       if (error) throw error;
       const map = new Map<string, string[]>();
       for (const row of (data ?? []) as BrandDomainRow[]) map.set(row.beer_name, row.domains);
+      return map;
+    },
+  });
+}
+
+// The standing shortlist of beers not yet drunk. Nothing is ever deleted from
+// it — an entry with a matching review crosses itself off and is scored
+// against the prediction made beforehand, which is the only thing that makes
+// the scorecard worth having. `seq` is the order it was authored in.
+export function useWantToTry() {
+  return useQuery({
+    queryKey: ["want_to_try"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("want_to_try")
+        .select("*")
+        .order("seq", { ascending: true, nullsFirst: false })
+        .order("beer");
+      if (error) throw error;
+      return (data ?? []) as WantToTryRow[];
+    },
+  });
+}
+
+// The world's average for a beer, keyed by the exact name as reviewed. It is
+// what makes the contrarian read possible: my rating is only interesting held
+// against what everyone else thought.
+export function useUntappdAverages() {
+  return useQuery({
+    queryKey: ["untappd_averages"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("untappd_averages").select("*");
+      if (error) throw error;
+      const map = new Map<string, number>();
+      for (const row of (data ?? []) as UntappdAverageRow[])
+        map.set(row.beer_name, Number(row.avg));
       return map;
     },
   });
