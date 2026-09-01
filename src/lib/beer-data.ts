@@ -29,6 +29,18 @@ export const STYLES = [
   "Shandy / Radler",
 ] as const;
 
+/**
+ * How long a fetched table is treated as fresh.
+ *
+ * Without this, React Query's default of 0 refetches a table the moment any
+ * new component subscribes to it — and every refetch hands back a new array
+ * or Map. That churn is not free: it is what used to rebuild the map's pins
+ * (and, before that, the whole map) the instant a marker was clicked and the
+ * beer list mounted its logos. Writes call invalidateQueries, which overrides
+ * this, so nothing goes stale after a beer is added or edited.
+ */
+const FRESH_FOR = 5 * 60 * 1000;
+
 export const METHODS = ["Draft", "Bottle", "Can", "Nitro"] as const;
 
 export function useBeers() {
@@ -43,6 +55,7 @@ export function useBeers() {
       if (error) throw error;
       return (data ?? []) as Beer[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -54,6 +67,7 @@ export function useBreweries() {
       if (error) throw error;
       return (data ?? []) as BreweryRow[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -65,6 +79,7 @@ export function useLocations() {
       if (error) throw error;
       return (data ?? []) as LocationRow[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -79,6 +94,7 @@ export function useCountries() {
       if (error) throw error;
       return (data ?? []) as CountryRow[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -95,6 +111,7 @@ export function useBrandDomains() {
       for (const row of (data ?? []) as BrandDomainRow[]) map.set(row.beer_name, row.domains);
       return map;
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -114,6 +131,7 @@ export function useWantToTry() {
       if (error) throw error;
       return (data ?? []) as WantToTryRow[];
     },
+    staleTime: FRESH_FOR,
   });
 }
 
@@ -131,6 +149,7 @@ export function useUntappdAverages() {
         map.set(row.beer_name, Number(row.avg));
       return map;
     },
+    staleTime: FRESH_FOR,
   });
 }
 

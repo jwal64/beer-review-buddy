@@ -3,7 +3,7 @@ import { useMemo } from "react";
 import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
-import { averageRating, flagEmoji, formatMonth, useBeers } from "@/lib/beer-data";
+import { averageRating, flagEmoji, formatMonth, useBeers, useCountries } from "@/lib/beer-data";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
 
@@ -37,6 +37,8 @@ function StatCard({ label, value }: { label: string; value: string }) {
 
 function HomePage() {
   const { data: beers, isLoading } = useBeers();
+  // Needed for the UK's constituent-country flags — see the note in beers.tsx.
+  const { data: countries } = useCountries();
 
   const stats = useMemo(() => {
     const list = beers ?? [];
@@ -83,7 +85,7 @@ function HomePage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{b.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {flagEmoji(b.origin_cc)} {b.style}
+                      {flagEmoji(b.origin_cc, countries)} {b.style}
                     </p>
                   </div>
                   <Rating value={Number(b.rating)} />

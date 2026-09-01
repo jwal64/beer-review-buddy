@@ -13,7 +13,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { flagEmoji, formatMonth, useBeers, type Beer } from "@/lib/beer-data";
+import { flagEmoji, formatMonth, useBeers, useCountries, type Beer } from "@/lib/beer-data";
 import { Search, Plus, Pencil } from "lucide-react";
 import { useSession } from "@/lib/use-session";
 import { BeerForm } from "@/components/BeerForm";
@@ -39,6 +39,10 @@ export const Route = createFileRoute("/beers")({
 
 function BeersPage() {
   const { data: beers, isLoading } = useBeers();
+  // The flags come from this table, not from arithmetic on the letters: the UK
+  // is split into GB-ENG, GB-SCT, GB-WLS and GB-NIR, and no letter pair makes
+  // those. Without it an English or Scottish beer rendered a globe.
+  const { data: countries } = useCountries();
   const { isSignedIn } = useSession();
   const [query, setQuery] = useState("");
   const [style, setStyle] = useState("All");
@@ -112,12 +116,17 @@ function BeersPage() {
                 >
                   <BeerLogo name={b.name} logo={b.logo} className="h-12 w-12" />
                   <div className="min-w-0 flex-1">
-                    <p className="flex items-center gap-2 truncate text-sm font-semibold">
+                    {/* A div, not a p: Badge renders a div, and a div inside a
+                        p is invalid HTML — the parser closes the p early, so
+                        the server's markup and the client's tree disagree and
+                        hydration errors on every row carrying the badge. */}
+                    <div className="flex items-center gap-2 truncate text-sm font-semibold">
                       {b.name}
                       {b.is_new && <Badge className="h-4 px-1.5 text-[10px] uppercase">New</Badge>}
-                    </p>
+                    </div>
                     <p className="truncate text-xs text-muted-foreground">
-                      {flagEmoji(b.origin_cc)} {b.style} · {b.abv}% · {b.method}
+                      {flagEmoji(b.origin_cc, countries)} {b.style}
+                      {b.abv != null && ` · ${b.abv}%`} · {b.method}
                     </p>
                     <Rating value={Number(b.rating)} className="mt-1" />
                   </div>
@@ -165,7 +174,14 @@ function BeersPage() {
                     ["Style", selected.style],
                     ["ABV", selected.abv ? `${selected.abv}%` : "—"],
                     ["Served", selected.method ?? "—"],
-                    ["Origin", `${flagEmoji(selected.origin_cc)} ${selected.origin_cc ?? "—"}`],
+                    [
+                      "Origin",
+                      `${flagEmoji(selected.origin_cc, countries)} ${
+                        countries?.find((c) => c.cc === selected.origin_cc)?.name ??
+                        selected.origin_cc ??
+                        "—"
+                      }`,
+                    ],
                     [
                       "Drunk in",
                       [selected.city, selected.country].filter(Boolean).join(", ") || "—",
