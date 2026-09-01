@@ -110,13 +110,11 @@ function BeersPage() {
                   onClick={() => setSelected(b)}
                   className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:bg-secondary"
                 >
-                  <BeerLogo name={b.name} brewery={b.brewery} className="h-12 w-12" />
+                  <BeerLogo name={b.name} className="h-12 w-12" />
                   <div className="min-w-0 flex-1">
                     <p className="flex items-center gap-2 truncate text-sm font-semibold">
                       {b.name}
-                      {b.is_new && (
-                        <Badge className="h-4 px-1.5 text-[10px] uppercase">New</Badge>
-                      )}
+                      {b.is_new && <Badge className="h-4 px-1.5 text-[10px] uppercase">New</Badge>}
                     </p>
                     <p className="truncate text-xs text-muted-foreground">
                       {flagEmoji(b.origin_cc)} {b.style} · {b.abv}% · {b.method}
@@ -140,11 +138,7 @@ function BeersPage() {
           {selected && (
             <>
               <SheetHeader className="flex-row items-center gap-3 space-y-0 text-left">
-                <BeerLogo
-                  name={selected.name}
-                  brewery={selected.brewery}
-                  className="h-14 w-14"
-                />
+                <BeerLogo name={selected.name} className="h-14 w-14" />
                 <div>
                   <SheetTitle className="font-display">{selected.name}</SheetTitle>
                   <SheetDescription>{selected.brewery ?? "Unknown brewery"}</SheetDescription>

@@ -1,17 +1,12 @@
 import { useState } from "react";
 import { beerLogo } from "@/lib/logos";
+import { useBrandDomains } from "@/lib/beer-data";
 import { cn } from "@/lib/utils";
 
-export function BeerLogo({
-  name,
-  brewery,
-  className,
-}: {
-  name: string;
-  brewery?: string | null;
-  className?: string;
-}) {
-  const src = beerLogo(name, brewery);
+export function BeerLogo({ name, className }: { name: string; className?: string }) {
+  // Shared with every other card on the page — react-query fetches it once.
+  const { data: domains } = useBrandDomains();
+  const src = beerLogo(name, domains);
   const [failed, setFailed] = useState(false);
 
   return (

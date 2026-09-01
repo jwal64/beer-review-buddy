@@ -4,8 +4,8 @@ import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useBeers, useBreweries, useLocations, type Beer } from "@/lib/beer-data";
-import { breweryLogo } from "@/lib/logos";
+import { useBeers, useBrandDomains, useBreweries, useLocations, type Beer } from "@/lib/beer-data";
+import { breweryLogo, type DomainMap } from "@/lib/logos";
 import { ClientOnly } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/map")({
@@ -30,6 +30,7 @@ function MapPage() {
   const beers = useBeers();
   const breweries = useBreweries();
   const locations = useLocations();
+  const { data: domains } = useBrandDomains();
   const loading = beers.isLoading || breweries.isLoading || locations.isLoading;
   const [filter, setFilter] = useState<{ kind: string; label: string } | null>(null);
 
@@ -37,7 +38,9 @@ function MapPage() {
     const list = beers.data ?? [];
     if (!filter) return [];
     if (filter.kind === "brewery")
-      return list.filter((b) => b.brewery && filter.label.toLowerCase().includes(b.brewery.toLowerCase()));
+      return list.filter(
+        (b) => b.brewery && filter.label.toLowerCase().includes(b.brewery.toLowerCase()),
+      );
     if (filter.kind === "city") return list.filter((b) => b.city === filter.label);
     return list;
   }, [beers.data, filter]);
@@ -51,6 +54,8 @@ function MapPage() {
           <ClientOnly fallback={<Skeleton className="h-[420px] w-full rounded-2xl" />}>
             <LeafletMap
               breweries={breweries.data ?? []}
+              beers={beers.data ?? []}
+              domains={domains}
               locations={locations.data ?? []}
               onPick={setFilter}
             />
@@ -83,7 +88,7 @@ function MapPage() {
                       key={b.id}
                       className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
                     >
-                      <BeerLogo name={b.name} brewery={b.brewery} className="h-11 w-11" />
+                      <BeerLogo name={b.name} className="h-11 w-11" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{b.name}</p>
                         <p className="truncate text-xs text-muted-foreground">
@@ -108,12 +113,16 @@ function MapPage() {
 function LeafletMap({
   breweries,
   locations,
+  beers,
+  domains,
   onPick,
 }: {
-  breweries: ReturnType<typeof useBreweries>["data"] extends infer T
-    ? NonNullable<T>
-    : never;
+  breweries: ReturnType<typeof useBreweries>["data"] extends infer T ? NonNullable<T> : never;
   locations: NonNullable<ReturnType<typeof useLocations>["data"]>;
+  // A brewery's logo is borrowed from a beer it makes — brand domains are
+  // keyed by beer, not by brewery.
+  beers: Beer[];
+  domains: DomainMap | undefined;
   onPick: (f: { kind: string; label: string }) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
@@ -146,7 +155,7 @@ function LeafletMap({
       breweries
         .filter((b) => b.lat != null && b.lng != null)
         .forEach((b) => {
-          const logo = breweryLogo(b.name);
+          const logo = breweryLogo(b.name, beers, domains);
           const marker = L.marker([b.lat!, b.lng!], { icon: breweryIcon }).addTo(map);
           marker.bindPopup(
             `<div style="font-family:Manrope,sans-serif;display:flex;align-items:center;gap:8px;color:#0a0f1c">
@@ -171,12 +180,9 @@ function LeafletMap({
     return () => {
       cancelled = true;
     };
-  }, [breweries, locations, onPick]);
+  }, [breweries, locations, beers, domains, onPick]);
 
   return (
-    <div
-      ref={ref}
-      className="h-[420px] w-full overflow-hidden rounded-2xl border border-border"
-    />
+    <div ref={ref} className="h-[420px] w-full overflow-hidden rounded-2xl border border-border" />
   );
 }

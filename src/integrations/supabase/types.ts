@@ -14,66 +14,108 @@ export type Database = {
   }
   public: {
     Tables: {
+      app_meta: {
+        Row: {
+          key: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          key: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          key?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       beers: {
         Row: {
-          abv: number | null
+          abv: number
           brewery: string | null
-          cc: string | null
-          city: string | null
-          country: string | null
+          cc: string
+          city: string
+          country: string
           created_at: string
           created_by: string | null
           drank_on: string
           id: string
           is_new: boolean
+          logo: string | null
           logo_url: string | null
-          method: string | null
+          method: string
           name: string
           notes: string | null
-          origin_cc: string | null
+          origin_cc: string
           rating: number
-          region: string | null
+          region: string
+          seq: number | null
           style: string
         }
         Insert: {
-          abv?: number | null
+          abv: number
           brewery?: string | null
-          cc?: string | null
-          city?: string | null
-          country?: string | null
+          cc: string
+          city: string
+          country: string
           created_at?: string
           created_by?: string | null
           drank_on?: string
           id?: string
           is_new?: boolean
+          logo?: string | null
           logo_url?: string | null
-          method?: string | null
+          method: string
           name: string
           notes?: string | null
-          origin_cc?: string | null
+          origin_cc: string
           rating: number
-          region?: string | null
+          region: string
+          seq?: number | null
           style: string
         }
         Update: {
-          abv?: number | null
+          abv?: number
           brewery?: string | null
-          cc?: string | null
-          city?: string | null
-          country?: string | null
+          cc?: string
+          city?: string
+          country?: string
           created_at?: string
           created_by?: string | null
           drank_on?: string
           id?: string
           is_new?: boolean
+          logo?: string | null
           logo_url?: string | null
-          method?: string | null
+          method?: string
           name?: string
           notes?: string | null
-          origin_cc?: string | null
+          origin_cc?: string
           rating?: number
-          region?: string | null
+          region?: string
+          seq?: number | null
           style?: string
+        }
+        Relationships: []
+      }
+      brand_domains: {
+        Row: {
+          beer_name: string
+          created_at: string
+          domains: string[]
+        }
+        Insert: {
+          beer_name: string
+          created_at?: string
+          domains: string[]
+        }
+        Update: {
+          beer_name?: string
+          created_at?: string
+          domains?: string[]
         }
         Relationships: []
       }
@@ -83,33 +125,60 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
+          lang: string
           lat: number | null
           lng: number | null
           location: string | null
           logo_url: string | null
           name: string
+          native_name: string | null
         }
         Insert: {
           cc?: string | null
           country?: string | null
           created_at?: string
           id?: string
+          lang: string
           lat?: number | null
           lng?: number | null
           location?: string | null
           logo_url?: string | null
           name: string
+          native_name?: string | null
         }
         Update: {
           cc?: string | null
           country?: string | null
           created_at?: string
           id?: string
+          lang?: string
           lat?: number | null
           lng?: number | null
           location?: string | null
           logo_url?: string | null
           name?: string
+          native_name?: string | null
+        }
+        Relationships: []
+      }
+      countries: {
+        Row: {
+          cc: string
+          created_at: string
+          flag: string | null
+          name: string | null
+        }
+        Insert: {
+          cc: string
+          created_at?: string
+          flag?: string | null
+          name?: string | null
+        }
+        Update: {
+          cc?: string
+          created_at?: string
+          flag?: string | null
+          name?: string | null
         }
         Relationships: []
       }
@@ -143,6 +212,63 @@ export type Database = {
           lat?: number | null
           lng?: number | null
           region?: string | null
+        }
+        Relationships: []
+      }
+      untappd_averages: {
+        Row: {
+          avg: number
+          beer_name: string
+          created_at: string
+        }
+        Insert: {
+          avg: number
+          beer_name: string
+          created_at?: string
+        }
+        Update: {
+          avg?: number
+          beer_name?: string
+          created_at?: string
+        }
+        Relationships: []
+      }
+      want_to_try: {
+        Row: {
+          abv: number | null
+          aka: string[] | null
+          beer: string
+          created_at: string
+          method: string | null
+          origin: string | null
+          region: string | null
+          seq: number | null
+          style: string
+          untappd: number | null
+        }
+        Insert: {
+          abv?: number | null
+          aka?: string[] | null
+          beer: string
+          created_at?: string
+          method?: string | null
+          origin?: string | null
+          region?: string | null
+          seq?: number | null
+          style: string
+          untappd?: number | null
+        }
+        Update: {
+          abv?: number | null
+          aka?: string[] | null
+          beer?: string
+          created_at?: string
+          method?: string | null
+          origin?: string | null
+          region?: string | null
+          seq?: number | null
+          style?: string
+          untappd?: number | null
         }
         Relationships: []
       }
