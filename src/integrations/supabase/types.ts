@@ -34,11 +34,11 @@ export type Database = {
       }
       beers: {
         Row: {
-          abv: number | null
+          abv: number
           brewery: string | null
-          cc: string | null
-          city: string | null
-          country: string | null
+          cc: string
+          city: string
+          country: string
           created_at: string
           created_by: string | null
           drank_on: string
@@ -46,21 +46,21 @@ export type Database = {
           is_new: boolean
           logo: string | null
           logo_url: string | null
-          method: string | null
+          method: string
           name: string
           notes: string | null
-          origin_cc: string | null
+          origin_cc: string
           rating: number
-          region: string | null
+          region: string
           seq: number | null
           style: string
         }
         Insert: {
-          abv?: number | null
+          abv: number
           brewery?: string | null
-          cc?: string | null
-          city?: string | null
-          country?: string | null
+          cc: string
+          city: string
+          country: string
           created_at?: string
           created_by?: string | null
           drank_on?: string
@@ -68,21 +68,21 @@ export type Database = {
           is_new?: boolean
           logo?: string | null
           logo_url?: string | null
-          method?: string | null
+          method: string
           name: string
           notes?: string | null
-          origin_cc?: string | null
+          origin_cc: string
           rating: number
-          region?: string | null
+          region: string
           seq?: number | null
           style: string
         }
         Update: {
-          abv?: number | null
+          abv?: number
           brewery?: string | null
-          cc?: string | null
-          city?: string | null
-          country?: string | null
+          cc?: string
+          city?: string
+          country?: string
           created_at?: string
           created_by?: string | null
           drank_on?: string
@@ -90,12 +90,12 @@ export type Database = {
           is_new?: boolean
           logo?: string | null
           logo_url?: string | null
-          method?: string | null
+          method?: string
           name?: string
           notes?: string | null
-          origin_cc?: string | null
+          origin_cc?: string
           rating?: number
-          region?: string | null
+          region?: string
           seq?: number | null
           style?: string
         }
@@ -125,7 +125,7 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
-          lang: string | null
+          lang: string
           lat: number | null
           lng: number | null
           location: string | null
@@ -138,7 +138,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
-          lang?: string | null
+          lang: string
           lat?: number | null
           lng?: number | null
           location?: string | null
@@ -151,7 +151,7 @@ export type Database = {
           country?: string | null
           created_at?: string
           id?: string
-          lang?: string | null
+          lang?: string
           lat?: number | null
           lng?: number | null
           location?: string | null
@@ -277,7 +277,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_bare_domain_list: { Args: { domains: string[] }; Returns: boolean }
     }
     Enums: {
       [_ in never]: never
