@@ -18,7 +18,7 @@ on:
 
 permissions:
   issues: write
-  contents: read
+  contents: write
 
 jobs:
   audit:
@@ -34,6 +34,20 @@ jobs:
         run: |
           npm install
           npx playwright install --with-deps chromium
+
+      - name: TEMP fetch the three with no logo
+        run: |
+          node tools/fetch-logos.mjs --force --only "Modelo Especial,Modelo Oro,Negra Modelo"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/stats/logos public/stats/data.js logo-fetch-report.json
+          git diff --cached --quiet || {
+            git commit -m "Fetch the three Modelo logos from the brand's own declared icon"
+            for a in 1 2 3; do
+              git push origin HEAD:${{ github.ref_name }} && break
+              git pull --rebase origin ${{ github.ref_name }}
+            done
+          }
 
       - name: Audit every logo
         id: audit
