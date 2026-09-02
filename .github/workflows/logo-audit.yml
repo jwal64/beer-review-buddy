@@ -34,13 +34,44 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      - name: Fetch every beer's logo
-        run: node tools/fetch-logos.mjs --force
+      # The ones a look at the contact sheet found wrong: a generated grey
+      # letter from Icon Horse, a photograph from a site header, or somebody
+      # else's mark entirely (cerveceradepr.com is a WordPress site, and its
+      # favicon is the WordPress W).
+      - name: Re-fetch the logos that came back wrong
+        run: |
+          node tools/fetch-logos.mjs --force --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
+          Affligem Tripel
+          Almaza Pilsener
+          Augustiner Helles
+          Big Wave Golden Ale
+          Bitburger Radler
+          Brahma
+          Estrella Jalisco
+          Heineken Silver
+          Ichnusa Anima Sarda
+          Magna
+          Mahou Cinco Estrellas
+          Modelo Especial
+          Modelo Oro
+          Mythos
+          Negra Modelo
+          Newcastle Brown Ale
+          Pacífico Clara
+          Pub Ale
+          Sapporo Premium
+          Singha
+          Smithwick's
+          Sol
+          Super Bock
+          Tuborg
+          EOF
+          )"
 
       - name: Commit what it found
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/stats/logos logo-fetch-report.json
-          git commit -m "Fetch every beer's logo from its brand's own site" || echo "nothing to commit"
+          git add public/stats/logos public/stats/data.js logo-fetch-report.json
+          git commit -m "Re-fetch the logos that came back as a letter or a photograph" || echo "nothing to commit"
           git push origin HEAD:${{ github.ref_name }}
