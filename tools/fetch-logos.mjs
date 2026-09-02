@@ -216,6 +216,30 @@ async function headerLogo(domain, page) {
 // recorded in BRAND_DOMAINS is that brand by definition. Failing that, the
 // item's label has to be the beer's whole name — never "Sol" against anything
 // in the world that happens to be called Sol.
+
+// Commons, asked by name. Wikidata's P154 is the precise answer and this is
+// the broad one, so it runs only when P154 has nothing: a file in Commons'
+// File namespace whose name contains the word "logo" *and* every significant
+// word of the beer's name. Both halves matter — "logo" alone would take a
+// photograph of a brewery sign, and the words alone would take a bottle shot.
+const commonsPath = file =>
+  'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(file) + `?width=${OUT_PX}`;
+
+async function commonsLogoFile(beerName, api, norm) {
+  const words = norm(beerName).split(' ').filter(w => w.length >= 3);
+  if (!words.length) return null;
+  const res = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
+    `&list=search&srnamespace=6&srlimit=20&srsearch=${encodeURIComponent(beerName + ' logo')}`);
+  const hits = (res?.query?.search ?? []).map(r => String(r.title).replace(/^File:/, ''));
+  const ok = hits.filter(t => {
+    const n = norm(t);
+    return /\blogo\b/.test(n) && words.every(w => n.includes(w));
+  });
+  // Vector first: it is the highest resolution there is.
+  ok.sort((a, b) => (/\.svgz?$/i.test(b) ? 1 : 0) - (/\.svgz?$/i.test(a) ? 1 : 0));
+  return ok[0] ?? null;
+}
+
 const wdCache = new Map();
 const registrable = d => d.replace(/^www\./, '').toLowerCase();
 
@@ -252,7 +276,8 @@ async function wikidataLogo(beerName, domains) {
         const byLabel = label.length > 3 &&
           (label === beer || beer.startsWith(label + ' ') || label.startsWith(beer + ' '));
         if (!byDomain && !byLabel) continue;
-        const file = claims?.P154?.[0]?.mainsnak?.datavalue?.value;
+        const file = claims?.P154?.[0]?.mainsnak?.datavalue?.value
+          ?? await commonsLogoFile(beerName, api, norm);
         if (!file) { why = `${id} is the right brand but has no logo on file`; continue; }
         const info = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
           `&titles=${encodeURIComponent('File:' + file)}&prop=imageinfo&iiprop=url&iiurlwidth=${OUT_PX}`);
@@ -268,6 +293,15 @@ async function wikidataLogo(beerName, domains) {
         out = { urls: [path, ii.thumburl, ii.url].filter(Boolean), id, file };
         break;
       }
+    }
+    // No Wikidata item matched — Grupo Modelo is not "Modelo Especial", and
+    // Almaza Brewery is not "Almaza Pilsener". Commons is asked directly in
+    // that case: a file there named for this brand *and* the word logo is the
+    // brand's logo, whatever any encyclopaedia article is called.
+    if (!out) {
+      const file = await commonsLogoFile(beerName, api, norm);
+      if (file) out = { url: null, urls: [commonsPath(file)], id: 'commons', file };
+      else if (why === 'no article was this brand') why = 'no article, and Commons has no file named for it';
     }
   } catch { out = null; }
   // Return what was cached, not `out`: a miss has to come back as the reason
@@ -611,6 +645,9 @@ if (import.meta.url === `file://${process.argv[1]}`) {
                            stored: r.size.fmt === 'svg' ? 'vector' : `${r.stored ?? '?'}px`,
                            url: r.url, bytes: r.buf.length });
   for (const n of kept) previous.delete(n);
+  // A beer whose re-fetch found nothing has no file any more (it was dropped
+  // above), so its old row would be a record of a logo that is not there.
+  for (const m of missing) previous.delete(m.name);
 
   writeFileSync(REPORT, JSON.stringify({
     at: new Date().toISOString(),

@@ -35,11 +35,10 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # The ones the sheet and the report still argue with: eight whose logo
-      # Wikidata holds but whose file would not download, and the three Modelo
-      # beers whose "header logo" is a JPEG cutout of a man holding a bottle.
-      # Everything else keeps the file it has.
-      - name: Re-fetch the ones still wrong
+      # The eleven with no file: five whose Wikidata item is the right brand
+      # but carries no logo, and six no article is named for — Grupo Modelo is
+      # not "Modelo Especial". Commons is asked by name for both.
+      - name: Fetch the ones with no logo yet
         run: |
           node tools/fetch-logos.mjs --force --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
           Affligem Tripel
