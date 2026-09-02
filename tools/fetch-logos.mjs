@@ -270,8 +270,14 @@ async function wikidataLogo(beerName, domains) {
       }
     }
   } catch { out = null; }
-  wdCache.set(key, out ?? { why });
-  return out;
+  // Return what was cached, not `out`: a miss has to come back as the reason
+  // it missed, or the caller sees null, cannot tell it from a source it never
+  // asked, and reports "no" for every one of the several different nothings
+  // this can end in. (It also crashed on the next line, which is how it was
+  // finally noticed.)
+  const answer = out ?? { why };
+  wdCache.set(key, answer);
+  return answer;
 }
 
 // The favicon services, in the order they proved useful when probed.
@@ -390,7 +396,7 @@ export async function findLogo(name, domains, page, lab = page) {
       const hit = await wikidataLogo(name, domains);
       if (hit?.why) { tried.push(`${cand.why} · ${hit.why}`); continue; }
       for (const u of hit?.urls ?? []) { got = await get(u, { ua: WIKI_UA }); if (got) break; }
-      if (!got) { tried.push(`${cand.why} · found ${hit.file}, but none of its URLs downloaded`); continue; }
+      if (!got) { tried.push(`${cand.why} · found ${hit?.file ?? 'a file'}, but none of its URLs downloaded`); continue; }
     } else if (cand.header) {
       const hit = await headerLogo(cand.domain, page);
       if (hit?.kind === 'svg')
