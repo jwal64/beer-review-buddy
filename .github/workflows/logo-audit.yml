@@ -35,12 +35,32 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # All of them again. Three rules changed that every logo has to pass,
-      # not just the ones that were missing: no JPEG from any source, nothing
-      # blank, and no Wikidata item whose label merely starts with the beer's
-      # name. Sixty logos already on disk were chosen without those.
-      - name: Fetch every logo again
+      # Eight of the logos in this directory are drawings rather than marks —
+      # a generic shield with the brewery's name set in Georgia. The fetcher
+      # leaves a file it did not write alone, which is right for a logo
+      # somebody drew on purpose and wrong for a stand-in nobody wants to
+      # keep. So they are taken out of its way, given a chance at the real
+      # thing, and put back only where there wasn't one.
+      - name: Set the drawn stand-ins aside
+        run: rm -f public/stats/logos/{affligem-tripel,almaza-pilsener,mahou-cinco-estrellas,mythos,newcastle-brown-ale,pacifico-clara,singha,smithwicks}.svg
+
+      - name: Fetch every logo
         run: node tools/fetch-logos.mjs --force
+
+      - name: Put back the drawings nothing better replaced
+        run: |
+          for f in affligem-tripel almaza-pilsener mahou-cinco-estrellas mythos \
+                   newcastle-brown-ale pacifico-clara singha smithwicks; do
+            # Any extension counts as replaced: the fetch may have landed a
+            # .webp where the drawing was a .svg, and restoring then would
+            # leave both, with the drawing winning on extension order.
+            if ls public/stats/logos/$f.* >/dev/null 2>&1; then
+              echo "$f — replaced by a fetched logo"
+            else
+              git checkout -- public/stats/logos/$f.svg && echo "$f — kept the drawing, nothing better found"
+            fi
+          done
+          node tools/fetch-logos.mjs --data-only
 
       - name: Commit what it found
         if: always()
@@ -49,11 +69,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/stats/logos public/stats/data.js logo-fetch-report.json
           git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
-          git commit -m "Re-fetch every logo at the best resolution anyone has"
+          git commit -m "Fetch every logo, and replace the drawn stand-ins where a real mark exists"
           # Half an hour of fetching should not be thrown away because somebody
-          # pushed a comment to the branch while it ran. Rebase onto whatever
-          # is there and try again; the logos are the only thing this commit
-          # touches, so there is nothing for it to conflict with.
+          # pushed to the branch while it ran. Rebase onto whatever is there and
+          # try again; the logos are all this commit touches, so there is
+          # nothing for it to conflict with.
           for attempt in 1 2 3; do
             git push origin HEAD:${{ github.ref_name }} && exit 0
             git pull --rebase origin ${{ github.ref_name }}
