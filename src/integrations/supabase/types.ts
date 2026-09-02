@@ -26,6 +26,7 @@ export type Database = {
           drank_on: string
           id: string
           is_new: boolean
+          logo: string | null
           logo_url: string | null
           method: string | null
           name: string
@@ -33,6 +34,7 @@ export type Database = {
           origin_cc: string | null
           rating: number
           region: string | null
+          seq: number | null
           style: string
         }
         Insert: {
@@ -46,6 +48,7 @@ export type Database = {
           drank_on?: string
           id?: string
           is_new?: boolean
+          logo?: string | null
           logo_url?: string | null
           method?: string | null
           name: string
@@ -53,6 +56,7 @@ export type Database = {
           origin_cc?: string | null
           rating: number
           region?: string | null
+          seq?: number | null
           style: string
         }
         Update: {
@@ -66,6 +70,7 @@ export type Database = {
           drank_on?: string
           id?: string
           is_new?: boolean
+          logo?: string | null
           logo_url?: string | null
           method?: string | null
           name?: string
@@ -73,6 +78,7 @@ export type Database = {
           origin_cc?: string | null
           rating?: number
           region?: string | null
+          seq?: number | null
           style?: string
         }
         Relationships: []
@@ -83,33 +89,39 @@ export type Database = {
           country: string | null
           created_at: string
           id: string
+          lang: string | null
           lat: number | null
           lng: number | null
           location: string | null
           logo_url: string | null
           name: string
+          native_name: string | null
         }
         Insert: {
           cc?: string | null
           country?: string | null
           created_at?: string
           id?: string
+          lang?: string | null
           lat?: number | null
           lng?: number | null
           location?: string | null
           logo_url?: string | null
           name: string
+          native_name?: string | null
         }
         Update: {
           cc?: string | null
           country?: string | null
           created_at?: string
           id?: string
+          lang?: string | null
           lat?: number | null
           lng?: number | null
           location?: string | null
           logo_url?: string | null
           name?: string
+          native_name?: string | null
         }
         Relationships: []
       }
