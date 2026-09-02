@@ -64,3 +64,37 @@ rest alone.
 it. Nothing automated can tell a brand's mark from a photograph of a bottle or
 from a generated grey letter — all three load, are the right size, and pass
 every check there is.
+
+## What is still wrong here
+
+Written down because the alternative is that somebody rediscovers each of
+these by squinting at the contact sheet. None of them is a bug in the
+fetcher — each is a brand whose logo is genuinely not available from any
+source the fetcher can reach, and each needs the brand's own artwork saved
+here by hand.
+
+**No file at all** — `npm run check` fails on these, which is the point:
+
+| Beer | Why |
+|------|-----|
+| Modelo Especial | modelousa.com serves a JPEG photograph of a man holding a bottle and calls it the logo; its declared icon is under 48px; no Wikipedia article is this brand (Grupo Modelo is the company, not the beer) and Commons has no file named for it |
+| Modelo Oro | the same site, the same three answers |
+| Negra Modelo | the same again |
+
+**A file that is not the brand's mark.** These pass the check and render, and
+they are wrong. Deleting them would not help — the runtime chain falls back to
+the same favicon the file was made from, so the page would show the same
+picture and the check would fail as well:
+
+| Beer | What it actually shows | Why |
+|------|------------------------|-----|
+| Magna | the WordPress logo | cerveceradepr.com is a bare WordPress install and that is its favicon; no measurement catches "this is a CMS default" |
+| Sol | a blue arrow | cervezasol.com answers with an icon that belongs to whoever runs the page, not to the beer |
+| Pub Ale | a blue dot | boddingtons.co.uk, the same story |
+| Estrella Jalisco | a very faint wide wordmark | the only mark on the site is a 584×51 Wix asset, nearly invisible at any size a card draws |
+
+**Drawings, not marks.** Nine files here are approximations somebody drew —
+a generic shield with the brewery's name set in Georgia, and so on. They look
+like logos and they are not the brand's artwork. They are listed in the
+section above; the fetcher leaves them alone, and any of them can be replaced
+simply by putting a real file here under the same name.
