@@ -105,13 +105,12 @@ function iconsFromHtml(html, base) {
     if (u) out.push({ url: u, why: `site rel="${rel.trim()}"`, kind: 'site-icon' });
   }
 
-  // og:image is a social card: as often a hero photograph as a logo. Kept,
-  // because for a few brands it is the only square mark anywhere; fenced,
-  // because for most it is a picture of a bottle.
-  const og = html.match(/<meta[^>]+(?:property|name)\s*=\s*["']og:image["'][^>]*>/i)?.[0];
-  const ogHref = og?.match(/\bcontent\s*=\s*["']([^"']+)["']/i)?.[1];
-  if (ogHref && abs(ogHref))
-    out.push({ url: abs(ogHref), why: 'site og:image', kind: 'og', squareOnly: true });
+  // og:image is deliberately absent. It is a social card, and every time it
+  // has answered here it has answered with one: 29 beers took a 1200×630
+  // photograph the first time it was allowed, and the last one left took
+  // prazdroj.cz's FB-share.png — a 600×600 photograph of the brewery gate,
+  // square enough to pass the shape test and flat enough to pass the
+  // photograph test. It has never once produced a mark worth keeping.
   return out;
 }
 
@@ -227,27 +226,31 @@ const commonsPath = file =>
 
 async function commonsLogoFile(beerName, api, norm) {
   const words = norm(beerName).split(' ').filter(w => w.length >= 3);
-  if (!words.length) return null;
+  // One word is not enough to name a brand on Commons. "Sol" matched
+  // Solana-sol-logo-horizontal-2025.svg — the cryptocurrency — and "Wrench"
+  // matched Monkey_Wrench_(early_style).svg. Both contain the beer's whole
+  // name as a whole word, so no amount of matching care would have helped:
+  // the name simply is not distinctive enough to search a million files with.
+  if (words.length < 2) return null;
   const hits = [];
-  // Twice: with the word appended, and without. Commons files are named by
-  // whoever uploaded them — "Smithwick's logo.svg", but also plain
-  // "Tsingtao.svg" — and the second query is what finds the latter.
   for (const q of [`${beerName} logo`, beerName]) {
     const res = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
       `&list=search&srnamespace=6&srlimit=20&srsearch=${encodeURIComponent(q)}`);
     for (const r of res?.query?.search ?? []) hits.push(String(r.title).replace(/^File:/, ''));
   }
   const ok = [...new Set(hits)].filter(t => {
-    const n = norm(t);
-    // Every significant word of the beer's name, and then either the word
-    // "logo" or a vector file. An SVG on Commons of a brand is artwork of its
-    // mark — nobody draws a photograph in vectors — so the extension carries
-    // the same claim the word does. Both halves still matter: the words alone
-    // would take a bottle shot named after the beer.
-    if (!words.every(w => n.includes(w))) return false;
-    return /\blogo\b/.test(n) || /\.svgz?$/i.test(t);
+    const n = ` ${norm(t)} `;
+    // Every significant word of the beer's name, as a whole word…
+    if (!words.every(w => n.includes(` ${w} `))) return false;
+    // …and the file has to say it is a logo. The vector extension was tried
+    // as a second way of saying that and is not one: Commons holds vector
+    // drawings of tools and coats of arms too.
+    if (!/ logo /.test(n)) return false;
+    // Commons is also where the encyclopaedia keeps its own furniture.
+    // "Logo of Tsingtao Wikipedians' Group" is a real logo of a real thing
+    // that is not a brewery.
+    return !/ (wikipedia|wikimedia|wikipedians|wikiproject|commons) /.test(n);
   });
-  // Vector first: it is the highest resolution there is.
   ok.sort((a, b) => (/\.svgz?$/i.test(b) ? 1 : 0) - (/\.svgz?$/i.test(a) ? 1 : 0));
   return ok[0] ?? null;
 }
@@ -293,8 +296,8 @@ async function wikidataLogo(beerName, domains) {
         // Busch has spent a century in court with.
         const byLabel = label.length > 3 && (label === beer || beer.startsWith(label + ' '));
         if (!byDomain && !byLabel) continue;
-        const file = claims?.P154?.[0]?.mainsnak?.datavalue?.value
-          ?? await commonsLogoFile(beerName, api, norm);
+        let file = claims?.P154?.[0]?.mainsnak?.datavalue?.value, byName = false;
+        if (!file) { file = await commonsLogoFile(beerName, api, norm); byName = !!file; }
         if (!file) { why = `${id} is the right brand but has no logo on file`; continue; }
         const info = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
           `&titles=${encodeURIComponent('File:' + file)}&prop=imageinfo&iiprop=url&iiurlwidth=${OUT_PX}`);
@@ -307,7 +310,7 @@ async function wikidataLogo(beerName, domains) {
         // away resolves through them and not through the path.
         const path = 'https://commons.wikimedia.org/wiki/Special:FilePath/' +
           encodeURIComponent(file) + (/\.svgz?$/i.test(ii.url) ? '' : `?width=${OUT_PX}`);
-        out = { urls: [path, ii.thumburl, ii.url].filter(Boolean), id, file };
+        out = { urls: [path, ii.thumburl, ii.url].filter(Boolean), id, file, byName };
         break;
       }
     }
@@ -317,7 +320,7 @@ async function wikidataLogo(beerName, domains) {
     // brand's logo, whatever any encyclopaedia article is called.
     if (!out) {
       const file = await commonsLogoFile(beerName, api, norm);
-      if (file) out = { url: null, urls: [commonsPath(file)], id: 'commons', file };
+      if (file) out = { urls: [commonsPath(file)], id: 'commons', file, byName: true };
       else if (why === 'no article was this brand') why = 'no article, and Commons has no file named for it';
     }
   } catch { out = null; }
@@ -440,7 +443,7 @@ function refuse(size, m, kind) {
 // than a rendering of one. Among rasters the answer is simply how big it is —
 // which is the point, since 180px is not HD and 2048 is. The source only
 // breaks ties.
-const KIND_RANK = { wikidata: 5, 'site-icon': 4, header: 3, service: 2, og: 1 };
+const KIND_RANK = { wikidata: 5, 'site-icon': 4, header: 3, commons: 2, service: 1 };
 const scoreOf = (s, kind) => (s.fmt === 'svg' ? 1e9 : Math.min(s.w, s.h) * 10) + (KIND_RANK[kind] ?? 0);
 const squareness = s => (s.fmt === 'svg' ? 1 : Math.min(s.w, s.h) / Math.max(s.w, s.h, 1));
 
@@ -475,11 +478,15 @@ export async function findLogo(name, domains, page, lab = page) {
     // Nothing beats a vector, so stop asking once one is in hand.
     if (best?.size.fmt === 'svg') break;
 
-    let got = null;
+    let got = null, kind = cand.kind, why = cand.why;
     if (cand.wikidata) {
       const hit = await wikidataLogo(name, domains);
       if (hit?.why) { tried.push(`${cand.why} · ${hit.why}`); continue; }
       for (const u of hit?.urls ?? []) { got = await get(u, { ua: WIKI_UA }); if (got) break; }
+      // A name match is a guess about which file is the brand's; P154 is the
+      // encyclopaedia saying so. Only the latter earns the JPEG exemption, and
+      // the report should not call one the other.
+      if (hit?.byName) { kind = 'commons'; why = 'commons by name'; }
       if (!got) { tried.push(`${cand.why} · found ${hit?.file ?? 'a file'}, but none of its URLs downloaded`); continue; }
     } else if (cand.header) {
       const hit = await headerLogo(cand.domain, page);
@@ -491,19 +498,19 @@ export async function findLogo(name, domains, page, lab = page) {
     }
 
     const size = got && measure(got.buf, got.type);
-    const where = `${cand.why} · ${cand.domain}`;
+    const where = `${why} · ${cand.domain}`;
     if (!size) { tried.push(`${where} · no`); continue; }
 
     const no = cand.reject?.(size)
       ?? (cand.squareOnly && squareness(size) < 0.6 ? 'not square' : null)
-      ?? refuse(size, await inspect(got.buf, size.fmt, lab), cand.kind);
+      ?? refuse(size, await inspect(got.buf, size.fmt, lab), kind);
     if (no) { refused = true; tried.push(`${where} · ${size.w}×${size.h} rejected, ${no}`); continue; }
 
-    const score = scoreOf(size, cand.kind);
+    const score = scoreOf(size, kind);
     tried.push(`${where} · ${size.w}×${size.h} ${size.fmt}`);
     if (!best || score > best.score)
-      best = { score, buf: got.buf, size, source: cand.why, domain: cand.domain,
-               kind: cand.kind, url: got.url ?? cand.url };
+      best = { score, buf: got.buf, size, source: why, domain: cand.domain,
+               kind, url: got.url ?? cand.url };
   }
   return best ? { name, ...best, tried } : { name, buf: null, tried, refused };
 }
