@@ -2,6 +2,8 @@ import { useState } from "react";
 import { beerLogoSources, isSuspectFavicon } from "@/lib/logos";
 import { useBrandDomains } from "@/lib/beer-data";
 import { cn } from "@/lib/utils";
+import { styleColor } from "@/lib/style-colors";
+
 
 // Walks the tiered source chain (local override → Brandfetch → Google
 // favicons → Icon Horse) one <img> at a time, the same order the stats site
@@ -12,13 +14,17 @@ import { cn } from "@/lib/utils";
 export function BeerLogo({
   name,
   logo,
+  style,
   className,
 }: {
   name: string;
   /** The beer row's `logo` column — a local `logos/<file>` override or a recorded hotlink. */
   logo?: string | null | undefined;
+  /** The beer's style, used to tint the monogram when no logo resolves. */
+  style?: string | null | undefined;
   className?: string | undefined;
 }) {
+
   // Shared with every other card on the page — react-query fetches it once.
   const { data: domains } = useBrandDomains();
   const sources = beerLogoSources(name, domains, logo);
@@ -53,8 +59,11 @@ export function BeerLogo({
           }}
         />
       ) : (
-        <span className="font-display text-lg text-primary">{name.charAt(0)}</span>
+        <span className="font-display text-lg" style={{ color: styleColor(style) }}>
+          {name.charAt(0)}
+        </span>
       )}
     </div>
   );
 }
+
