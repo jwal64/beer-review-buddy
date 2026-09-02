@@ -14,6 +14,8 @@ import {
   flagEmoji,
   type Beer,
   type CountryRow,
+  place,
+  breweryPlace,
 } from "@/lib/beer-data";
 import { beerLogo, breweryLogo, type DomainMap, type LogoMap } from "@/lib/logos";
 import { ClientOnly } from "@tanstack/react-router";
@@ -266,7 +268,7 @@ function cityPopup(
 ) {
   // "Antwerp, Antwerp" — several cities share their region's name, and saying
   // it twice reads like a mistake.
-  const where = [loc.city, loc.region === loc.city ? null : loc.region].filter(Boolean).join(", ");
+  const where = place(loc.city, loc.region, loc.country);
   return `<div class="bm-pop">
       <div class="bm-pop-title">${flagEmoji(loc.cc, countries)} ${esc(where)}</div>
       <div class="bm-pop-sub">${esc(loc.country)}</div>
@@ -289,9 +291,7 @@ function breweryPopup(
     : "";
   return `<div class="bm-pop">
       <div class="bm-pop-title">${mark}<span>${flagEmoji(brewery.cc, countries)} ${esc(brewery.name)}</span></div>
-      <div class="bm-pop-sub">${esc(
-        [brewery.location, brewery.country].filter(Boolean).join(" · "),
-      )}</div>
+      <div class="bm-pop-sub">${esc(breweryPlace(brewery))}</div>
       <div class="bm-pop-sub">${esc(tally(made, "yet"))}</div>
       ${beerRows(made, domains, logos, countries)}
     </div>`;

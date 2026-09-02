@@ -13,7 +13,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { flagEmoji, formatMonth, useBeers, useCountries, type Beer } from "@/lib/beer-data";
+import { flagEmoji, formatMonth, useBeers, useCountries, type Beer, place } from "@/lib/beer-data";
 import { Search, Plus, Pencil } from "lucide-react";
 import { useSession } from "@/lib/use-session";
 import { BeerForm } from "@/components/BeerForm";
@@ -79,7 +79,6 @@ function BeersPage() {
       })
       .sort(SORTS[sort]);
   }, [beers, query, style, sort]);
-
 
   return (
     <Shell title="All beers" subtitle={`${filtered.length} reviews`}>
@@ -195,10 +194,7 @@ function BeersPage() {
                         "—"
                       }`,
                     ],
-                    [
-                      "Drunk in",
-                      [selected.city, selected.country].filter(Boolean).join(", ") || "—",
-                    ],
+                    ["Drunk in", place(selected.city, selected.region, selected.country) || "—"],
                     ["When", formatMonth(selected.drank_on)],
                   ].map(([k, v]) => (
                     <div key={k} className="rounded-xl border border-border bg-card p-3">

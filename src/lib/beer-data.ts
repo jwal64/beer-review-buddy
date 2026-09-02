@@ -209,3 +209,36 @@ export function formatMonth(date: string) {
     year: "numeric",
   });
 }
+
+/**
+ * A place, written one way everywhere: city, then the region or state, then
+ * the country — "New Rochelle, New York, USA", "Montreal, Quebec, Canada".
+ * The stats site has the same function; the two surfaces show the same
+ * reviews and should not describe where they happened differently.
+ *
+ * The region is dropped only when it repeats the city — Antwerp is in
+ * Antwerp, and saying so twice reads as a mistake rather than as detail.
+ */
+export function place(city?: string | null, region?: string | null, country?: string | null) {
+  const out: string[] = [];
+  const c = (city ?? "").trim();
+  const r = (region ?? "").trim();
+  const n = (country ?? "").trim();
+  if (c) out.push(c);
+  if (r && r !== c) out.push(r);
+  if (n) out.push(n);
+  return out.join(", ");
+}
+
+/**
+ * A brewery keeps "City, Region" in one field and its country in another, so
+ * its place is assembled from the pieces rather than concatenated — otherwise
+ * a brewery whose location is only a city loses its region silently.
+ */
+export function breweryPlace(brewery?: { location?: string | null; country?: string | null }) {
+  const parts = (brewery?.location ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return place(parts[0], parts.slice(1).join(", "), brewery?.country);
+}

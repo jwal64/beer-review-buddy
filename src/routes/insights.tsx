@@ -13,6 +13,7 @@ import {
   useCountries,
   useUntappdAverages,
   useWantToTry,
+  place,
 } from "@/lib/beer-data";
 import {
   MIN_N,
@@ -768,7 +769,9 @@ function InsightsPage() {
                       <p className="truncate text-[11px] text-muted-foreground">
                         {e.row.style}
                         {e.row.abv != null ? ` · ${Number(e.row.abv)}%` : ""}
-                        {e.row.region ? ` · ${e.row.region}` : ""}
+                        {e.row.region
+                          ? ` · ${place("", e.row.region, countries?.find((c) => c.cc === e.row.origin)?.name)}`
+                          : ""}
                       </p>
                     </div>
                     <div className="shrink-0 text-right">
