@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-02T14:40:41.591Z",
+  "at": "2026-09-02T14:45:16.216Z",
   "total": 101,
   "fetched": [
     {
@@ -847,21 +847,8 @@
         "site /favicon.svg · drinkpacifico.com · no",
         "site header logo · drinkpacifico.com · no",
         "google faviconV2 · drinkpacifico.com · no",
-        "icon.horse · drinkpacifico.com · 256×256 rejected, a generated lettermark",
+        "icon.horse · drinkpacifico.com · no",
         "duckduckgo · drinkpacifico.com · no"
-      ]
-    },
-    {
-      "beer": "Almaza Pilsener",
-      "tried": [
-        "wikidata P154 · almaza.com · no",
-        "site /apple-touch-icon.png · almaza.com · no",
-        "site /apple-touch-icon-precomposed.png · almaza.com · no",
-        "site /favicon.svg · almaza.com · no",
-        "site header logo · almaza.com · no",
-        "google faviconV2 · almaza.com · no",
-        "icon.horse · almaza.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · almaza.com · no"
       ]
     },
     {
@@ -873,7 +860,7 @@
         "site /favicon.svg · singhabeer.com · no",
         "site header logo · singhabeer.com · no",
         "google faviconV2 · singhabeer.com · no",
-        "icon.horse · singhabeer.com · 256×256 rejected, a generated lettermark",
+        "icon.horse · singhabeer.com · no",
         "duckduckgo · singhabeer.com · no"
       ]
     },
@@ -881,11 +868,26 @@
       "beer": "Mahou Cinco Estrellas",
       "tried": [
         "wikidata P154 · mahou.es · no",
-        "site rel=\"shortcut icon\" · mahou.es · no",
+        "site /apple-touch-icon.png · mahou.es · no",
+        "site /apple-touch-icon-precomposed.png · mahou.es · no",
+        "site /favicon.svg · mahou.es · no",
         "site header logo · mahou.es · no",
         "google faviconV2 · mahou.es · no",
         "icon.horse · mahou.es · no",
         "duckduckgo · mahou.es · no"
+      ]
+    },
+    {
+      "beer": "Almaza Pilsener",
+      "tried": [
+        "wikidata P154 · almaza.com · no",
+        "site /apple-touch-icon.png · almaza.com · no",
+        "site /apple-touch-icon-precomposed.png · almaza.com · no",
+        "site /favicon.svg · almaza.com · no",
+        "site header logo · almaza.com · no",
+        "google faviconV2 · almaza.com · no",
+        "icon.horse · almaza.com · no",
+        "duckduckgo · almaza.com · no"
       ]
     },
     {
@@ -897,29 +899,8 @@
         "site /favicon.svg · affligembeer.be · no",
         "site header logo · affligembeer.be · no",
         "google faviconV2 · affligembeer.be · no",
-        "icon.horse · affligembeer.be · 256×256 rejected, a generated lettermark",
+        "icon.horse · affligembeer.be · no",
         "duckduckgo · affligembeer.be · no"
-      ]
-    },
-    {
-      "beer": "Smithwick's",
-      "tried": [
-        "wikidata P154 · smithwicks.com · no",
-        "site /apple-touch-icon.png · smithwicks.com · no",
-        "site /apple-touch-icon-precomposed.png · smithwicks.com · no",
-        "site /favicon.svg · smithwicks.com · no",
-        "site header logo · smithwicks.com · no",
-        "google faviconV2 · smithwicks.com · no",
-        "icon.horse · smithwicks.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · smithwicks.com · no",
-        "wikidata P154 · smithwicks.ie · no",
-        "site /apple-touch-icon.png · smithwicks.ie · no",
-        "site /apple-touch-icon-precomposed.png · smithwicks.ie · no",
-        "site /favicon.svg · smithwicks.ie · no",
-        "site header logo · smithwicks.ie · no",
-        "google faviconV2 · smithwicks.ie · no",
-        "icon.horse · smithwicks.ie · 256×256 rejected, a generated lettermark",
-        "duckduckgo · smithwicks.ie · no"
       ]
     },
     {
@@ -931,8 +912,29 @@
         "site /favicon.svg · mythosbrewery.gr · no",
         "site header logo · mythosbrewery.gr · no",
         "google faviconV2 · mythosbrewery.gr · no",
-        "icon.horse · mythosbrewery.gr · 256×256 rejected, a generated lettermark",
+        "icon.horse · mythosbrewery.gr · no",
         "duckduckgo · mythosbrewery.gr · no"
+      ]
+    },
+    {
+      "beer": "Smithwick's",
+      "tried": [
+        "wikidata P154 · smithwicks.com · no",
+        "site /apple-touch-icon.png · smithwicks.com · no",
+        "site /apple-touch-icon-precomposed.png · smithwicks.com · no",
+        "site /favicon.svg · smithwicks.com · no",
+        "site header logo · smithwicks.com · no",
+        "google faviconV2 · smithwicks.com · no",
+        "icon.horse · smithwicks.com · no",
+        "duckduckgo · smithwicks.com · no",
+        "wikidata P154 · smithwicks.ie · the Wikipedia API did not answer",
+        "site /apple-touch-icon.png · smithwicks.ie · no",
+        "site /apple-touch-icon-precomposed.png · smithwicks.ie · no",
+        "site /favicon.svg · smithwicks.ie · no",
+        "site header logo · smithwicks.ie · no",
+        "google faviconV2 · smithwicks.ie · no",
+        "icon.horse · smithwicks.ie · no",
+        "duckduckgo · smithwicks.ie · no"
       ]
     },
     {
@@ -944,14 +946,16 @@
         "site /favicon.svg · newcastlebrown.com · no",
         "site header logo · newcastlebrown.com · no",
         "google faviconV2 · newcastlebrown.com · no",
-        "icon.horse · newcastlebrown.com · 256×256 rejected, a generated lettermark",
+        "icon.horse · newcastlebrown.com · no",
         "duckduckgo · newcastlebrown.com · no",
-        "wikidata P154 · newcastlebrownale.com · no",
+        "wikidata P154 · newcastlebrownale.com · the Wikipedia API did not answer",
         "site /apple-touch-icon.png · newcastlebrownale.com · no",
         "site /apple-touch-icon-precomposed.png · newcastlebrownale.com · no",
         "site /favicon.svg · newcastlebrownale.com · no",
         "site header logo · newcastlebrownale.com · no",
-        "google faviconV2 · newcastlebrownale.com · skipped, out of time"
+        "google faviconV2 · newcastlebrownale.com · no",
+        "icon.horse · newcastlebrownale.com · no",
+        "duckduckgo · newcastlebrownale.com · no"
       ]
     }
   ]
