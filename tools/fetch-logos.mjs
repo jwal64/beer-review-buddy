@@ -392,14 +392,19 @@ async function inspect(buf, fmt, page) {
 }
 
 // What the inspection is allowed to conclude.
-function refuse(size, m) {
+function refuse(size, m, kind) {
   // A JPEG is a photograph. The format is the tell, and a far better one than
   // any measurement of the pixels: a mark needs transparency and hard edges,
   // so brands and Commons alike ship PNG or SVG, and JPEG is what you get when
   // the "logo" is really a picture of the product. It is how modelousa.com's
   // cutout of a man holding a bottle, Wikidata's photograph of Mythos in two
   // glasses and a dark shot of Guinness pints all arrived called logos.
-  if (size.fmt === 'jpg') return 'a JPEG, which is a photograph and not a mark';
+  // …but only where the *source* chose the format. A favicon service
+  // re-encodes whatever the site gave it, and Google and DuckDuckGo both hand
+  // back Bud Light's perfectly real logo as a JPEG. There the format says
+  // nothing, and the pixels have to answer instead.
+  if (size.fmt === 'jpg' && kind !== 'service')
+    return 'a JPEG, which is a photograph and not a mark';
   if (!m) return null;                                   // measurement timed out
   if (m.undrawable) return 'an image the browser cannot draw';
   // An inline SVG lifted from a header can come out empty — the shapes were in
@@ -447,7 +452,7 @@ const BUDGET_MS = 180000;
 export async function findLogo(name, domains, page, lab = page) {
   const tried = [];
   const until = Date.now() + BUDGET_MS;
-  let best = null;
+  let best = null, refused = false;
 
   for (const cand of await candidatesFor(name, domains, page)) {
     if (Date.now() > until) { tried.push(`${cand.why} · ${cand.domain} · skipped, out of time`); break; }
@@ -475,8 +480,8 @@ export async function findLogo(name, domains, page, lab = page) {
 
     const no = cand.reject?.(size)
       ?? (cand.squareOnly && squareness(size) < 0.6 ? 'not square' : null)
-      ?? refuse(size, await inspect(got.buf, size.fmt, lab));
-    if (no) { tried.push(`${where} · ${size.w}×${size.h} rejected, ${no}`); continue; }
+      ?? refuse(size, await inspect(got.buf, size.fmt, lab), cand.kind);
+    if (no) { refused = true; tried.push(`${where} · ${size.w}×${size.h} rejected, ${no}`); continue; }
 
     const score = scoreOf(size, cand.kind);
     tried.push(`${where} · ${size.w}×${size.h} ${size.fmt}`);
@@ -484,7 +489,7 @@ export async function findLogo(name, domains, page, lab = page) {
       best = { score, buf: got.buf, size, source: cand.why, domain: cand.domain,
                kind: cand.kind, url: got.url ?? cand.url };
   }
-  return best ? { name, ...best, tried } : { name, buf: null, tried };
+  return best ? { name, ...best, tried } : { name, buf: null, tried, refused };
 }
 
 // ── data.js ───────────────────────────────────────────────────
@@ -642,12 +647,17 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     writeFileSync(join(ROOT, r.file), r.buf);
   }
 
-  // A beer re-fetched that came back with nothing loses the file it had. That
-  // file is what the fetch just refused — a photograph, or a grey capital —
-  // and leaving it in place would keep the wrong logo *and* let the check pass.
+  // A beer re-fetched that came back with nothing loses the file it had —
+  // but only when something was actually *refused*. That file is then what
+  // the fetch just turned down, and leaving it would keep the wrong logo and
+  // let the check pass. When every candidate merely failed to answer, the
+  // network had a bad minute and the logo already on disk is the better
+  // answer; Big Wave lost a perfectly good one that way.
   for (const m of missing) {
     const old = fileFor(m.name);
-    if (old && mine.has(old)) { unlinkSync(join(LOGO_DIR, old)); console.log(`  – dropped logos/${old}`); }
+    if (!old || !mine.has(old)) continue;
+    if (m.refused) { unlinkSync(join(LOGO_DIR, old)); console.log(`  – dropped logos/${old}`); }
+    else console.log(`  · kept logos/${old} — nothing was refused, no source answered`);
   }
 
   writeBrandLogos(logosOnDisk(names));
@@ -667,7 +677,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   for (const n of kept) previous.delete(n);
   // A beer whose re-fetch found nothing has no file any more (it was dropped
   // above), so its old row would be a record of a logo that is not there.
-  for (const m of missing) previous.delete(m.name);
+  for (const m of missing) if (m.refused || !fileFor(m.name)) previous.delete(m.name);
 
   writeFileSync(REPORT, JSON.stringify({
     at: new Date().toISOString(),
