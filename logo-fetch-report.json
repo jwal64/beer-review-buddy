@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-02T14:58:02.497Z",
+  "at": "2026-09-02T15:38:31.551Z",
   "total": 101,
   "fetched": [
     {
@@ -931,33 +931,9 @@
   ],
   "missing": [
     {
-      "beer": "Almaza Pilsener",
-      "tried": [
-        "wikidata P154 · almaza.com · no",
-        "site /apple-touch-icon.png · almaza.com · no",
-        "site /apple-touch-icon-precomposed.png · almaza.com · no",
-        "site /favicon.svg · almaza.com · no",
-        "site header logo · almaza.com · no",
-        "google faviconV2 · almaza.com · no",
-        "icon.horse · almaza.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · almaza.com · no"
-      ]
-    },
-    {
-      "beer": "Mahou Cinco Estrellas",
-      "tried": [
-        "wikidata P154 · mahou.es · no",
-        "site rel=\"shortcut icon\" · mahou.es · no",
-        "site header logo · mahou.es · no",
-        "google faviconV2 · mahou.es · no",
-        "icon.horse · mahou.es · no",
-        "duckduckgo · mahou.es · no"
-      ]
-    },
-    {
       "beer": "Pacífico Clara",
       "tried": [
-        "wikidata P154 · drinkpacifico.com · no",
+        "wikidata P154 · Q4570769 is the right brand but has no logo on file",
         "site /apple-touch-icon.png · drinkpacifico.com · no",
         "site /apple-touch-icon-precomposed.png · drinkpacifico.com · no",
         "site /favicon.svg · drinkpacifico.com · no",
@@ -968,22 +944,9 @@
       ]
     },
     {
-      "beer": "Affligem Tripel",
-      "tried": [
-        "wikidata P154 · affligembeer.be · no",
-        "site /apple-touch-icon.png · affligembeer.be · no",
-        "site /apple-touch-icon-precomposed.png · affligembeer.be · no",
-        "site /favicon.svg · affligembeer.be · no",
-        "site header logo · affligembeer.be · no",
-        "google faviconV2 · affligembeer.be · no",
-        "icon.horse · affligembeer.be · no",
-        "duckduckgo · affligembeer.be · no"
-      ]
-    },
-    {
       "beer": "Singha",
       "tried": [
-        "wikidata P154 · singhabeer.com · no",
+        "wikidata P154 · Q2140520 is the right brand but has no logo on file",
         "site /apple-touch-icon.png · singhabeer.com · no",
         "site /apple-touch-icon-precomposed.png · singhabeer.com · no",
         "site /favicon.svg · singhabeer.com · no",
@@ -994,22 +957,95 @@
       ]
     },
     {
+      "beer": "Negra Modelo",
+      "tried": [
+        "wikidata P154 · no article was this brand",
+        "site rel=\"icon\" · modelousa.com · no",
+        "site og:image · modelousa.com · 1962×1098 rejected, not square",
+        "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
+        "google faviconV2 · modelousa.com · no",
+        "icon.horse · modelousa.com · no",
+        "duckduckgo · modelousa.com · no"
+      ]
+    },
+    {
+      "beer": "Modelo Especial",
+      "tried": [
+        "wikidata P154 · no article was this brand",
+        "site rel=\"icon\" · modelousa.com · no",
+        "site og:image · modelousa.com · 1962×1098 rejected, not square",
+        "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
+        "google faviconV2 · modelousa.com · no",
+        "icon.horse · modelousa.com · no",
+        "duckduckgo · modelousa.com · no"
+      ]
+    },
+    {
+      "beer": "Almaza Pilsener",
+      "tried": [
+        "wikidata P154 · no article was this brand",
+        "site /apple-touch-icon.png · almaza.com · no",
+        "site /apple-touch-icon-precomposed.png · almaza.com · no",
+        "site /favicon.svg · almaza.com · no",
+        "site header logo · almaza.com · no",
+        "google faviconV2 · almaza.com · no",
+        "icon.horse · almaza.com · 256×256 rejected, a generated lettermark",
+        "duckduckgo · almaza.com · no"
+      ]
+    },
+    {
+      "beer": "Modelo Oro",
+      "tried": [
+        "wikidata P154 · no article was this brand",
+        "site rel=\"icon\" · modelousa.com · no",
+        "site og:image · modelousa.com · 1962×1098 rejected, not square",
+        "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
+        "google faviconV2 · modelousa.com · no",
+        "icon.horse · modelousa.com · no",
+        "duckduckgo · modelousa.com · no"
+      ]
+    },
+    {
+      "beer": "Mahou Cinco Estrellas",
+      "tried": [
+        "wikidata P154 · no article was this brand",
+        "site rel=\"shortcut icon\" · mahou.es · no",
+        "site header logo · mahou.es · no",
+        "google faviconV2 · mahou.es · no",
+        "icon.horse · mahou.es · no",
+        "duckduckgo · mahou.es · no"
+      ]
+    },
+    {
       "beer": "Mythos",
       "tried": [
-        "wikidata P154 · mythosbrewery.gr · no",
+        "wikidata P154 · Q1637028 is the right brand but has no logo on file",
         "site /apple-touch-icon.png · mythosbrewery.gr · no",
         "site /apple-touch-icon-precomposed.png · mythosbrewery.gr · no",
         "site /favicon.svg · mythosbrewery.gr · no",
         "site header logo · mythosbrewery.gr · no",
         "google faviconV2 · mythosbrewery.gr · no",
-        "icon.horse · mythosbrewery.gr · no",
+        "icon.horse · mythosbrewery.gr · 256×256 rejected, a generated lettermark",
         "duckduckgo · mythosbrewery.gr · no"
+      ]
+    },
+    {
+      "beer": "Affligem Tripel",
+      "tried": [
+        "wikidata P154 · no article was this brand",
+        "site /apple-touch-icon.png · affligembeer.be · no",
+        "site /apple-touch-icon-precomposed.png · affligembeer.be · no",
+        "site /favicon.svg · affligembeer.be · no",
+        "site header logo · affligembeer.be · no",
+        "google faviconV2 · affligembeer.be · no",
+        "icon.horse · affligembeer.be · no",
+        "duckduckgo · affligembeer.be · no"
       ]
     },
     {
       "beer": "Smithwick's",
       "tried": [
-        "wikidata P154 · smithwicks.com · no",
+        "wikidata P154 · Q21680864 is the right brand but has no logo on file",
         "site /apple-touch-icon.png · smithwicks.com · no",
         "site /apple-touch-icon-precomposed.png · smithwicks.com · no",
         "site /favicon.svg · smithwicks.com · no",
@@ -1029,7 +1065,7 @@
     {
       "beer": "Newcastle Brown Ale",
       "tried": [
-        "wikidata P154 · newcastlebrown.com · no",
+        "wikidata P154 · Q887730 is the right brand but has no logo on file",
         "site /apple-touch-icon.png · newcastlebrown.com · no",
         "site /apple-touch-icon-precomposed.png · newcastlebrown.com · no",
         "site /favicon.svg · newcastlebrown.com · no",
