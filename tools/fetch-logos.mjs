@@ -226,12 +226,14 @@ const commonsPath = file =>
 
 async function commonsLogoFile(beerName, api, norm) {
   const words = norm(beerName).split(' ').filter(w => w.length >= 3);
-  // One word is not enough to name a brand on Commons. "Sol" matched
+  // A one-word name is the dangerous case: "Sol" matched
   // Solana-sol-logo-horizontal-2025.svg — the cryptocurrency — and "Wrench"
   // matched Monkey_Wrench_(early_style).svg. Both contain the beer's whole
-  // name as a whole word, so no amount of matching care would have helped:
-  // the name simply is not distinctive enough to search a million files with.
-  if (words.length < 2) return null;
+  // name as a whole word, so matching more carefully does not help. What
+  // separates them from Singha, which the search gets right, is position: a
+  // file named for a brand leads with it. So a single word has to be the
+  // first word of the filename, which Solana's and Monkey Wrench's are not.
+  const leadOnly = words.length < 2;
   const hits = [];
   for (const q of [`${beerName} logo`, beerName]) {
     const res = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
@@ -242,6 +244,7 @@ async function commonsLogoFile(beerName, api, norm) {
     const n = ` ${norm(t)} `;
     // Every significant word of the beer's name, as a whole word…
     if (!words.every(w => n.includes(` ${w} `))) return false;
+    if (leadOnly && !n.startsWith(` ${words[0]} `)) return false;
     // …and the file has to say it is a logo. The vector extension was tried
     // as a second way of saying that and is not one: Commons holds vector
     // drawings of tools and coats of arms too.

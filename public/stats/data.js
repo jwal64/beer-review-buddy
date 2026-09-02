@@ -419,6 +419,7 @@ const BRAND_LOGOS = {
 "Sam Adams Boston Lager":"logos/sam-adams-boston-lager.svg",
 "Samuel Adams Summer Ale":"logos/samuel-adams-summer-ale.svg",
 "Sapporo Premium":"logos/sapporo-premium.webp",
+"Singha":"logos/singha.svg",
 "Smithwick's":"logos/smithwicks.svg",
 "Sol":"logos/sol.webp",
 "Spaten Oktoberfest Ur-Märzen / Winter":"logos/spaten-oktoberfest-ur-marzen-winter.webp",
@@ -437,6 +438,8 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
+
+
 
 
 
