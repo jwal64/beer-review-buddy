@@ -12,13 +12,17 @@ import { cn } from "@/lib/utils";
 export function BeerLogo({
   name,
   logo,
+  style,
   className,
 }: {
   name: string;
   /** The beer row's `logo` column — a local `logos/<file>` override or a recorded hotlink. */
   logo?: string | null | undefined;
+  /** The beer's style, used to tint the monogram when no logo resolves. */
+  style?: string | null | undefined;
   className?: string | undefined;
 }) {
+
   // Shared with every other card on the page — react-query fetches it once.
   const { data: domains } = useBrandDomains();
   const sources = beerLogoSources(name, domains, logo);
