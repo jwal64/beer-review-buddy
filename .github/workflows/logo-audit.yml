@@ -34,39 +34,12 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # The ones a look at the contact sheet found wrong: a generated grey
-      # letter from Icon Horse, a photograph from a site header, or somebody
-      # else's mark entirely (cerveceradepr.com is a WordPress site, and its
-      # favicon is the WordPress W).
-      - name: Re-fetch the logos that came back wrong
-        run: |
-          node tools/fetch-logos.mjs --force --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
-          Affligem Tripel
-          Almaza Pilsener
-          Augustiner Helles
-          Big Wave Golden Ale
-          Bitburger Radler
-          Brahma
-          Estrella Jalisco
-          Heineken Silver
-          Ichnusa Anima Sarda
-          Magna
-          Mahou Cinco Estrellas
-          Modelo Especial
-          Modelo Oro
-          Mythos
-          Negra Modelo
-          Newcastle Brown Ale
-          Pacífico Clara
-          Pub Ale
-          Sapporo Premium
-          Singha
-          Smithwick's
-          Sol
-          Super Bock
-          Tuborg
-          EOF
-          )"
+      # The eight whose own sites answer nothing to a datacentre IP, and whose
+      # stale files have been deleted so the fetch picks them up: they need the
+      # Wikidata tier, which identifies the brand by the domain already
+      # recorded for it rather than by guessing at a Wikipedia article.
+      - name: Fetch the logos that are still missing
+        run: node tools/fetch-logos.mjs
 
       - name: Commit what it found
         run: |

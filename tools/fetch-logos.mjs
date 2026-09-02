@@ -232,12 +232,67 @@ export const slug = name => name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
 // Tier 4 is fenced because that is what went wrong the first time this ran:
 // 29 beers came back with a 1200×630 social card, which is a photograph of a
 // bottle where a logo should be.
+
+// ── Wikidata ──────────────────────────────────────────────────
+// For a brand whose own site cannot be reached at all. Eight of them could
+// not: almaza.com, mahou.es, singhabeer.com, smithwicks.com and the rest
+// answer nothing to a datacentre IP, and every favicon service then had
+// nothing to pass on either.
+//
+// Wikidata property P154 is "logo image" — not a photograph of the product,
+// not an article's lead image, but the mark itself, which is exactly the thing
+// wanted here. The hard part is being sure the item is the right brand, and
+// the domain solves it: P856 is "official website", so an item whose official
+// website is the domain already recorded in BRAND_DOMAINS is that brand by
+// definition. An item that does not match on the domain is not used — a
+// confidently wrong logo is worse than none, and Wikipedia search will happily
+// answer "Sol" with a Mexican state.
+const wdCache = new Map();
+const registrable = d => d.replace(/^www\./, '').toLowerCase();
+
+async function wikidataLogo(beerName, domains) {
+  const key = `${beerName}|${domains.join(',')}`;
+  if (wdCache.has(key)) return wdCache.get(key);
+  const api = async url => {
+    const r = await get(url, { accept: 'application/json' });
+    try { return r && JSON.parse(r.buf.toString('utf8')); } catch { return null; }
+  };
+  let out = null;
+  try {
+    const search = await api('https://en.wikipedia.org/w/api.php?action=query&format=json&list=search' +
+      `&srsearch=${encodeURIComponent(beerName + ' beer')}&srlimit=6`);
+    const titles = (search?.query?.search ?? []).map(r => r.title);
+    if (titles.length) {
+      const props = await api('https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageprops' +
+        `&titles=${encodeURIComponent(titles.join('|'))}`);
+      const ids = Object.values(props?.query?.pages ?? {})
+        .map(p => p.pageprops?.wikibase_item).filter(Boolean);
+      for (const id of ids) {
+        const ent = await api(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=${id}&props=claims`);
+        const claims = ent?.entities?.[id]?.claims;
+        const site = claims?.P856?.map(c => c.mainsnak?.datavalue?.value).filter(Boolean) ?? [];
+        const hosts = site.map(u => { try { return registrable(new URL(u).host); } catch { return ''; } });
+        if (!hosts.some(h => domains.some(d => h === registrable(d)))) continue;
+        const file = claims?.P154?.[0]?.mainsnak?.datavalue?.value;
+        if (!file) continue;
+        const info = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
+          `&titles=${encodeURIComponent('File:' + file)}&prop=imageinfo&iiprop=url&iiurlwidth=512`);
+        const url = Object.values(info?.query?.pages ?? {})[0]?.imageinfo?.[0]?.thumburl;
+        if (url) { out = { url, id, file }; break; }
+      }
+    }
+  } catch { out = null; }
+  wdCache.set(key, out);
+  return out;
+}
+
 async function tiersFor(domain, page) {
   const site = await siteCandidates(domain);
   return [
     { why: 'site icon', items: site.filter(s => !s.last) },
     { why: 'header',    items: [{ header: true, why: 'site header logo' }] },
     { why: 'service',   items: AGGREGATORS.map(a => ({ url: a.url(domain), why: a.why, reject: a.reject })) },
+    { why: 'wikidata',  items: [{ wikidata: true, why: 'wikidata P154' }] },
     { why: 'og',        items: site.filter(s => s.last), squareOnly: true },
   ];
 }
@@ -249,7 +304,11 @@ export async function findLogo(name, domains, page) {
       let best = null;
       for (const cand of tier.items) {
         let got = null, size = null;
-        if (cand.header) {
+        if (cand.wikidata) {
+          const hit = await wikidataLogo(name, domains);
+          if (hit) got = await get(hit.url);
+          if (got) size = measure(got.buf, got.type);
+        } else if (cand.header) {
           const hit = page && await headerLogo(d, page);
           if (hit?.kind === 'svg') got = { buf: Buffer.from(hit.markup, 'utf8'), type: 'image/svg+xml', url: `${d} (inline svg)` };
           else if (hit?.kind === 'img') got = await get(hit.url);

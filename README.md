@@ -36,6 +36,8 @@ without a deploy, and still works offline or if the database is unreachable.
 | `npm run sri` | Re-derives the stats page's CDN `integrity` hashes from npm |
 | `npm run smoke` | Opens the stats page in a real browser and checks it renders (needs `npm i`) |
 | `npm run logos` | Checks every beer actually resolves a logo, against the live CDNs (needs `npm i`) |
+| `npm run fetch-logos` | Fetches the logo for any beer that has no file yet, from its brand's own site (needs `npm i` and open internet) |
+| `npm run logo-sheet` | Draws all 101 logos onto one sheet, so they can be looked at (needs `npm i`) |
 
 ## The tables
 
@@ -45,7 +47,7 @@ without a deploy, and still works offline or if the database is unreachable.
 | `breweries` | Where a beer is made, its language and, when it differs, the beer's native name |
 | `locations` | Every city a review was logged in, with coordinates for the map |
 | `countries` | Country code → flag and display name. Both are needed; one without the other renders blank |
-| `brand_domains` | Beer name → the domains its logo is looked up from |
+| `brand_domains` | Beer name → its logo: the file committed under `public/stats/logos/`, and the domains to fall back to when there isn't one |
 | `want_to_try` | The standing shortlist. Nothing is ever deleted: an entry with a matching review crosses itself off and is scored against the prediction made beforehand |
 | `untappd_averages` | The world's average per beer, for the contrarian chart |
 | `app_meta` | When the Untappd figures were last re-verified, and how long before that is stale |
