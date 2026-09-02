@@ -35,25 +35,12 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # The eleven with no file: five whose Wikidata item is the right brand
-      # but carries no logo, and six no article is named for — Grupo Modelo is
-      # not "Modelo Especial". Commons is asked by name for both.
-      - name: Fetch the ones with no logo yet
-        run: |
-          node tools/fetch-logos.mjs --force --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
-          Affligem Tripel
-          Almaza Pilsener
-          Mahou Cinco Estrellas
-          Modelo Especial
-          Modelo Oro
-          Mythos
-          Negra Modelo
-          Newcastle Brown Ale
-          Pacífico Clara
-          Singha
-          Smithwick's
-          EOF
-          )"
+      # All of them again. Three rules changed that every logo has to pass,
+      # not just the ones that were missing: no JPEG from any source, nothing
+      # blank, and no Wikidata item whose label merely starts with the beer's
+      # name. Sixty logos already on disk were chosen without those.
+      - name: Fetch every logo again
+        run: node tools/fetch-logos.mjs --force
 
       - name: Commit what it found
         if: always()

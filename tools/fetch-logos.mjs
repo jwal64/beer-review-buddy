@@ -273,8 +273,13 @@ async function wikidataLogo(beerName, domains) {
         const label = norm(ent?.entities?.[id]?.labels?.en?.value ?? '');
         const beer = norm(beerName);
         const byDomain = hosts.some(h => domains.some(d => h === registrable(d)));
-        const byLabel = label.length > 3 &&
-          (label === beer || beer.startsWith(label + ' ') || label.startsWith(beer + ' '));
+        // The beer may be more specific than the article ("Guinness Draught"
+        // against the item called Guinness), never less: an item whose label
+        // merely *starts* with the beer's name is a different brand wearing
+        // the same first word. That direction is how budweiser.com ended up
+        // with Budějovický Budvar's logo on it — the Czech brewery Anheuser-
+        // Busch has spent a century in court with.
+        const byLabel = label.length > 3 && (label === beer || beer.startsWith(label + ' '));
         if (!byDomain && !byLabel) continue;
         const file = claims?.P154?.[0]?.mainsnak?.datavalue?.value
           ?? await commonsLogoFile(beerName, api, norm);
@@ -356,34 +361,58 @@ function measure(buf, type) {
 // Either alone is wrong: plenty of real logos sit on an opaque square (DAB's
 // green box, Asahi's black one), and a richly illustrated crest holds hundreds
 // of colours. Both together is what a photograph looks like and a mark does not.
-async function looksLikeAPhotograph(buf, fmt, page) {
-  if (fmt === 'svg') return null;                       // vector: never a photo
-  const mime = fmt === 'ico' ? 'image/x-icon' : `image/${fmt}`;
+async function inspect(buf, fmt, page) {
+  const mime = fmt === 'ico' ? 'image/x-icon' : fmt === 'svg' ? 'image/svg+xml' : `image/${fmt}`;
   try {
-    const m = await withTimeout(page.evaluate(async ({ dataUrl }) => {
+    return await withTimeout(page.evaluate(async ({ dataUrl }) => {
       const img = new Image();
       const ok = await new Promise(r => { img.onload = () => r(true); img.onerror = () => r(false); img.src = dataUrl; });
-      if (!ok || !img.naturalWidth) return null;
+      if (!ok || !img.naturalWidth) return { undrawable: true };
       const N = 128;
       const c = document.createElement('canvas');
       c.width = c.height = N;
       const ctx = c.getContext('2d', { willReadFrequently: true });
-      ctx.drawImage(img, 0, 0, N, N);
+      const scale = Math.min(N / img.naturalWidth, N / img.naturalHeight);
+      const w = Math.round(img.naturalWidth * scale), h = Math.round(img.naturalHeight * scale);
+      ctx.drawImage(img, (N - w) / 2, (N - h) / 2, w, h);
       const { data } = ctx.getImageData(0, 0, N, N);
       const seen = new Set();
-      let clear = 0;
+      let ink = 0;
       for (let i = 0; i < data.length; i += 4) {
-        if (data[i + 3] < 16) { clear++; continue; }
+        if (data[i + 3] < 16) continue;
+        ink++;
         // 5 bits a channel: fine enough to tell a gradient from a flat fill,
         // coarse enough that JPEG noise is not counted as colour.
         seen.add(((data[i] >> 3) << 10) | ((data[i + 1] >> 3) << 5) | (data[i + 2] >> 3));
       }
-      return { clear: clear / (N * N), colours: seen.size };
-    }, { dataUrl: `data:${mime};base64,${buf.toString('base64')}` }), 15000, 'measuring an image');
-    if (!m) return null;
-    return m.clear < 0.02 && m.colours > 1200
-      ? `a photograph (${m.colours} colours, nothing transparent)` : null;
-  } catch { return null; }
+      const drawn = w * h;
+      return { ink: ink / drawn, clear: 1 - ink / drawn, colours: seen.size };
+    }, { dataUrl: `data:${mime};base64,${buf.toString('base64')}` }), 30000, 'measuring an image');
+  } catch { return null; }   // timed out: say nothing rather than the wrong thing
+}
+
+// What the inspection is allowed to conclude.
+function refuse(size, m) {
+  // A JPEG is a photograph. The format is the tell, and a far better one than
+  // any measurement of the pixels: a mark needs transparency and hard edges,
+  // so brands and Commons alike ship PNG or SVG, and JPEG is what you get when
+  // the "logo" is really a picture of the product. It is how modelousa.com's
+  // cutout of a man holding a bottle, Wikidata's photograph of Mythos in two
+  // glasses and a dark shot of Guinness pints all arrived called logos.
+  if (size.fmt === 'jpg') return 'a JPEG, which is a photograph and not a mark';
+  if (!m) return null;                                   // measurement timed out
+  if (m.undrawable) return 'an image the browser cannot draw';
+  // An inline SVG lifted from a header can come out empty — the shapes were in
+  // a <use> or a stylesheet that did not come with it. 112 bytes of nothing
+  // renders as nothing, and passes every other check there is.
+  if (m.ink < 0.015) return `blank (${(m.ink * 100).toFixed(1)}% of it is drawn on)`;
+  // The backstop for a photograph that is not a JPEG. Deliberately cautious:
+  // real logos sit on opaque squares (DAB's green box, Asahi's black one) and
+  // illustrated crests hold hundreds of colours, so this only fires where
+  // both are true at once.
+  if (m.clear < 0.02 && m.colours > 1200)
+    return `a photograph (${m.colours} colours, nothing transparent)`;
+  return null;
 }
 
 // Vector wins outright: every resolution at once, and the mark itself rather
@@ -446,16 +475,7 @@ export async function findLogo(name, domains, page, lab = page) {
 
     const no = cand.reject?.(size)
       ?? (cand.squareOnly && squareness(size) < 0.6 ? 'not square' : null)
-      // A JPEG in a header's logo slot is a photograph. The format is the
-      // tell, and a far better one than any measurement of the pixels: a mark
-      // needs transparency and hard edges, so brands ship PNG or SVG, and
-      // JPEG is what you get when the "logo" is really a picture of the
-      // product. modelousa.com's is a cutout of a man holding a bottle — 19%
-      // transparent and 860 colours, which is to say indistinguishable by
-      // measurement from Paulaner's crest at 930.
-      ?? ((cand.kind === 'header' || cand.kind === 'og') && size.fmt === 'jpg'
-          ? 'a JPEG, which is a photograph and not a mark' : null)
-      ?? await looksLikeAPhotograph(got.buf, size.fmt, lab);
+      ?? refuse(size, await inspect(got.buf, size.fmt, lab));
     if (no) { tried.push(`${where} · ${size.w}×${size.h} rejected, ${no}`); continue; }
 
     const score = scoreOf(size, cand.kind);
