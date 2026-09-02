@@ -342,6 +342,7 @@ const BRAND_LOGOS = {
 "Affligem Tripel":"logos/affligem-tripel.svg",
 "Almaza Pilsener":"logos/almaza-pilsener.svg",
 "Asahi Super Dry":"logos/asahi-super-dry.webp",
+"Augustiner Helles":"logos/augustiner-helles.webp",
 "Beck's":"logos/becks.svg",
 "Belhaven Scottish Stout":"logos/belhaven-scottish-stout.svg",
 "Big Wave Golden Ale":"logos/big-wave-golden-ale.webp",
@@ -358,7 +359,7 @@ const BRAND_LOGOS = {
 "Chill Lemon":"logos/chill-lemon.webp",
 "Chimay Blue":"logos/chimay-blue.webp",
 "Coopers Pale Ale":"logos/coopers-pale-ale.svg",
-"Coors Light":"logos/coors-light.svg",
+"Coors Light":"logos/coors-light.webp",
 "Corona Extra":"logos/corona-extra.svg",
 "DAB Dortmunder Export":"logos/dab-dortmunder-export.webp",
 "Daura":"logos/daura.svg",
@@ -418,7 +419,7 @@ const BRAND_LOGOS = {
 "Sam Adams Boston Lager":"logos/sam-adams-boston-lager.svg",
 "Samuel Adams Summer Ale":"logos/samuel-adams-summer-ale.svg",
 "Sapporo Premium":"logos/sapporo-premium.webp",
-"Singha":"logos/singha.svg",
+"Singha":"logos/singha.webp",
 "Smithwick's":"logos/smithwicks.svg",
 "Sol":"logos/sol.webp",
 "Spaten Oktoberfest Ur-Märzen / Winter":"logos/spaten-oktoberfest-ur-marzen-winter.webp",
@@ -437,6 +438,8 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
+
+
 
 
 
