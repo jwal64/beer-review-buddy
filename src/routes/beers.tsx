@@ -37,8 +37,17 @@ export const Route = createFileRoute("/beers")({
   component: BeersPage,
 });
 
+const SORTS = {
+  Recent: (a: Beer, b: Beer) => b.drank_on.localeCompare(a.drank_on),
+  Rating: (a: Beer, b: Beer) => Number(b.rating) - Number(a.rating),
+  Name: (a: Beer, b: Beer) => a.name.localeCompare(b.name),
+  ABV: (a: Beer, b: Beer) => Number(b.abv ?? 0) - Number(a.abv ?? 0),
+} satisfies Record<string, (a: Beer, b: Beer) => number>;
+
+type SortKey = keyof typeof SORTS;
+
 function BeersPage() {
-  const { data: beers, isLoading } = useBeers();
+  const { data: beers, isLoading, isError, refetch } = useBeers();
   // The flags come from this table, not from arithmetic on the letters: the UK
   // is split into GB-ENG, GB-SCT, GB-WLS and GB-NIR, and no letter pair makes
   // those. Without it an English or Scottish beer rendered a globe.
@@ -46,6 +55,7 @@ function BeersPage() {
   const { isSignedIn } = useSession();
   const [query, setQuery] = useState("");
   const [style, setStyle] = useState("All");
+  const [sort, setSort] = useState<SortKey>("Recent");
   const [selected, setSelected] = useState<Beer | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingBeer, setEditingBeer] = useState<Beer | null>(null);
@@ -57,16 +67,19 @@ function BeersPage() {
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
-    return (beers ?? []).filter((b) => {
-      const matchesStyle = style === "All" || b.style === style;
-      const matchesQuery =
-        !q ||
-        b.name.toLowerCase().includes(q) ||
-        (b.brewery ?? "").toLowerCase().includes(q) ||
-        (b.city ?? "").toLowerCase().includes(q);
-      return matchesStyle && matchesQuery;
-    });
-  }, [beers, query, style]);
+    return (beers ?? [])
+      .filter((b) => {
+        const matchesStyle = style === "All" || b.style === style;
+        const matchesQuery =
+          !q ||
+          b.name.toLowerCase().includes(q) ||
+          (b.brewery ?? "").toLowerCase().includes(q) ||
+          (b.city ?? "").toLowerCase().includes(q);
+        return matchesStyle && matchesQuery;
+      })
+      .sort(SORTS[sort]);
+  }, [beers, query, style, sort]);
+
 
   return (
     <Shell title="All beers" subtitle={`${filtered.length} reviews`}>
