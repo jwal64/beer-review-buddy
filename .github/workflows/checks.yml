@@ -2,17 +2,26 @@ name: Data check
 
 # The stats site has no build step, so nothing else would notice a beer added
 # with a country code that has no flag, a brewery that was never registered or
-# a missing brand domain. This runs the same checks CLAUDE.md asks for, on
-# every push — including the pushes Lovable makes when the app is edited there.
+# a missing brand domain. This runs the same checks CLAUDE.md asks for —
+# including over the pushes Lovable makes to main when the app is edited there.
 
+# A branch push and its pull request are the same commit, so running on both
+# checked everything twice and reported one failure as three red crosses. The
+# pull request is where a branch is read, and main is where Lovable pushes —
+# between them every commit that reaches the site is still checked once.
 on:
   push:
-    branches: ['**']
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# A second push supersedes the first; only main's history is worth finishing.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   check:
@@ -31,6 +40,11 @@ jobs:
       # does not survive is what a migration would quietly write wrong.
       - name: Check the Supabase projection round-trips
         run: node tools/roundtrip-supabase.mjs
+
+      # npm never reads bun.lock, so a forgotten `bun install` used to pass
+      # everything here and fail Lovable's build after the merge instead.
+      - name: Check bun.lock is in step with package.json
+        run: node tools/check-lockfile.mjs
 
       - name: Syntax-check the site scripts
         run: node --check public/stats/data.js && node --check public/stats/app.js && node --check public/stats/live-data.js

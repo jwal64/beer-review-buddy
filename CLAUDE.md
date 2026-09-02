@@ -37,7 +37,7 @@ follows the same loop, and the loop is what makes it land on Lovable:
 3. **Validate before pushing** — Lovable deploys `main`, so `main` stays green:
 
    ```sh
-   npm run check          # the data rules + projection round-trip (always)
+   npm run check          # data rules + projection round-trip + bun.lock (always)
    npx tsc --noEmit       # if src/ changed
    npx eslint <files>     # if src/ or tools/ changed; prettier --write first
    npx vite build         # if src/, vite.config.ts or package.json changed
@@ -52,6 +52,14 @@ A remote Claude session gets its dependencies automatically — the
 `SessionStart` hook in `.claude/hooks/session-start.sh` runs `npm install` when
 the container starts, so all of the commands above work from the first turn.
 The data tools in `tools/` need nothing installed at all.
+
+The hook finds the repository from its own path, not from `CLAUDE_PROJECT_DIR`.
+That variable is unset in a session with more than one repository attached, and
+under `set -u` reading it ended the hook before it installed anything — silently,
+and looking exactly like a session that needed no dependencies, because the
+`tools/` checks need none and kept working. If `npx tsc`, `npm run smoke` or
+`npm run fetch-logos` ever reports a missing module, check `node_modules` exists
+before believing anything else.
 
 ### Git rules (Lovable)
 
@@ -69,7 +77,15 @@ only.
 - **`package.json` changes need `bun.lock` updated too** (`bun install`).
   Lovable builds with bun; a manifest the lockfile disagrees with fails its
   install. CI and the session hook use npm, which is fine — just keep both
-  files in the same commit.
+  files in the same commit. `npm run check` enforces this now
+  (`tools/check-lockfile.mjs`), so a forgotten `bun install` fails here rather
+  than in a Lovable deploy after the merge. It compares the two files as text:
+  `bun install --frozen-lockfile` cannot be the check, because eleven
+  resolution URLs in `bun.lock` point at Lovable's own registry mirror
+  (`europe-west4-npm.pkg.dev/lovable-core-prod`), which answers 403 to anyone
+  outside their sandbox. Editing only the `scripts` block needs no
+  `bun install` — the lockfile records dependencies, and the check only reads
+  those.
 - **Schema changes are new migration files, never edits to applied ones.** A
   file in `supabase/migrations/` that has run is history; changing it does
   nothing to the database and desynchronises the migration record. Add a new
@@ -199,7 +215,10 @@ npm run fetch-logos -- --force --only "Sol"
 
 For a brand that no source has, draw or save the logo into
 `public/stats/logos/` yourself and add the entry to `BRAND_LOGOS` by hand. The
-fetcher leaves a file it did not write alone, `--force` included.
+fetcher leaves a file it did not write alone, `--force` included. Nine logos
+are here that way and are drawn approximations rather than the brand's own
+artwork — `public/stats/logos/README.md` lists them and says why each one had
+to be drawn.
 
 A single beer can still override its brand's file with `logo:"logos/<file>"`
 on its own `beers[]` entry — that is the per-review escape hatch, for artwork

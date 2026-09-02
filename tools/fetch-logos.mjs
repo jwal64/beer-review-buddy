@@ -590,6 +590,16 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   console.log(`${names.length} beers · ${names.filter(fileFor).length} already have a file · ` +
     `fetching ${work.length}${kept.length ? ` · leaving ${kept.length} hand-placed alone (${kept.join(', ')})` : ''}\n`);
 
+  // Nothing to fetch is the expected state once every beer has a file, and it
+  // does not need a browser. Launching one anyway turned the ordinary no-op
+  // run into a crash on any machine whose Chromium revision does not match the
+  // installed Playwright — which reads as a broken tool rather than as
+  // "there was nothing to do".
+  if (!work.length) {
+    console.log('Nothing to fetch.\n');
+    process.exit(0);
+  }
+
   // One browser for the whole run: the header source navigates in it, the
   // photograph test measures in it, and the re-encoding at the end draws in it.
   // Each worker gets its own page, because they navigate independently.

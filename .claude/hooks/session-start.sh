@@ -13,7 +13,15 @@ if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
 
-cd "$CLAUDE_PROJECT_DIR"
+# This used to cd to $CLAUDE_PROJECT_DIR. That variable is not always set — a
+# session with more than one repository attached has no single project dir —
+# and under `set -u` reading it ended the hook before it installed anything.
+# The failure was silent and looked exactly like a session that needs no
+# dependencies: the data tools in tools/ need nothing and still ran, so only a
+# later `npm run smoke`, `fetch-logos` or `tsc` revealed that node_modules was
+# never populated. This script sits at <repo>/.claude/hooks/, so its own path
+# names the repository unambiguously whatever the environment says.
+cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 
 # Remote environments ship browsers preinstalled and set
 # PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD; guard anyway so a hook run can never stall

@@ -339,6 +339,8 @@ const BRAND_DOMAINS = {
 // has no file yet.
 // ════════════════════════════════════════════════════════════
 const BRAND_LOGOS = {
+"Affligem Tripel":"logos/affligem-tripel.svg",
+"Almaza Pilsener":"logos/almaza-pilsener.svg",
 "Asahi Super Dry":"logos/asahi-super-dry.webp",
 "Beck's":"logos/becks.svg",
 "Belhaven Scottish Stout":"logos/belhaven-scottish-stout.svg",
@@ -387,14 +389,18 @@ const BRAND_LOGOS = {
 "La Fin Du Monde":"logos/la-fin-du-monde.webp",
 "Leffe Blonde":"logos/leffe-blonde.webp",
 "Magna":"logos/magna.webp",
+"Mahou Cinco Estrellas":"logos/mahou-cinco-estrellas.svg",
 "Medalla Light":"logos/medalla-light.webp",
 "Menabrea":"logos/menabrea.webp",
 "Michelob Ultra":"logos/michelob-ultra.webp",
 "Miller Lite":"logos/miller-lite.webp",
+"Mythos":"logos/mythos.svg",
 "Narragansett Lager":"logos/narragansett-lager.webp",
+"Newcastle Brown Ale":"logos/newcastle-brown-ale.svg",
 "Norrlands Guld":"logos/norrlands-guld.svg",
 "Ocean SJU":"logos/ocean-sju.webp",
 "Orion":"logos/orion.webp",
+"Pacífico Clara":"logos/pacifico-clara.svg",
 "Paulaner Hefe":"logos/paulaner-hefe.webp",
 "Paulaner Hefe-Weißbier":"logos/paulaner-hefe-weissbier.webp",
 "Peroni Nastro Azzurro":"logos/peroni-nastro-azzurro.webp",
@@ -410,7 +416,8 @@ const BRAND_LOGOS = {
 "Sam Adams Boston Lager":"logos/sam-adams-boston-lager.svg",
 "Samuel Adams Summer Ale":"logos/samuel-adams-summer-ale.svg",
 "Sapporo Premium":"logos/sapporo-premium.webp",
-"Singha":"logos/singha.webp",
+"Singha":"logos/singha.svg",
+"Smithwick's":"logos/smithwicks.svg",
 "Sol":"logos/sol.webp",
 "Spaten Oktoberfest Ur-Märzen / Winter":"logos/spaten-oktoberfest-ur-marzen-winter.webp",
 "Stella Artois":"logos/stella-artois.webp",
@@ -428,8 +435,6 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
-
-
 
 
 
