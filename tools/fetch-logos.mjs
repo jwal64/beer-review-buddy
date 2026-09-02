@@ -221,8 +221,6 @@ async function headerLogo(domain, page) {
 // File namespace whose name contains the word "logo" *and* every significant
 // word of the beer's name. Both halves matter — "logo" alone would take a
 // photograph of a brewery sign, and the words alone would take a bottle shot.
-const commonsPath = file =>
-  'https://commons.wikimedia.org/wiki/Special:FilePath/' + encodeURIComponent(file) + `?width=${OUT_PX}`;
 
 async function commonsLogoFile(beerName, api, norm) {
   const words = norm(beerName).split(' ').filter(w => w.length >= 3);
@@ -317,15 +315,14 @@ async function wikidataLogo(beerName, domains) {
         break;
       }
     }
-    // No Wikidata item matched — Grupo Modelo is not "Modelo Especial", and
-    // Almaza Brewery is not "Almaza Pilsener". Commons is asked directly in
-    // that case: a file there named for this brand *and* the word logo is the
-    // brand's logo, whatever any encyclopaedia article is called.
-    if (!out) {
-      const file = await commonsLogoFile(beerName, api, norm);
-      if (file) out = { urls: [commonsPath(file)], id: 'commons', file, byName: true };
-      else if (why === 'no article was this brand') why = 'no article, and Commons has no file named for it';
-    }
+    // There was a second Commons search here, for beers no Wikidata item
+    // matched at all. It is gone. Identifying a brand from a filename alone is
+    // what put Solana's mark on Sol, Monkey Wrench's on Wrench and Orion
+    // Pharma's — a pharmaceutical company — on Orion, and each guard added
+    // against it caught only the example that prompted it. The search stays
+    // where it corroborates: above, where the item is already known to be the
+    // right brand and only its logo is missing. It does not get to decide
+    // which brand a file belongs to.
   } catch { out = null; }
   // Return what was cached, not `out`: a miss has to come back as the reason
   // it missed, or the caller sees null, cannot tell it from a source it never
