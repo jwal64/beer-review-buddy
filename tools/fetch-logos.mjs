@@ -352,12 +352,18 @@ const AGGREGATORS = [
 
 const EXT = { svg: '.svg', png: '.png', jpg: '.jpg', webp: '.webp', gif: '.gif', ico: '.ico' };
 
-function measure(buf, type) {
+function measure(buf, type, kind) {
   if (!buf || buf.length < 64) return null;
   if (/text\/html/i.test(type || '')) return null;
   const s = imageSize(buf);
   if (!s || !s.fmt || s.fmt === '?') return null;
-  if (s.fmt !== 'svg' && Math.max(s.w, s.h) < MIN_PX) return null;
+  // The floor is aimed at the services' generic globe, which is 16px and is
+  // nobody's logo. A site's *own declared icon* is not that: whatever size a
+  // brand publishes at, that is the brand saying this is its mark, and a real
+  // 32px crest beats no logo at all. It is recorded at its own size, so the
+  // sheet and the report both show how small it is.
+  const floor = kind === 'site-icon' ? 32 : MIN_PX;
+  if (s.fmt !== 'svg' && Math.max(s.w, s.h) < floor) return null;
   return s;
 }
 
@@ -495,7 +501,7 @@ export async function findLogo(name, domains, page, lab = page) {
       got = await get(cand.url);
     }
 
-    const size = got && measure(got.buf, got.type);
+    const size = got && measure(got.buf, got.type, kind);
     const where = `${why} · ${cand.domain}`;
     if (!size) { tried.push(`${where} · no`); continue; }
 

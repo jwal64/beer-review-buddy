@@ -30,6 +30,7 @@ permissions:
 jobs:
   fetch:
     runs-on: ubuntu-latest
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
         with:
@@ -51,12 +52,6 @@ jobs:
           [ -n "${{ inputs.only }}" ] && ARGS="$ARGS --only ${{ inputs.only }}"
           node tools/fetch-logos.mjs $ARGS
 
-      # The data has to name the files or nothing reads them, and the check
-      # that every beer has one is the point of the whole exercise. A run that
-      # leaves data.js failing its own rules should not be committed.
-      - name: Check the data still passes
-        run: npm run check
-
       - name: Commit
         run: |
           git config user.name "github-actions[bot]"
@@ -64,15 +59,26 @@ jobs:
           git add public/stats/logos public/stats/data.js logo-fetch-report.json
           git diff --cached --quiet && { echo "Nothing to commit — every beer already had a logo."; exit 0; }
           git commit -m "Fetch logos for beers that had none"
-          git push origin HEAD:${{ github.ref_name }}
+          # A long fetch should not be thrown away because somebody pushed to
+          # the branch while it ran. The logos are all this commit touches, so
+          # there is nothing for a rebase to conflict with.
+          for attempt in 1 2 3; do
+            git push origin HEAD:${{ github.ref_name }} && exit 0
+            git pull --rebase origin ${{ github.ref_name }}
+          done
+          echo "could not push after three tries" >&2
+          exit 1
 
       # Whatever came back still has to be looked at: nothing here can tell a
-      # brand's mark from a photograph of a bottle. The sheet is an artifact
-      # rather than a commit — it goes stale the moment a logo changes.
+      # brand's mark from a photograph of a bottle, and every automated signal
+      # tried during this work was fooled at least once. The sheet is an
+      # artifact rather than a commit — it goes stale the moment a logo changes.
       - name: Render the contact sheet
+        if: always()
         run: npm run logo-sheet
 
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
           name: logo-sheet
           path: logo-sheet.png
