@@ -2,6 +2,8 @@ import { useState } from "react";
 import { beerLogoSources, isSuspectFavicon } from "@/lib/logos";
 import { useBrandDomains } from "@/lib/beer-data";
 import { cn } from "@/lib/utils";
+import { styleColor } from "@/lib/style-colors";
+
 
 // Walks the tiered source chain (local override → Brandfetch → Google
 // favicons → Icon Horse) one <img> at a time, the same order the stats site
