@@ -57,8 +57,11 @@ export function BeerLogo({
           }}
         />
       ) : (
-        <span className="font-display text-lg text-primary">{name.charAt(0)}</span>
+        <span className="font-display text-lg" style={{ color: styleColor(style) }}>
+          {name.charAt(0)}
+        </span>
       )}
     </div>
   );
 }
+
