@@ -136,9 +136,14 @@ async function headerLogo(domain, page) {
         for (const el of document.querySelectorAll('img, svg')) {
           const r = el.getBoundingClientRect();
           if (r.width < 32 || r.height < 14 || r.top > 700) continue;
+          // Named, not merely near the top. "The biggest picture in the
+          // header" is how modelousa.com's lifestyle shot — a photograph of a
+          // man holding a bottle — became three beers' logos. An element that
+          // calls itself a logo is making a claim; one that happens to sit up
+          // there is not.
           const named = LOGOISH.test(label(el)) || LOGOISH.test(label(el.parentElement ?? el));
-          if (!named && !inHead(el)) continue;
-          const score = (named ? 1e6 : 0) + (inHead(el) ? 1e5 : 0) + r.width * r.height;
+          if (!named) continue;
+          const score = (inHead(el) ? 1e5 : 0) + r.width * r.height;
           if (el.tagName.toLowerCase() === 'img') {
             const src = el.currentSrc || el.src;
             if (src && !src.startsWith('data:image/gif')) cands.push({ score, kind: 'img', url: src });
@@ -181,7 +186,14 @@ async function headerLogo(domain, page) {
 // does not serve gets the 16px default back.
 const AGGREGATORS = [
   { why: 'google faviconV2', url: d => `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${d}&size=256` },
-  { why: 'icon.horse',       url: d => `https://icon.horse/icon/${d}` },
+  // Icon Horse draws a letter on a grey square for a domain it cannot find an
+  // icon for, and serves it 200 OK at exactly 256×256 — a confident answer
+  // that is not the brand's logo, which is the one kind of miss worse than no
+  // answer at all. It handed twelve beers a grey capital before this was
+  // noticed. When it passes a site's real icon through it comes back at that
+  // icon's own size (192, 180, 44…), so the exact square is the tell.
+  { why: 'icon.horse',       url: d => `https://icon.horse/icon/${d}`,
+    reject: s => s.fmt !== 'svg' && s.w === 256 && s.h === 256 ? 'a generated lettermark' : null },
   { why: 'duckduckgo',       url: d => `https://icons.duckduckgo.com/ip3/${d}.ico` },
 ];
 
@@ -225,7 +237,7 @@ async function tiersFor(domain, page) {
   return [
     { why: 'site icon', items: site.filter(s => !s.last) },
     { why: 'header',    items: [{ header: true, why: 'site header logo' }] },
-    { why: 'service',   items: AGGREGATORS.map(a => ({ url: a.url(domain), why: a.why })) },
+    { why: 'service',   items: AGGREGATORS.map(a => ({ url: a.url(domain), why: a.why, reject: a.reject })) },
     { why: 'og',        items: site.filter(s => s.last), squareOnly: true },
   ];
 }
@@ -250,6 +262,8 @@ export async function findLogo(name, domains, page) {
           tried.push(`${cand.why} · ${d} · ${size.w}×${size.h} rejected, not square`);
           continue;
         }
+        const why = size && cand.reject?.(size);
+        if (why) { tried.push(`${cand.why} · ${d} · ${size.w}×${size.h} rejected, ${why}`); continue; }
         tried.push(`${cand.why} · ${d} · ${size ? `${size.w}×${size.h} ${size.fmt}` : 'no'}`);
         if (!size) continue;
         const score = scoreOf(size);
@@ -262,10 +276,71 @@ export async function findLogo(name, domains, page) {
   return { name, buf: null, tried };
 }
 
+
+// ── data.js ───────────────────────────────────────────────────
+// The files are only half of it: data.js has to name them, or nothing reads
+// them. The block is written in the same shape tools/render-data-js.mjs
+// writes, so the next `npm run sync` produces the identical text and the file
+// does not churn.
+const DATA_JS = join(ROOT, 'data.js');
+const RULE = '// ' + '═'.repeat(60);
+
+export function writeBrandLogos(map) {
+  const q = v => JSON.stringify(String(v));
+  const block = [
+    RULE,
+    "// BRAND LOGOS — the committed file each beer's logo is drawn from",
+    RULE,
+    '// A path under public/stats/, one per beer name, fetched once by',
+    '// `npm run fetch-logos` and held in the repo. This is where a logo comes',
+    '// from: the same picture on every render, working offline, and nobody',
+    "// else's to withdraw. The domains above are the fallback for a beer that",
+    '// has no file yet.',
+    RULE,
+    'const BRAND_LOGOS = {',
+    ...Object.keys(map).sort().map(k => `${q(k)}:${q(map[k])},`),
+    '};',
+    '',
+  ].join('\n');
+
+  let src = readFileSync(DATA_JS, 'utf8');
+  const existing = src.match(/(?:^\/\/ ═+\n\/\/ BRAND LOGOS[\s\S]*?)^const BRAND_LOGOS = \{[\s\S]*?^\};\n/m);
+  if (existing) src = src.replace(existing[0], block + '\n');
+  else {
+    const anchor = src.match(/^const BRAND_DOMAINS = \{[\s\S]*?^\};\n\n/m);
+    if (!anchor) throw new Error('could not find the BRAND_DOMAINS block in data.js');
+    src = src.replace(anchor[0], anchor[0] + block + '\n');
+  }
+  writeFileSync(DATA_JS, src);
+  return Object.keys(map).length;
+}
+
+// Every logo file on disk, keyed by the beer it belongs to. Read from the
+// directory rather than from this run, so --data-only can rebuild the map
+// after a fetch that happened somewhere else.
+export function logosOnDisk(names) {
+  const onDisk = new Set(readdirSync(LOGO_DIR));
+  const map = {};
+  for (const n of names)
+    for (const e of Object.values(EXT))
+      if (onDisk.has(slug(n) + e)) { map[n] = `logos/${slug(n)}${e}`; break; }
+  return map;
+}
+
 // ── main ──────────────────────────────────────────────────────
 if (import.meta.url === `file://${process.argv[1]}`) {
   const { beers, WANT_TO_TRY, BRAND_DOMAINS } = loadData();
   const names = [...new Set([...beers.map(b => b.beer), ...WANT_TO_TRY.map(w => w.beer)])].sort();
+
+  // Just point data.js at whatever is already in logos/. No network, so it
+  // works in a sandbox that cannot reach a single logo service — which is
+  // where the fetch itself never can.
+  if (args.includes('--data-only')) {
+    const map = logosOnDisk(names);
+    console.log(`${writeBrandLogos(map)} of ${names.length} beers named in data.js` +
+      `${names.length - Object.keys(map).length ? ` — ${names.filter(n => !map[n]).join(', ')} still have no file` : ''}`);
+    process.exit(0);
+  }
 
   mkdirSync(LOGO_DIR, { recursive: true });
   const onDisk = new Set(readdirSync(LOGO_DIR));
@@ -363,6 +438,8 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     kept: kept.map(n => ({ beer: n, file: `logos/${fileFor(n)}` })),
     missing: missing.map(r => ({ beer: r.name, tried: r.tried })),
   }, null, 2));
+
+  writeBrandLogos(logosOnDisk(names));
 
   console.log(`\n${found.length} written · ${missing.length} still missing`);
   for (const m of missing) console.log(`  ✗ ${m.name}\n      ${m.tried.join('\n      ')}`);

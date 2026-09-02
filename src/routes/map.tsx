@@ -303,6 +303,7 @@ function LeafletMap({
   locations,
   beers,
   domains,
+  logos,
   countries,
   onPick,
 }: {
@@ -421,6 +422,7 @@ function LeafletMap({
               l,
               beers.filter((x) => x.city === l.city && x.cc === l.cc),
               domains,
+              logos,
               countries,
             ),
             { maxWidth: 260, minWidth: 208 },
