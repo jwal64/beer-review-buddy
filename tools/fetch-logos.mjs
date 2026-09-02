@@ -228,12 +228,24 @@ const commonsPath = file =>
 async function commonsLogoFile(beerName, api, norm) {
   const words = norm(beerName).split(' ').filter(w => w.length >= 3);
   if (!words.length) return null;
-  const res = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
-    `&list=search&srnamespace=6&srlimit=20&srsearch=${encodeURIComponent(beerName + ' logo')}`);
-  const hits = (res?.query?.search ?? []).map(r => String(r.title).replace(/^File:/, ''));
-  const ok = hits.filter(t => {
+  const hits = [];
+  // Twice: with the word appended, and without. Commons files are named by
+  // whoever uploaded them — "Smithwick's logo.svg", but also plain
+  // "Tsingtao.svg" — and the second query is what finds the latter.
+  for (const q of [`${beerName} logo`, beerName]) {
+    const res = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
+      `&list=search&srnamespace=6&srlimit=20&srsearch=${encodeURIComponent(q)}`);
+    for (const r of res?.query?.search ?? []) hits.push(String(r.title).replace(/^File:/, ''));
+  }
+  const ok = [...new Set(hits)].filter(t => {
     const n = norm(t);
-    return /\blogo\b/.test(n) && words.every(w => n.includes(w));
+    // Every significant word of the beer's name, and then either the word
+    // "logo" or a vector file. An SVG on Commons of a brand is artwork of its
+    // mark — nobody draws a photograph in vectors — so the extension carries
+    // the same claim the word does. Both halves still matter: the words alone
+    // would take a bottle shot named after the beer.
+    if (!words.every(w => n.includes(w))) return false;
+    return /\blogo\b/.test(n) || /\.svgz?$/i.test(t);
   });
   // Vector first: it is the highest resolution there is.
   ok.sort((a, b) => (/\.svgz?$/i.test(b) ? 1 : 0) - (/\.svgz?$/i.test(a) ? 1 : 0));
