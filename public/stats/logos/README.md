@@ -73,13 +73,13 @@ fetcher — each is a brand whose logo is genuinely not available from any
 source the fetcher can reach, and each needs the brand's own artwork saved
 here by hand.
 
-**No file at all** — `npm run check` fails on these, which is the point:
-
-| Beer | Why |
-|------|-----|
-| Modelo Especial | modelousa.com serves a JPEG photograph of a man holding a bottle and calls it the logo; its declared icon is under 48px; no Wikipedia article is this brand (Grupo Modelo is the company, not the beer) and Commons has no file named for it |
-| Modelo Oro | the same site, the same three answers |
-| Negra Modelo | the same again |
+**Low resolution, but the right mark.** The three Modelo beers carry
+`modelousa.com`'s own declared icon at 32×32 — the gold crown crest. It is
+small because that is the only size the brewery publishes: the site's header
+"logo" is a JPEG photograph of a man holding a bottle, no Wikipedia article is
+this brand (Grupo Modelo is the company, not the beer), and Commons has no
+file named for any of them. A 32px crest is the brand's mark and a 413px
+photograph is not, which is the whole of the reasoning.
 
 **A file that is not the brand's mark.** These pass the check and render, and
 they are wrong. Deleting them would not help — the runtime chain falls back to
