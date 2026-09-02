@@ -397,8 +397,11 @@ const BRAND_LOGOS = {
 "Menabrea":"logos/menabrea.webp",
 "Michelob Ultra":"logos/michelob-ultra.webp",
 "Miller Lite":"logos/miller-lite.webp",
+"Modelo Especial":"logos/modelo-especial.webp",
+"Modelo Oro":"logos/modelo-oro.webp",
 "Mythos":"logos/mythos.svg",
 "Narragansett Lager":"logos/narragansett-lager.webp",
+"Negra Modelo":"logos/negra-modelo.webp",
 "Newcastle Brown Ale":"logos/newcastle-brown-ale.svg",
 "Norrlands Guld":"logos/norrlands-guld.svg",
 "Ocean SJU":"logos/ocean-sju.webp",
@@ -438,6 +441,7 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
+
 
 
 
