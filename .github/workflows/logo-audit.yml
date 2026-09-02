@@ -35,38 +35,21 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # Two whose domain was simply wrong: ichnusa.com is not the beer's site
-      # (birraichnusa.it is), and solbeer.com answered with a blue arrow that
-      # is nobody's lager.
-      - name: Re-fetch the two with corrected domains
-        run: node tools/fetch-logos.mjs --force --only "Ichnusa Anima Sarda,Sol"
-
-      # The rest fall into two groups that want the same treatment. Some have
-      # sites that answer nothing at all to a datacentre IP; the others have
-      # sites that answer with the wrong thing — the WordPress W, a photograph
-      # of a man holding a bottle, a picture of a full glass. Either way the
-      # encyclopaedia's logo beats the site's, so it goes first for these.
-      - name: Fetch the rest from Wikidata first
+      # The eight whose own sites answer nothing at all to a datacentre IP.
+      # Nothing else has ever had anything to offer for them: every favicon
+      # service had nothing to pass on either, and Icon Horse's grey capital
+      # was the only thing left. Wikidata's P154 is their last real source.
+      - name: Fetch the eight from Wikidata
         run: |
           node tools/fetch-logos.mjs --force --prefer-wikidata --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
           Affligem Tripel
           Almaza Pilsener
-          Augustiner Helles
-          Bitburger Radler
-          Estrella Jalisco
-          Magna
           Mahou Cinco Estrellas
-          Modelo Especial
-          Modelo Oro
           Mythos
-          Negra Modelo
           Newcastle Brown Ale
           Pacífico Clara
-          Pub Ale
           Singha
           Smithwick's
-          Super Bock
-          Tuborg
           EOF
           )"
 

@@ -60,7 +60,7 @@ async function get(url, { timeout = 20000, accept = 'image/*,*/*' } = {}) {
   const t = setTimeout(() => ac.abort(), timeout);
   try {
     const res = await fetch(url, { signal: ac.signal, redirect: 'follow',
-      headers: { 'user-agent': UA, accept } });
+      headers: { 'user-agent': ua, accept } });
     if (!res.ok) return null;
     return { buf: Buffer.from(await res.arrayBuffer()),
              type: (res.headers.get('content-type') || '').split(';')[0].trim(),
@@ -257,18 +257,26 @@ export const slug = name => name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
 const wdCache = new Map();
 const registrable = d => d.replace(/^www\./, '').toLowerCase();
 
+// Wikimedia's API asks for a user agent that says who is calling and refuses
+// generic browser strings from cloud addresses — which is why the first run of
+// this tier answered nothing at all for every beer, silently, exactly like a
+// brand with no logo.
+const WIKI_UA = 'beer-review-buddy-logo-fetcher/1.0 (https://github.com/jwal64/beer-review-buddy)';
+
 async function wikidataLogo(beerName, domains) {
   const key = `${beerName}|${domains.join(',')}`;
   if (wdCache.has(key)) return wdCache.get(key);
   const api = async url => {
-    const r = await get(url, { accept: 'application/json' });
+    const r = await get(url, { accept: 'application/json', ua: WIKI_UA });
     try { return r && JSON.parse(r.buf.toString('utf8')); } catch { return null; }
   };
-  let out = null;
+  let out = null, why = 'no article matched';
   try {
     const search = await api('https://en.wikipedia.org/w/api.php?action=query&format=json&list=search' +
       `&srsearch=${encodeURIComponent(beerName + ' beer')}&srlimit=6`);
     const titles = (search?.query?.search ?? []).map(r => r.title);
+    if (!search) why = 'the Wikipedia API did not answer';
+    else if (!titles.length) why = 'no article found';
     if (titles.length) {
       const props = await api('https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageprops' +
         `&titles=${encodeURIComponent(titles.join('|'))}`);
@@ -291,7 +299,7 @@ async function wikidataLogo(beerName, domains) {
         const byLabel = label.length > 3 && (label === beer || beer.startsWith(label + ' ') || label.startsWith(beer + ' '));
         if (!byDomain && !byLabel) continue;
         const file = claims?.P154?.[0]?.mainsnak?.datavalue?.value;
-        if (!file) continue;
+        if (!file) { why = `${id} is the right brand but has no logo on file`; continue; }
         const info = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
           `&titles=${encodeURIComponent('File:' + file)}&prop=imageinfo&iiprop=url&iiurlwidth=512`);
         const url = Object.values(info?.query?.pages ?? {})[0]?.imageinfo?.[0]?.thumburl;
@@ -299,7 +307,8 @@ async function wikidataLogo(beerName, domains) {
       }
     }
   } catch { out = null; }
-  wdCache.set(key, out);
+  if (!out && why === 'no article matched' ) why = 'no article was this brand';
+  wdCache.set(key, out ?? { why });
   return out;
 }
 
@@ -332,7 +341,8 @@ export async function findLogo(name, domains, page) {
         let got = null, size = null;
         if (cand.wikidata) {
           const hit = await wikidataLogo(name, domains);
-          if (hit) got = await get(hit.url);
+          if (hit?.url) got = await get(hit.url);
+          else if (hit?.why) { tried.push(`${cand.why} · ${d} · ${hit.why}`); continue; }
           if (got) size = measure(got.buf, got.type);
         } else if (cand.header) {
           const hit = page && await headerLogo(d, page);
