@@ -24,7 +24,7 @@
 // back). The Fetch logos workflow runs it on a runner and commits the result;
 // logo-fetch-report.json records where every logo came from, so a wrong one
 // can be traced back to the source that gave it.
-import { mkdirSync, writeFileSync, existsSync, readdirSync, unlinkSync } from 'node:fs';
+import { mkdirSync, writeFileSync, readFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, loadData } from './load-data.mjs';
 import { imageSize } from './probe-logo-sources.mjs';
@@ -109,6 +109,71 @@ async function siteCandidates(domain) {
   return found;
 }
 
+// ── the brand's own header logo, read in a browser ────────────
+// The tier that needs a real page. A site that declares no icon big enough
+// still draws its logo at the top of every page — often as inline SVG, which
+// no amount of reading the HTML as text will find, and which is the mark
+// itself rather than a picture of it.
+//
+// The SVG is serialised with its computed fill and stroke written onto every
+// node, because the colours usually live in a stylesheet that is not coming
+// with it, and a wordmark that arrives black renders as a black square.
+const headerCache = new Map();
+async function headerLogo(domain, page) {
+  if (headerCache.has(domain)) return headerCache.get(domain);
+  let out = null;
+  for (const base of [`https://${domain}/`, `https://www.${domain}/`]) {
+    try {
+      await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      await page.waitForTimeout(1200);
+      out = await page.evaluate(() => {
+        const LOGOISH = /logo|brand|wordmark|marque/i;
+        const label = el => [el.id, el.getAttribute('class') || '', el.getAttribute('alt') || '',
+          el.getAttribute('aria-label') || '', el.getAttribute('src') || ''].join(' ');
+        const inHead = el => !!el.closest('header,nav,[class*="header" i],[class*="nav" i]')
+          || !!el.closest('a[href="/"]');
+        const cands = [];
+        for (const el of document.querySelectorAll('img, svg')) {
+          const r = el.getBoundingClientRect();
+          if (r.width < 32 || r.height < 14 || r.top > 700) continue;
+          const named = LOGOISH.test(label(el)) || LOGOISH.test(label(el.parentElement ?? el));
+          if (!named && !inHead(el)) continue;
+          const score = (named ? 1e6 : 0) + (inHead(el) ? 1e5 : 0) + r.width * r.height;
+          if (el.tagName.toLowerCase() === 'img') {
+            const src = el.currentSrc || el.src;
+            if (src && !src.startsWith('data:image/gif')) cands.push({ score, kind: 'img', url: src });
+          } else if (el.querySelector('path, circle, rect, polygon, text, use, image')) {
+            const clone = el.cloneNode(true);
+            // Walk both trees together: the live nodes know their computed
+            // colour, the clone is what gets written out.
+            const live = [el, ...el.querySelectorAll('*')];
+            const copy = [clone, ...clone.querySelectorAll('*')];
+            for (let i = 0; i < live.length; i++) {
+              const cs = getComputedStyle(live[i]);
+              const f = cs.fill, st = cs.stroke;
+              if (f && f !== 'none') copy[i].setAttribute('fill', f);
+              if (st && st !== 'none') copy[i].setAttribute('stroke', st);
+              copy[i].removeAttribute('class');
+            }
+            for (const bad of copy.filter(n => /^(script|style)$/i.test(n.tagName))) bad.remove();
+            clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            if (!clone.getAttribute('viewBox') && r.width && r.height)
+              clone.setAttribute('viewBox', `0 0 ${Math.round(r.width)} ${Math.round(r.height)}`);
+            clone.setAttribute('width', Math.round(r.width));
+            clone.setAttribute('height', Math.round(r.height));
+            cands.push({ score, kind: 'svg', markup: clone.outerHTML });
+          }
+        }
+        cands.sort((a, b) => b.score - a.score);
+        return cands[0] ?? null;
+      });
+    } catch { out = null; }
+    if (out) break;
+  }
+  headerCache.set(domain, out);
+  return out;
+}
+
 // The aggregators, in the order they proved useful when probed. Brandfetch is
 // absent on purpose: it answers 403 to the public client ID this project used,
 // for every URL shape and every domain. Google's `sz` is 256 and not 512 for
@@ -119,15 +184,6 @@ const AGGREGATORS = [
   { why: 'icon.horse',       url: d => `https://icon.horse/icon/${d}` },
   { why: 'duckduckgo',       url: d => `https://icons.duckduckgo.com/ip3/${d}.ico` },
 ];
-
-async function candidatesFor(domain) {
-  const site = await siteCandidates(domain);
-  return [
-    ...site.filter(s => !s.last),
-    ...AGGREGATORS.map(a => ({ url: a.url(domain), why: a.why })),
-    ...site.filter(s => s.last),
-  ];
-}
 
 const EXT = { svg: '.svg', png: '.png', jpg: '.jpg', webp: '.webp', gif: '.gif', ico: '.ico' };
 
@@ -140,32 +196,70 @@ function measure(buf, type) {
   return s;
 }
 
-// Vector wins outright — it is the mark itself rather than a rendering of it.
-// Among rasters the biggest wins, and a tie goes to whoever was asked first,
-// which is how the ladder's ordering turns into a preference.
-const scoreOf = s => (s.fmt === 'svg' ? 100000 : Math.max(s.w, s.h));
+// Within a tier the biggest wins; vector wins outright, being the mark itself
+// rather than a rendering of it. Squareness is part of the size: a logo is
+// drawn into a square 24px cell, so of a 1200×630 banner only the 630 is ever
+// visible, and calling it "1200 wide" would let a social card outrank a real
+// 144px app icon.
+const scoreOf = s => (s.fmt === 'svg' ? 100000 : Math.min(s.w, s.h));
+const squareness = s => (s.fmt === 'svg' ? 1 : Math.min(s.w, s.h) / Math.max(s.w, s.h, 1));
 
 export const slug = name => name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
   .replace(/ß/g, 'ss').replace(/['’]/g, '')
   .toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
 
-export async function findLogo(name, domains) {
+// The ladder, best tier first. Order is a judgement about *what a thing is*,
+// not how big it is, so a tier that answers is taken even when a later one
+// could answer larger:
+//
+//   1  the icons the site declares       — square, made to be shrunk, the brand's own
+//   2  the logo drawn in its header      — the mark itself, often inline SVG
+//   3  the favicon aggregators           — the same icons, second-hand
+//   4  og:image, only if roughly square  — usually a hero photograph; a last resort
+//
+// Tier 4 is fenced because that is what went wrong the first time this ran:
+// 29 beers came back with a 1200×630 social card, which is a photograph of a
+// bottle where a logo should be.
+async function tiersFor(domain, page) {
+  const site = await siteCandidates(domain);
+  return [
+    { why: 'site icon', items: site.filter(s => !s.last) },
+    { why: 'header',    items: [{ header: true, why: 'site header logo' }] },
+    { why: 'service',   items: AGGREGATORS.map(a => ({ url: a.url(domain), why: a.why })) },
+    { why: 'og',        items: site.filter(s => s.last), squareOnly: true },
+  ];
+}
+
+export async function findLogo(name, domains, page) {
   const tried = [];
-  let best = null;
   for (const d of domains) {
-    for (const cand of await candidatesFor(d)) {
-      const got = await get(cand.url);
-      const size = got && measure(got.buf, got.type);
-      tried.push(`${cand.why} · ${d} · ${size ? `${size.w}×${size.h} ${size.fmt}` : 'no'}`);
-      if (!size) continue;
-      const score = scoreOf(size);
-      if (!best || score > best.score)
-        best = { score, buf: got.buf, size, source: cand.why, domain: d, url: cand.url };
-      if (score >= 100000) break;                       // vector: nothing beats it
+    for (const tier of await tiersFor(d, page)) {
+      let best = null;
+      for (const cand of tier.items) {
+        let got = null, size = null;
+        if (cand.header) {
+          const hit = page && await headerLogo(d, page);
+          if (hit?.kind === 'svg') got = { buf: Buffer.from(hit.markup, 'utf8'), type: 'image/svg+xml', url: `${d} (inline svg)` };
+          else if (hit?.kind === 'img') got = await get(hit.url);
+          if (got) size = measure(got.buf, got.type);
+        } else {
+          got = await get(cand.url);
+          size = got && measure(got.buf, got.type);
+        }
+        if (size && tier.squareOnly && squareness(size) < 0.6) {
+          tried.push(`${cand.why} · ${d} · ${size.w}×${size.h} rejected, not square`);
+          continue;
+        }
+        tried.push(`${cand.why} · ${d} · ${size ? `${size.w}×${size.h} ${size.fmt}` : 'no'}`);
+        if (!size) continue;
+        const score = scoreOf(size);
+        if (!best || score > best.score)
+          best = { score, buf: got.buf, size, source: cand.why, domain: d, url: got.url ?? cand.url };
+      }
+      if (best) return { name, ...best, tried };
     }
-    if (best && best.score >= 180) break;               // already better than we draw
   }
-  return best ? { name, ...best, tried } : { name, buf: null, tried };
+  return { name, buf: null, tried };
 }
 
 // ── main ──────────────────────────────────────────────────────
@@ -177,20 +271,42 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const onDisk = new Set(readdirSync(LOGO_DIR));
   const fileFor = n => [...Object.values(EXT)].map(e => slug(n) + e).find(f => onDisk.has(f));
 
-  const work = names.filter(n => (!ONLY || ONLY.has(n)) && (FORCE || !fileFor(n)));
-  console.log(`${names.length} beers · ${names.filter(fileFor).length} already have a file · fetching ${work.length}\n`);
+  // A file this tool wrote is its to replace; a file somebody put there by
+  // hand is not, and --force does not mean "throw away the logo I drew". The
+  // last report says which is which, by filename.
+  const mine = new Set();
+  try {
+    for (const f of JSON.parse(readFileSync(REPORT, 'utf8')).fetched ?? [])
+      mine.add(f.file.replace(/^logos\//, ''));
+  } catch { /* no report yet — nothing here is ours */ }
+  const handPlaced = n => { const f = fileFor(n); return !!f && !mine.has(f); };
+
+  const work = names.filter(n =>
+    (!ONLY || ONLY.has(n)) && !handPlaced(n) && (FORCE || !fileFor(n)));
+  const kept = names.filter(handPlaced);
+  console.log(`${names.length} beers · ${names.filter(fileFor).length} already have a file · ` +
+    `fetching ${work.length}${kept.length ? ` · leaving ${kept.length} hand-placed alone (${kept.join(', ')})` : ''}\n`);
+
+  // One browser for the whole run: the header tier navigates in it, and the
+  // re-encoding at the end draws in it. Each worker gets its own page, because
+  // they navigate independently.
+  const { chromium } = await import('playwright');
+  const browser = await chromium.launch(
+    process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
 
   const found = [], missing = [];
   const queue = [...work];
   const worker = async () => {
+    const page = await browser.newPage({ userAgent: UA });
     while (queue.length) {
       const name = queue.shift();
-      const r = await findLogo(name, [].concat(BRAND_DOMAINS[name] ?? []));
+      const r = await findLogo(name, [].concat(BRAND_DOMAINS[name] ?? []), page);
       if (r.buf) { found.push(r); console.log(`  ✓ ${name} — ${r.source} (${r.domain}) ${r.size.w}×${r.size.h} ${r.size.fmt}`); }
       else { missing.push(r); console.log(`  ✗ ${name} — nothing usable`); }
     }
+    await page.close();
   };
-  await Promise.all(Array.from({ length: 6 }, worker));
+  await Promise.all(Array.from({ length: 5 }, worker));
 
   // ── normalise ───────────────────────────────────────────────
   // SVG is written through untouched. A raster is redrawn onto a transparent
@@ -199,10 +315,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   // does the decoding, which is what lets an .ico or an animated .gif land the
   // same way as a .png.
   const rasters = found.filter(r => r.size.fmt !== 'svg');
-  if (rasters.length) {
-    const { chromium } = await import('playwright');
-    const browser = await chromium.launch(
-      process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
+  {
     const page = await browser.newPage();
     for (const r of rasters) {
       const mime = r.size.fmt === 'ico' ? 'image/x-icon' : `image/${r.size.fmt}`;
@@ -210,20 +323,25 @@ if (import.meta.url === `file://${process.argv[1]}`) {
         const img = new Image();
         const ok = await new Promise(res => { img.onload = () => res(true); img.onerror = () => res(false); img.src = dataUrl; });
         if (!ok || !img.naturalWidth) return null;
+        // The square is the image's own longest edge, capped at OUT_PX —
+        // never larger. Padding a 64px icon out to 256 would not add detail,
+        // and would make it draw at a quarter of its size in a box sized to
+        // the file rather than to the mark inside it.
+        const S = Math.min(OUT_PX, Math.max(img.naturalWidth, img.naturalHeight));
         const c = document.createElement('canvas');
-        c.width = c.height = OUT_PX;
+        c.width = c.height = S;
         const ctx = c.getContext('2d');
-        const scale = Math.min(OUT_PX / img.naturalWidth, OUT_PX / img.naturalHeight, 1);
+        const scale = Math.min(S / img.naturalWidth, S / img.naturalHeight);
         const w = Math.round(img.naturalWidth * scale), h = Math.round(img.naturalHeight * scale);
         ctx.imageSmoothingQuality = 'high';
-        ctx.drawImage(img, (OUT_PX - w) / 2, (OUT_PX - h) / 2, w, h);
+        ctx.drawImage(img, (S - w) / 2, (S - h) / 2, w, h);
         return c.toDataURL('image/webp', 0.92);
       }, { dataUrl: `data:${mime};base64,${r.buf.toString('base64')}`, OUT_PX });
       if (out) { r.buf = Buffer.from(out.split(',')[1], 'base64'); r.ext = '.webp'; }
       else r.ext = EXT[r.size.fmt] ?? '.png';
     }
-    await browser.close();
   }
+  await browser.close();
 
   for (const r of found) {
     const ext = r.size.fmt === 'svg' ? '.svg' : (r.ext ?? '.webp');
@@ -240,9 +358,12 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     total: names.length,
     fetched: found.map(r => ({ beer: r.name, file: r.file, source: r.source, domain: r.domain,
                                url: r.url, size: `${r.size.w}×${r.size.h}`, bytes: r.buf.length })),
+    // Files somebody chose by hand. Listed so the report stays the full answer
+    // to "where does each beer's logo come from", not just this run's part.
+    kept: kept.map(n => ({ beer: n, file: `logos/${fileFor(n)}` })),
     missing: missing.map(r => ({ beer: r.name, tried: r.tried })),
   }, null, 2));
 
   console.log(`\n${found.length} written · ${missing.length} still missing`);
-  for (const m of missing) console.log(`  ✗ ${m.beer}\n      ${m.tried.join('\n      ')}`);
+  for (const m of missing) console.log(`  ✗ ${m.name}\n      ${m.tried.join('\n      ')}`);
 }

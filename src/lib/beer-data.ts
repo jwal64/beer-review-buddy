@@ -98,20 +98,48 @@ export function useCountries() {
   });
 }
 
+// One row per beer name, holding both halves of "where does this logo come
+// from": the committed file for the brand, and the domains to fall back to if
+// there isn't one. Both hooks below read it, under one query key, so the two
+// views of the table cost a single request.
+function brandDomainsQuery() {
+  return {
+    queryKey: ["brand_domains"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("brand_domains").select("*");
+      if (error) throw error;
+      return (data ?? []) as BrandDomainRow[];
+    },
+    staleTime: FRESH_FOR,
+  };
+}
+
 // Beer name → the domains its logo is looked up from. A beer with no row here
 // renders a placeholder forever, in this app and on the site both, so the form
 // asks for one when a beer has none.
 export function useBrandDomains() {
   return useQuery({
-    queryKey: ["brand_domains"],
-    queryFn: async () => {
-      const { data, error } = await supabase.from("brand_domains").select("*");
-      if (error) throw error;
+    ...brandDomainsQuery(),
+    select: (rows: BrandDomainRow[]) => {
       const map = new Map<string, string[]>();
-      for (const row of (data ?? []) as BrandDomainRow[]) map.set(row.beer_name, row.domains);
+      for (const row of rows) map.set(row.beer_name, row.domains);
       return map;
     },
-    staleTime: FRESH_FOR,
+  });
+}
+
+// Beer name → the logo file committed for that brand, under the static site's
+// logos/. This is where a logo normally comes from: it is the same picture on
+// every render, it works offline, and no third party can withdraw it. The
+// domains are what happens when a beer has no file yet.
+export function useBrandLogos() {
+  return useQuery({
+    ...brandDomainsQuery(),
+    select: (rows: BrandDomainRow[]) => {
+      const map = new Map<string, string>();
+      for (const row of rows) if (row.logo) map.set(row.beer_name, row.logo);
+      return map;
+    },
   });
 }
 

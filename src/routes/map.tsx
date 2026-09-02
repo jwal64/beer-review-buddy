@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   useBeers,
   useBrandDomains,
+  useBrandLogos,
   useBreweries,
   useCountries,
   useLocations,
@@ -14,7 +15,7 @@ import {
   type Beer,
   type CountryRow,
 } from "@/lib/beer-data";
-import { beerLogo, breweryLogo, type DomainMap } from "@/lib/logos";
+import { beerLogo, breweryLogo, type DomainMap, type LogoMap } from "@/lib/logos";
 import { ClientOnly } from "@tanstack/react-router";
 // Bundled with the app — the map's layout breaks entirely without this
 // stylesheet, so it must not depend on a third-party CDN being up.
@@ -55,6 +56,7 @@ function MapPage() {
   const locations = useLocations();
   const countries = useCountries();
   const { data: domains } = useBrandDomains();
+  const { data: logos } = useBrandLogos();
   const loading = beers.isLoading || breweries.isLoading || locations.isLoading;
   const [filter, setFilter] = useState<{ kind: string; label: string } | null>(null);
   const [mode, setMode] = useState<MapMode>("drank");
@@ -125,6 +127,7 @@ function MapPage() {
               breweries={breweries.data ?? []}
               beers={beers.data ?? []}
               domains={domains}
+              logos={logos}
               locations={locations.data ?? []}
               countries={countries.data ?? []}
               onPick={setFilter}
@@ -224,20 +227,25 @@ const tally = (list: Beer[], nothingWord: string) =>
 
 /** A beer's logo tile: monogram underneath, image over it, letter uncovered
  *  again if the image fails. */
-function logoCell(beer: Beer, domains: DomainMap | undefined) {
-  const src = beerLogo(beer.name, domains, beer.logo);
+function logoCell(beer: Beer, domains: DomainMap | undefined, logos: LogoMap | undefined) {
+  const src = beerLogo(beer.name, domains, beer.logo ?? logos?.get(beer.name));
   const img = src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()" />` : "";
   return `<span class="bm-pop-logo"><span>${esc(beer.name.charAt(0))}</span>${img}</span>`;
 }
 
 /** One line per pour: logo, name, where it is from, what it is, what it got. */
-function beerRows(list: Beer[], domains: DomainMap | undefined, countries: CountryRow[]) {
+function beerRows(
+  list: Beer[],
+  domains: DomainMap | undefined,
+  logos: LogoMap | undefined,
+  countries: CountryRow[],
+) {
   if (!list.length) return "";
   return `<div class="bm-pop-list">${list
     .map((b) => {
       const meta = [b.style, b.method].filter(Boolean).join(" · ");
       return `<div class="bm-pop-row">
-          ${logoCell(b, domains)}
+          ${logoCell(b, domains, logos)}
           <div style="min-width:0">
             <div class="bm-pop-name">${esc(b.name)}</div>
             <div class="bm-pop-meta">${flagEmoji(b.origin_cc, countries)} ${esc(meta)}</div>
@@ -253,6 +261,7 @@ function cityPopup(
   loc: { city: string; region: string | null; country: string; cc: string | null },
   poured: Beer[],
   domains: DomainMap | undefined,
+  logos: LogoMap | undefined,
   countries: CountryRow[],
 ) {
   // "Antwerp, Antwerp" — several cities share their region's name, and saying
@@ -262,7 +271,7 @@ function cityPopup(
       <div class="bm-pop-title">${flagEmoji(loc.cc, countries)} ${esc(where)}</div>
       <div class="bm-pop-sub">${esc(loc.country)}</div>
       <div class="bm-pop-sub">${esc(tally(poured, "here"))}</div>
-      ${beerRows(poured, domains, countries)}
+      ${beerRows(poured, domains, logos, countries)}
     </div>`;
 }
 
@@ -271,6 +280,7 @@ function breweryPopup(
   brewery: { name: string; location: string | null; country: string | null; cc: string | null },
   made: Beer[],
   domains: DomainMap | undefined,
+  logos: LogoMap | undefined,
   countries: CountryRow[],
   logo: string | null,
 ) {
@@ -283,7 +293,7 @@ function breweryPopup(
         [brewery.location, brewery.country].filter(Boolean).join(" · "),
       )}</div>
       <div class="bm-pop-sub">${esc(tally(made, "yet"))}</div>
-      ${beerRows(made, domains, countries)}
+      ${beerRows(made, domains, logos, countries)}
     </div>`;
 }
 
@@ -303,6 +313,7 @@ function LeafletMap({
   // keyed by beer, not by brewery.
   beers: Beer[];
   domains: DomainMap | undefined;
+  logos: LogoMap | undefined;
   countries: CountryRow[];
   onPick: (f: { kind: string; label: string }) => void;
 }) {
@@ -392,8 +403,9 @@ function LeafletMap({
               b,
               beers.filter((x) => x.brewery === b.name),
               domains,
+              logos,
               countries,
-              breweryLogo(b.name, beers, domains),
+              breweryLogo(b.name, beers, domains, logos),
             ),
             { maxWidth: 260, minWidth: 208 },
           );
@@ -416,7 +428,7 @@ function LeafletMap({
           marker.on("click", () => pickRef.current({ kind: "city", label: l.city }));
         });
     }
-  }, [ready, mode, breweries, locations, beers, domains, countries]);
+  }, [ready, mode, breweries, locations, beers, domains, logos, countries]);
 
   return (
     <div ref={ref} className="h-[420px] w-full overflow-hidden rounded-2xl border border-border" />

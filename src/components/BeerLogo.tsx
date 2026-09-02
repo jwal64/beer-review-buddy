@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { beerLogoSources, isSuspectFavicon } from "@/lib/logos";
-import { useBrandDomains } from "@/lib/beer-data";
+import { useBrandDomains, useBrandLogos } from "@/lib/beer-data";
 import { cn } from "@/lib/utils";
 import { styleColor } from "@/lib/style-colors";
 
@@ -27,7 +27,10 @@ export function BeerLogo({
 
   // Shared with every other card on the page — react-query fetches it once.
   const { data: domains } = useBrandDomains();
-  const sources = beerLogoSources(name, domains, logo);
+  const { data: brandLogos } = useBrandLogos();
+  // The review row's own `logo` wins: it is set for one beer in particular,
+  // where the brand's file is set for the brand.
+  const sources = beerLogoSources(name, domains, logo ?? brandLogos?.get(name));
   const [tier, setTier] = useState(0);
   // A list row's component can be reused for a different beer — restart the
   // chain when the name changes rather than carrying the old beer's progress.
