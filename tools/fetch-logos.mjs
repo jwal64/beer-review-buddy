@@ -411,11 +411,15 @@ function refuse(size, m, kind) {
   // the "logo" is really a picture of the product. It is how modelousa.com's
   // cutout of a man holding a bottle, Wikidata's photograph of Mythos in two
   // glasses and a dark shot of Guinness pints all arrived called logos.
-  // …but only where the *source* chose the format. A favicon service
-  // re-encodes whatever the site gave it, and Google and DuckDuckGo both hand
-  // back Bud Light's perfectly real logo as a JPEG. There the format says
-  // nothing, and the pixels have to answer instead.
-  if (size.fmt === 'jpg' && kind !== 'service')
+  // …but only where the format is the source's own claim about the content.
+  // Two exceptions, for opposite reasons. A favicon service re-encodes
+  // whatever the site gave it — Google and DuckDuckGo both hand back Bud
+  // Light's perfectly real mark as a JPEG — so the format says nothing there.
+  // And Wikidata's P154 *is* the claim: the property means "logo image", so a
+  // JPEG under it is an old upload of a logo at least as often as it is a
+  // photograph, and Augustiner's is 1920×1187 of exactly that. In both cases
+  // the pixels answer instead of the extension.
+  if (size.fmt === 'jpg' && kind !== 'service' && kind !== 'wikidata')
     return 'a JPEG, which is a photograph and not a mark';
   if (!m) return null;                                   // measurement timed out
   if (m.undrawable) return 'an image the browser cannot draw';
