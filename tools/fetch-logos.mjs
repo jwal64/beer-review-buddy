@@ -55,10 +55,7 @@ const OUT_PX = 256;
 
 const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
-// 8 seconds, not 20. A hundred beers times a dozen candidates times a handful
-// of domains is a lot of waiting for sources that are simply not there, and a
-// logo server that needs longer than this is not one to depend on anyway.
-async function get(url, { timeout = 8000, accept = 'image/*,*/*' } = {}) {
+async function get(url, { timeout = 20000, accept = 'image/*,*/*' } = {}) {
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), timeout);
   try {
@@ -128,22 +125,15 @@ async function siteCandidates(domain) {
 // The SVG is serialised with its computed fill and stroke written onto every
 // node, because the colours usually live in a stylesheet that is not coming
 // with it, and a wordmark that arrives black renders as a black square.
-// page.evaluate has no timeout of its own: on a site that keeps the main
-// thread busy it waits forever, and one such site would hang the whole run.
-// Everything that touches a page goes through this.
-const withTimeout = (p, ms, label) => Promise.race([
-  p, new Promise((_, rej) => setTimeout(() => rej(new Error(`${label} timed out`)), ms)),
-]);
-
 const headerCache = new Map();
 async function headerLogo(domain, page) {
   if (headerCache.has(domain)) return headerCache.get(domain);
   let out = null;
   for (const base of [`https://${domain}/`, `https://www.${domain}/`]) {
     try {
-      await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 15000 });
+      await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 25000 });
       await page.waitForTimeout(1200);
-      out = await withTimeout(page.evaluate(() => {
+      out = await page.evaluate(() => {
         const LOGOISH = /logo|brand|wordmark|marque/i;
         const label = el => [el.id, el.getAttribute('class') || '', el.getAttribute('alt') || '',
           el.getAttribute('aria-label') || '', el.getAttribute('src') || ''].join(' ');
@@ -188,7 +178,7 @@ async function headerLogo(domain, page) {
         }
         cands.sort((a, b) => b.score - a.score);
         return cands[0] ?? null;
-      }), 15000, `reading ${base}`);
+      });
     } catch { out = null; }
     if (out) break;
   }
@@ -277,7 +267,7 @@ async function wikidataLogo(beerName, domains) {
   let out = null;
   try {
     const search = await api('https://en.wikipedia.org/w/api.php?action=query&format=json&list=search' +
-      `&srsearch=${encodeURIComponent(beerName + ' beer')}&srlimit=4`);
+      `&srsearch=${encodeURIComponent(beerName + ' beer')}&srlimit=6`);
     const titles = (search?.query?.search ?? []).map(r => r.title);
     if (titles.length) {
       const props = await api('https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageprops' +
@@ -325,12 +315,20 @@ async function tiersFor(domain, page) {
   return WIKIDATA_FIRST ? [wikidata, ...rest] : [...rest.slice(0, 3), wikidata, rest[3]];
 }
 
+// A beer gets three minutes. Every source has its own timeout already, but a
+// brand with two dead domains can still spend all of them in sequence — and
+// the answer after three minutes of that is the same as the answer now.
+const BUDGET_MS = 180000;
+
 export async function findLogo(name, domains, page) {
   const tried = [];
+  const until = Date.now() + BUDGET_MS;
   for (const d of domains) {
+    if (Date.now() > until) { tried.push(`${d} · skipped, out of time`); break; }
     for (const tier of await tiersFor(d, page)) {
       let best = null;
       for (const cand of tier.items) {
+        if (Date.now() > until) { tried.push(`${cand.why} · ${d} · skipped, out of time`); break; }
         let got = null, size = null;
         if (cand.wikidata) {
           const hit = await wikidataLogo(name, domains);
@@ -468,7 +466,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     }
     await page.close();
   };
-  await Promise.all(Array.from({ length: 5 }, worker));
+  await Promise.all(Array.from({ length: 10 }, worker));
 
   // ── normalise ───────────────────────────────────────────────
   // SVG is written through untouched. A raster is redrawn onto a transparent
