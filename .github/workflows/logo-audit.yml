@@ -35,13 +35,26 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # All of them, because what decides the answer has changed: candidates
-      # are ranked by resolution now, vector above everything, and every raster
-      # has to survive being looked at before it can win. A 180px touch icon
-      # that was the best answer under the old rules is not the best answer
-      # under these, and a photograph is not an answer at all.
-      - name: Fetch every logo again, at the best resolution anyone has
-        run: node tools/fetch-logos.mjs --force
+      # The ones the sheet and the report still argue with: eight whose logo
+      # Wikidata holds but whose file would not download, and the three Modelo
+      # beers whose "header logo" is a JPEG cutout of a man holding a bottle.
+      # Everything else keeps the file it has.
+      - name: Re-fetch the ones still wrong
+        run: |
+          node tools/fetch-logos.mjs --force --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
+          Affligem Tripel
+          Almaza Pilsener
+          Mahou Cinco Estrellas
+          Modelo Especial
+          Modelo Oro
+          Mythos
+          Negra Modelo
+          Newcastle Brown Ale
+          Pacífico Clara
+          Singha
+          Smithwick's
+          EOF
+          )"
 
       - name: Commit what it found
         if: always()

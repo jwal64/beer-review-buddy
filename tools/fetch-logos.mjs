@@ -258,9 +258,14 @@ async function wikidataLogo(beerName, domains) {
           `&titles=${encodeURIComponent('File:' + file)}&prop=imageinfo&iiprop=url&iiurlwidth=${OUT_PX}`);
         const ii = Object.values(info?.query?.pages ?? {})[0]?.imageinfo?.[0];
         if (!ii) { why = `Commons has no file called ${file}`; continue; }
-        // The original when it is vector — every size at once, and smaller
-        // than a raster render of it. Otherwise the biggest thumbnail.
-        out = { url: /\.svgz?$/i.test(ii.url) ? ii.url : (ii.thumburl ?? ii.url), id, file };
+        // Special:FilePath first: it is the address Commons documents for
+        // fetching a file, it redirects to whichever host is serving it today,
+        // and `width` gets a render of an SVG at any size. The imageinfo URLs
+        // are kept behind it because a file whose name has been normalised
+        // away resolves through them and not through the path.
+        const path = 'https://commons.wikimedia.org/wiki/Special:FilePath/' +
+          encodeURIComponent(file) + (/\.svgz?$/i.test(ii.url) ? '' : `?width=${OUT_PX}`);
+        out = { urls: [path, ii.thumburl, ii.url].filter(Boolean), id, file };
         break;
       }
     }
@@ -383,8 +388,9 @@ export async function findLogo(name, domains, page, lab = page) {
     let got = null;
     if (cand.wikidata) {
       const hit = await wikidataLogo(name, domains);
-      if (hit?.url) got = await get(hit.url, { ua: WIKI_UA });
-      else if (hit?.why) { tried.push(`${cand.why} · ${hit.why}`); continue; }
+      if (hit?.why) { tried.push(`${cand.why} · ${hit.why}`); continue; }
+      for (const u of hit?.urls ?? []) { got = await get(u, { ua: WIKI_UA }); if (got) break; }
+      if (!got) { tried.push(`${cand.why} · found ${hit.file}, but none of its URLs downloaded`); continue; }
     } else if (cand.header) {
       const hit = await headerLogo(cand.domain, page);
       if (hit?.kind === 'svg')
@@ -400,6 +406,15 @@ export async function findLogo(name, domains, page, lab = page) {
 
     const no = cand.reject?.(size)
       ?? (cand.squareOnly && squareness(size) < 0.6 ? 'not square' : null)
+      // A JPEG in a header's logo slot is a photograph. The format is the
+      // tell, and a far better one than any measurement of the pixels: a mark
+      // needs transparency and hard edges, so brands ship PNG or SVG, and
+      // JPEG is what you get when the "logo" is really a picture of the
+      // product. modelousa.com's is a cutout of a man holding a bottle — 19%
+      // transparent and 860 colours, which is to say indistinguishable by
+      // measurement from Paulaner's crest at 930.
+      ?? ((cand.kind === 'header' || cand.kind === 'og') && size.fmt === 'jpg'
+          ? 'a JPEG, which is a photograph and not a mark' : null)
       ?? await looksLikeAPhotograph(got.buf, size.fmt, lab);
     if (no) { tried.push(`${where} · ${size.w}×${size.h} rejected, ${no}`); continue; }
 
