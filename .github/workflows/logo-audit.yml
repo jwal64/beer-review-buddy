@@ -35,23 +35,13 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # The eight whose own sites answer nothing at all to a datacentre IP.
-      # Nothing else has ever had anything to offer for them: every favicon
-      # service had nothing to pass on either, and Icon Horse's grey capital
-      # was the only thing left. Wikidata's P154 is their last real source.
-      - name: Fetch the eight from Wikidata
-        run: |
-          node tools/fetch-logos.mjs --force --prefer-wikidata --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
-          Affligem Tripel
-          Almaza Pilsener
-          Mahou Cinco Estrellas
-          Mythos
-          Newcastle Brown Ale
-          Pacífico Clara
-          Singha
-          Smithwick's
-          EOF
-          )"
+      # All of them, because what decides the answer has changed: candidates
+      # are ranked by resolution now, vector above everything, and every raster
+      # has to survive being looked at before it can win. A 180px touch icon
+      # that was the best answer under the old rules is not the best answer
+      # under these, and a photograph is not an answer at all.
+      - name: Fetch every logo again, at the best resolution anyone has
+        run: node tools/fetch-logos.mjs --force
 
       - name: Commit what it found
         if: always()
@@ -60,5 +50,5 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/stats/logos public/stats/data.js logo-fetch-report.json
           git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
-          git commit -m "Fetch the remaining logos from each brand's encyclopaedia entry"
+          git commit -m "Re-fetch every logo at the best resolution anyone has"
           git push origin HEAD:${{ github.ref_name }}
