@@ -344,11 +344,13 @@ const BRAND_LOGOS = {
 "Asahi Super Dry":"logos/asahi-super-dry.webp",
 "Beck's":"logos/becks.svg",
 "Belhaven Scottish Stout":"logos/belhaven-scottish-stout.svg",
+"Big Wave Golden Ale":"logos/big-wave-golden-ale.webp",
 "Birra Moretti":"logos/birra-moretti.webp",
 "Bitburger Radler":"logos/bitburger-radler.webp",
 "Bloodline Blood Orange IPA":"logos/bloodline-blood-orange-ipa.webp",
 "Blue Moon":"logos/blue-moon.webp",
 "Brahma":"logos/brahma.webp",
+"Bud Light":"logos/bud-light.webp",
 "Budweiser":"logos/budweiser.webp",
 "Carlsberg":"logos/carlsberg.svg",
 "Carlsberg Elephant":"logos/carlsberg-elephant.svg",
@@ -356,7 +358,7 @@ const BRAND_LOGOS = {
 "Chill Lemon":"logos/chill-lemon.webp",
 "Chimay Blue":"logos/chimay-blue.webp",
 "Coopers Pale Ale":"logos/coopers-pale-ale.svg",
-"Coors Light":"logos/coors-light.webp",
+"Coors Light":"logos/coors-light.svg",
 "Corona Extra":"logos/corona-extra.svg",
 "DAB Dortmunder Export":"logos/dab-dortmunder-export.webp",
 "Daura":"logos/daura.svg",
@@ -435,6 +437,8 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
+
+
 
 
 
