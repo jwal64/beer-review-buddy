@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-02T15:44:38.045Z",
+  "at": "2026-09-02T16:00:38.782Z",
   "total": 101,
   "fetched": [
     {
@@ -9,18 +9,8 @@
       "domain": "asahibeer.com",
       "from": "3840×1497 png",
       "stored": "2048px",
-      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Asahi_logo.svg/3840px-Asahi_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0a/Asahi_logo.svg/3840px-Asahi_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
       "bytes": 55414
-    },
-    {
-      "beer": "Augustiner Helles",
-      "file": "logos/augustiner-helles.svg",
-      "source": "site header logo",
-      "domain": "augustiner-braeu.de",
-      "from": "76×126 svg",
-      "stored": "vector",
-      "url": "augustiner-braeu.de (inline svg)",
-      "bytes": 179
     },
     {
       "beer": "Beck's",
@@ -43,23 +33,13 @@
       "bytes": 47631
     },
     {
-      "beer": "Big Wave Golden Ale",
-      "file": "logos/big-wave-golden-ale.webp",
-      "source": "duckduckgo",
-      "domain": "konabrewingco.com",
-      "from": "48×48 png",
-      "stored": "48px",
-      "url": "https://icons.duckduckgo.com/ip3/konabrewingco.com.ico",
-      "bytes": 2582
-    },
-    {
       "beer": "Birra Moretti",
       "file": "logos/birra-moretti.webp",
       "source": "wikidata P154",
       "domain": "birramoretti.com",
       "from": "1431×1359 png",
       "stored": "1431px",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/3/32/Birra_Moretti_Logo_2023.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/3/32/Birra_Moretti_Logo_2023.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled",
       "bytes": 230112
     },
     {
@@ -85,42 +65,32 @@
     {
       "beer": "Blue Moon",
       "file": "logos/blue-moon.webp",
-      "source": "site rel=\"icon\"",
+      "source": "wikidata P154",
       "domain": "bluemoonbrewingcompany.com",
-      "from": "90×90 png",
-      "stored": "90px",
-      "url": "https://www.bluemoonbrewingcompany.com/sites/bluemoon/files/BlueMoon-Favicon.png",
-      "bytes": 5044
+      "from": "729×767 png",
+      "stored": "767px",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/15/Blue_Moon_Wolf_BMW_Logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled",
+      "bytes": 106460
     },
     {
       "beer": "Brahma",
       "file": "logos/brahma.webp",
       "source": "wikidata P154",
       "domain": "brahma.com.br",
-      "from": "3840×1206 png",
+      "from": "3840×2968 png",
       "stored": "2048px",
-      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/8e/Logotipo_da_Brahma_%282025%29.svg/3840px-Logotipo_da_Brahma_%282025%29.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "bytes": 47788
-    },
-    {
-      "beer": "Bud Light",
-      "file": "logos/bud-light.webp",
-      "source": "duckduckgo",
-      "domain": "budlight.com",
-      "from": "512×512 jpg",
-      "stored": "512px",
-      "url": "https://icons.duckduckgo.com/ip3/budlight.com.ico",
-      "bytes": 8994
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9e/Brahma_Logo.svg/3840px-Brahma_Logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 89466
     },
     {
       "beer": "Budweiser",
       "file": "logos/budweiser.webp",
       "source": "wikidata P154",
       "domain": "budweiser.com",
-      "from": "931×931 png",
-      "stored": "931px",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Budejovicky_Budvar_logo.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-      "bytes": 46526
+      "from": "3840×1463 png",
+      "stored": "2048px",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/86/Budweiser_Budvar_logo.svg/3840px-Budweiser_Budvar_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 145552
     },
     {
       "beer": "Carlsberg",
@@ -189,7 +159,7 @@
       "domain": "coorslight.com",
       "from": "3840×1200 png",
       "stored": "2048px",
-      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Coors_Light_logo.svg/3840px-Coors_Light_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/63/Coors_Light_logo.svg/3840px-Coors_Light_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
       "bytes": 44422
     },
     {
@@ -205,12 +175,12 @@
     {
       "beer": "DAB Dortmunder Export",
       "file": "logos/dab-dortmunder-export.webp",
-      "source": "wikidata P154",
+      "source": "site header logo",
       "domain": "dab.de",
-      "from": "549×550 jpg",
-      "stored": "550px",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e6/Logo_dab_dortmund.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-      "bytes": 22446
+      "from": "500×400 png",
+      "stored": "500px",
+      "url": "https://www.dab.de/medien-fuer-inhalte/dab/dab-full-logo-dbi.png",
+      "bytes": 12342
     },
     {
       "beer": "De Koninck",
@@ -265,12 +235,12 @@
     {
       "beer": "Estrella Galicia",
       "file": "logos/estrella-galicia.webp",
-      "source": "wikidata P154",
+      "source": "site rel=\"icon\"",
       "domain": "estrellagalicia.com",
-      "from": "3840×2881 png",
-      "stored": "2048px",
-      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4b/Estrella_Galicia_escudo_color_vectorial_HDJR.svg/3840px-Estrella_Galicia_escudo_color_vectorial_HDJR.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "bytes": 118322
+      "from": "300×300 png",
+      "stored": "300px",
+      "url": "https://estrellagalicia.com/wp-content/uploads/2022/06/favicon-300x300.png",
+      "bytes": 12000
     },
     {
       "beer": "Estrella Jalisco",
@@ -305,12 +275,12 @@
     {
       "beer": "Grolsch",
       "file": "logos/grolsch.webp",
-      "source": "wikidata P154",
+      "source": "site rel=\"apple-touch-icon\"",
       "domain": "grolsch.com",
-      "from": "1728×796 png",
-      "stored": "1728px",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/5/5e/Grolsch_Logo.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-      "bytes": 82010
+      "from": "144×144 png",
+      "stored": "144px",
+      "url": "https://www.grolsch.com/apple-touch-icon.png",
+      "bytes": 7436
     },
     {
       "beer": "Grolsch Puur Weizen",
@@ -325,12 +295,12 @@
     {
       "beer": "Guinness Draught",
       "file": "logos/guinness-draught.webp",
-      "source": "wikidata P154",
+      "source": "site rel=\"icon\"",
       "domain": "guinness.com",
-      "from": "2073×1353 jpg",
-      "stored": "2048px",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/9/9c/St._James%27s_Gate_Brewery%2C_Dublin%2C_Ireland.jpg?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-      "bytes": 383504
+      "from": "512×512 png",
+      "stored": "512px",
+      "url": "https://www.guinness.com/icon.png?icon.2ye_zmc-vc4vn.png",
+      "bytes": 23304
     },
     {
       "beer": "Harp Lager",
@@ -385,12 +355,12 @@
     {
       "beer": "Hoegaarden",
       "file": "logos/hoegaarden.webp",
-      "source": "site rel=\"icon\"",
+      "source": "wikidata P154",
       "domain": "hoegaarden.com",
-      "from": "192×192 png",
-      "stored": "192px",
-      "url": "https://static.wixstatic.com/media/bff35e_c0fb7fca33e6481daf21f75ad6c9db07%7Emv2.png/v1/fill/w_192%2Ch_192%2Clg_1%2Cusm_0.66_1.00_0.01/bff35e_c0fb7fca33e6481daf21f75ad6c9db07%7Emv2.png",
-      "bytes": 8300
+      "from": "3840×960 png",
+      "stored": "2048px",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/71/Hoegaarden_logo.svg/3840px-Hoegaarden_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 70930
     },
     {
       "beer": "Hofbräu Dunkel",
@@ -415,22 +385,22 @@
     {
       "beer": "Hop Commander",
       "file": "logos/hop-commander.webp",
-      "source": "site header logo",
+      "source": "site rel=\"shortcut icon\"",
       "domain": "captainlawrencebrewing.com",
-      "from": "1536×415 jpg",
-      "stored": "1536px",
-      "url": "https://www.captainlawrencebrewing.com/wp-content/uploads/2026/03/Fermenters2_1920x519-1536x415.jpg",
-      "bytes": 59268
+      "from": "142×142 png",
+      "stored": "142px",
+      "url": "https://www.captainlawrencebrewing.com/wp-content/uploads/2017/06/favicon2.png",
+      "bytes": 4314
     },
     {
       "beer": "Ichnusa Anima Sarda",
       "file": "logos/ichnusa-anima-sarda.webp",
-      "source": "site og:image",
-      "domain": "birraichnusa.it",
-      "from": "300×300 jpg",
-      "stored": "300px",
-      "url": "https://www.birraichnusa.it/wp-content/uploads/2024/06/ichnusa-birra-sarda.jpg",
-      "bytes": 4964
+      "source": "google faviconV2",
+      "domain": "ichnusa.com",
+      "from": "152×152 png",
+      "stored": "152px",
+      "url": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://ichnusa.com&size=256",
+      "bytes": 5212
     },
     {
       "beer": "IJwit",
@@ -543,16 +513,6 @@
       "bytes": 14778
     },
     {
-      "beer": "Mythos",
-      "file": "logos/mythos.webp",
-      "source": "wikidata P154",
-      "domain": "mythosbrewery.gr",
-      "from": "3840×2560 jpg",
-      "stored": "2048px",
-      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Full_Glass_of_Mythos_Beer_with_Logo_%2848721071253%29.jpg/3840px-Full_Glass_of_Mythos_Beer_with_Logo_%2848721071253%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
-      "bytes": 364864
-    },
-    {
       "beer": "Narragansett Lager",
       "file": "logos/narragansett-lager.webp",
       "source": "site header logo",
@@ -587,10 +547,10 @@
       "file": "logos/orion.webp",
       "source": "wikidata P154",
       "domain": "orionbeer.co.jp",
-      "from": "3840×1575 png",
+      "from": "3840×1756 png",
       "stored": "2048px",
-      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/9/9f/Orion_Breweries_company_logo.svg/3840px-Orion_Breweries_company_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
-      "bytes": 50622
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/5/54/Orion_pharma_logo_%282025-%29.svg/3840px-Orion_pharma_logo_%282025-%29.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 53852
     },
     {
       "beer": "Paulaner Hefe",
@@ -634,23 +594,23 @@
     },
     {
       "beer": "Pilsner Urquell",
-      "file": "logos/pilsner-urquell.svg",
-      "source": "site header logo",
+      "file": "logos/pilsner-urquell.webp",
+      "source": "wikidata P154",
       "domain": "pilsnerurquell.com",
-      "from": "288×173 svg",
-      "stored": "vector",
-      "url": "pilsnerurquell.com (inline svg)",
-      "bytes": 222
+      "from": "3840×1280 png",
+      "stored": "2048px",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/0c/Pilsner-urquell-logo.svg/3840px-Pilsner-urquell-logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 88790
     },
     {
       "beer": "Presidente",
       "file": "logos/presidente.webp",
-      "source": "site rel=\"icon\"",
+      "source": "wikidata P154",
       "domain": "presidente.com.do",
-      "from": "320×320 png",
-      "stored": "320px",
-      "url": "https://www.presidente.com.do/sites/g/files/seuoyk596/files/presidente-favicon_3.png",
-      "bytes": 20228
+      "from": "3840×3064 png",
+      "stored": "2048px",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b4/Presidente_beer_logo.svg/3840px-Presidente_beer_logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 163852
     },
     {
       "beer": "Pub Ale",
@@ -679,7 +639,7 @@
       "domain": "radeberger.de",
       "from": "3840×1821 png",
       "stored": "2048px",
-      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Radeberger_Logo.svg/3840px-Radeberger_Logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/04/Radeberger_Logo.svg/3840px-Radeberger_Logo.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
       "bytes": 214456
     },
     {
@@ -755,12 +715,12 @@
     {
       "beer": "Sol",
       "file": "logos/sol.webp",
-      "source": "google faviconV2",
-      "domain": "solbeer.com",
-      "from": "180×180 png",
-      "stored": "180px",
-      "url": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://solbeer.com&size=256",
-      "bytes": 3138
+      "source": "wikidata P154",
+      "domain": "cervezasol.com",
+      "from": "3840×571 png",
+      "stored": "2048px",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/e/ef/Solana-sol-logo-horizontal-2025.svg/3840px-Solana-sol-logo-horizontal-2025.svg.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 15146
     },
     {
       "beer": "Spaten Oktoberfest Ur-Märzen / Winter",
@@ -775,22 +735,22 @@
     {
       "beer": "Stella Artois",
       "file": "logos/stella-artois.webp",
-      "source": "site header logo",
+      "source": "wikidata P154",
       "domain": "stellaartois.com",
-      "from": "364×74 png",
-      "stored": "364px",
-      "url": "https://cdn.builder.io/api/v1/image/assets%2Fcbbec0a153654c18ad41d632a0f7425d%2F11ec462415ab4384bf0aec2fc15cf186",
-      "bytes": 6490
+      "from": "1839×1310 png",
+      "stored": "1839px",
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/10/Stella_Artois_new_logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail_unscaled",
+      "bytes": 224830
     },
     {
       "beer": "Stiegl Goldbräu",
       "file": "logos/stiegl-goldbrau.webp",
       "source": "site header logo",
       "domain": "stiegl.at",
-      "from": "300×293 png",
+      "from": "300×293 webp",
       "stored": "300px",
-      "url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAElAQMAAABkvE3+AAAAA1BMVEUAAACnej3aAAAAAXRSTlMAQObYZgAAACJJREFUGBntwTEBAAAAwiD7p14JT2AAAAAAAAAAAAAAAD8BLKMAAb0LXnQAAAAASUVORK5CYII=",
-      "bytes": 744
+      "url": "https://www.stiegl.at/wp-content/uploads/2022/04/logo-schatten-2.png.webp",
+      "bytes": 10790
     },
     {
       "beer": "Stone IPA",
@@ -814,13 +774,13 @@
     },
     {
       "beer": "Tennent's",
-      "file": "logos/tennents.svg",
-      "source": "site header logo",
-      "domain": "tennents.co.uk",
-      "from": "360×410 svg",
-      "stored": "vector",
-      "url": "tennents.co.uk (inline svg)",
-      "bytes": 4309
+      "file": "logos/tennents.webp",
+      "source": "site rel=\"apple-touch-icon\"",
+      "domain": "tennents.com",
+      "from": "512×512 png",
+      "stored": "512px",
+      "url": "https://www.tennents.com/icons/icon-512x512.png?v=d48ea34dec27fec024a3aab5db0854b5",
+      "bytes": 8382
     },
     {
       "beer": "Texels Skuumkoppe",
@@ -921,22 +881,57 @@
   ],
   "missing": [
     {
-      "beer": "Pacífico Clara",
+      "beer": "Almaza Pilsener",
       "tried": [
-        "wikidata P154 · Q4570769 is the right brand but has no logo on file",
-        "site /apple-touch-icon.png · drinkpacifico.com · no",
-        "site /apple-touch-icon-precomposed.png · drinkpacifico.com · no",
-        "site /favicon.svg · drinkpacifico.com · no",
-        "site header logo · drinkpacifico.com · no",
-        "google faviconV2 · drinkpacifico.com · no",
-        "icon.horse · drinkpacifico.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · drinkpacifico.com · no"
+        "wikidata P154 · no article, and Commons has no file named for it",
+        "site /apple-touch-icon.png · almaza.com · no",
+        "site /apple-touch-icon-precomposed.png · almaza.com · no",
+        "site /favicon.svg · almaza.com · no",
+        "site header logo · almaza.com · no",
+        "google faviconV2 · almaza.com · no",
+        "icon.horse · almaza.com · 256×256 rejected, a generated lettermark",
+        "duckduckgo · almaza.com · no"
+      ]
+    },
+    {
+      "beer": "Augustiner Helles",
+      "tried": [
+        "wikidata P154 · augustiner-braeu.de · 1920×1187 rejected, a JPEG, which is a photograph and not a mark",
+        "site rel=\"icon\" · augustiner-braeu.de · no",
+        "site header logo · augustiner-braeu.de · 76×126 rejected, an image the browser cannot draw",
+        "google faviconV2 · augustiner-braeu.de · no",
+        "icon.horse · augustiner-braeu.de · no",
+        "duckduckgo · augustiner-braeu.de · no"
+      ]
+    },
+    {
+      "beer": "Bud Light",
+      "tried": [
+        "wikidata P154 · no article, and Commons has no file named for it",
+        "site /apple-touch-icon.png · budlight.com · no",
+        "site /apple-touch-icon-precomposed.png · budlight.com · no",
+        "site /favicon.svg · budlight.com · no",
+        "site header logo · budlight.com · no",
+        "google faviconV2 · budlight.com · 256×256 rejected, a JPEG, which is a photograph and not a mark",
+        "icon.horse · budlight.com · 256×256 rejected, a generated lettermark",
+        "duckduckgo · budlight.com · 512×512 rejected, a JPEG, which is a photograph and not a mark"
+      ]
+    },
+    {
+      "beer": "Mahou Cinco Estrellas",
+      "tried": [
+        "wikidata P154 · the Wikipedia API did not answer",
+        "site rel=\"shortcut icon\" · mahou.es · no",
+        "site header logo · mahou.es · no",
+        "google faviconV2 · mahou.es · no",
+        "icon.horse · mahou.es · no",
+        "duckduckgo · mahou.es · no"
       ]
     },
     {
       "beer": "Modelo Oro",
       "tried": [
-        "wikidata P154 · no article, and Commons has no file named for it",
+        "wikidata P154 · the Wikipedia API did not answer",
         "site rel=\"icon\" · modelousa.com · no",
         "site og:image · modelousa.com · 1962×1098 rejected, not square",
         "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
@@ -948,7 +943,7 @@
     {
       "beer": "Modelo Especial",
       "tried": [
-        "wikidata P154 · no article, and Commons has no file named for it",
+        "wikidata P154 · the Wikipedia API did not answer",
         "site rel=\"icon\" · modelousa.com · no",
         "site og:image · modelousa.com · 1962×1098 rejected, not square",
         "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
@@ -970,27 +965,16 @@
       ]
     },
     {
-      "beer": "Almaza Pilsener",
+      "beer": "Pacífico Clara",
       "tried": [
-        "wikidata P154 · no article, and Commons has no file named for it",
-        "site /apple-touch-icon.png · almaza.com · no",
-        "site /apple-touch-icon-precomposed.png · almaza.com · no",
-        "site /favicon.svg · almaza.com · no",
-        "site header logo · almaza.com · no",
-        "google faviconV2 · almaza.com · no",
-        "icon.horse · almaza.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · almaza.com · no"
-      ]
-    },
-    {
-      "beer": "Mahou Cinco Estrellas",
-      "tried": [
-        "wikidata P154 · no article, and Commons has no file named for it",
-        "site rel=\"shortcut icon\" · mahou.es · no",
-        "site header logo · mahou.es · no",
-        "google faviconV2 · mahou.es · no",
-        "icon.horse · mahou.es · no",
-        "duckduckgo · mahou.es · no"
+        "wikidata P154 · Q4570769 is the right brand but has no logo on file",
+        "site /apple-touch-icon.png · drinkpacifico.com · no",
+        "site /apple-touch-icon-precomposed.png · drinkpacifico.com · no",
+        "site /favicon.svg · drinkpacifico.com · no",
+        "site header logo · drinkpacifico.com · no",
+        "google faviconV2 · drinkpacifico.com · no",
+        "icon.horse · drinkpacifico.com · 256×256 rejected, a generated lettermark",
+        "duckduckgo · drinkpacifico.com · no"
       ]
     },
     {
@@ -1002,14 +986,40 @@
         "site /favicon.svg · affligembeer.be · no",
         "site header logo · affligembeer.be · no",
         "google faviconV2 · affligembeer.be · no",
-        "icon.horse · affligembeer.be · no",
+        "icon.horse · affligembeer.be · 256×256 rejected, a generated lettermark",
         "duckduckgo · affligembeer.be · no"
+      ]
+    },
+    {
+      "beer": "Big Wave Golden Ale",
+      "tried": [
+        "wikidata P154 · no article, and Commons has no file named for it",
+        "site /apple-touch-icon.png · konabrewingco.com · no",
+        "site /apple-touch-icon-precomposed.png · konabrewingco.com · no",
+        "site /favicon.svg · konabrewingco.com · no",
+        "site header logo · konabrewingco.com · no",
+        "google faviconV2 · konabrewingco.com · no",
+        "icon.horse · konabrewingco.com · no",
+        "duckduckgo · konabrewingco.com · no"
+      ]
+    },
+    {
+      "beer": "Mythos",
+      "tried": [
+        "wikidata P154 · mythosbrewery.gr · 3840×2560 rejected, a JPEG, which is a photograph and not a mark",
+        "site /apple-touch-icon.png · mythosbrewery.gr · no",
+        "site /apple-touch-icon-precomposed.png · mythosbrewery.gr · no",
+        "site /favicon.svg · mythosbrewery.gr · no",
+        "site header logo · mythosbrewery.gr · no",
+        "google faviconV2 · mythosbrewery.gr · no",
+        "icon.horse · mythosbrewery.gr · 256×256 rejected, a generated lettermark",
+        "duckduckgo · mythosbrewery.gr · no"
       ]
     },
     {
       "beer": "Smithwick's",
       "tried": [
-        "wikidata P154 · Q21680864 is the right brand but has no logo on file",
+        "wikidata P154 · the Wikipedia API did not answer",
         "site /apple-touch-icon.png · smithwicks.com · no",
         "site /apple-touch-icon-precomposed.png · smithwicks.com · no",
         "site /favicon.svg · smithwicks.com · no",
@@ -1022,7 +1032,7 @@
         "site /favicon.svg · smithwicks.ie · no",
         "site header logo · smithwicks.ie · no",
         "google faviconV2 · smithwicks.ie · no",
-        "icon.horse · smithwicks.ie · no",
+        "icon.horse · smithwicks.ie · 256×256 rejected, a generated lettermark",
         "duckduckgo · smithwicks.ie · no"
       ]
     },
@@ -1042,7 +1052,7 @@
         "site /favicon.svg · newcastlebrownale.com · no",
         "site header logo · newcastlebrownale.com · no",
         "google faviconV2 · newcastlebrownale.com · no",
-        "icon.horse · newcastlebrownale.com · 256×256 rejected, a generated lettermark",
+        "icon.horse · newcastlebrownale.com · no",
         "duckduckgo · newcastlebrownale.com · no"
       ]
     }

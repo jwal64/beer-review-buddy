@@ -340,16 +340,13 @@ const BRAND_DOMAINS = {
 // ════════════════════════════════════════════════════════════
 const BRAND_LOGOS = {
 "Asahi Super Dry":"logos/asahi-super-dry.webp",
-"Augustiner Helles":"logos/augustiner-helles.svg",
 "Beck's":"logos/becks.svg",
 "Belhaven Scottish Stout":"logos/belhaven-scottish-stout.svg",
-"Big Wave Golden Ale":"logos/big-wave-golden-ale.webp",
 "Birra Moretti":"logos/birra-moretti.webp",
 "Bitburger Radler":"logos/bitburger-radler.webp",
 "Bloodline Blood Orange IPA":"logos/bloodline-blood-orange-ipa.webp",
 "Blue Moon":"logos/blue-moon.webp",
 "Brahma":"logos/brahma.webp",
-"Bud Light":"logos/bud-light.webp",
 "Budweiser":"logos/budweiser.webp",
 "Carlsberg":"logos/carlsberg.svg",
 "Carlsberg Elephant":"logos/carlsberg-elephant.svg",
@@ -394,7 +391,6 @@ const BRAND_LOGOS = {
 "Menabrea":"logos/menabrea.webp",
 "Michelob Ultra":"logos/michelob-ultra.webp",
 "Miller Lite":"logos/miller-lite.webp",
-"Mythos":"logos/mythos.webp",
 "Narragansett Lager":"logos/narragansett-lager.webp",
 "Norrlands Guld":"logos/norrlands-guld.svg",
 "Ocean SJU":"logos/ocean-sju.webp",
@@ -403,7 +399,7 @@ const BRAND_LOGOS = {
 "Paulaner Hefe-Weißbier":"logos/paulaner-hefe-weissbier.webp",
 "Peroni Nastro Azzurro":"logos/peroni-nastro-azzurro.webp",
 "Peroni Original":"logos/peroni-original.webp",
-"Pilsner Urquell":"logos/pilsner-urquell.svg",
+"Pilsner Urquell":"logos/pilsner-urquell.webp",
 "Presidente":"logos/presidente.webp",
 "Pub Ale":"logos/pub-ale.svg",
 "Quilmes":"logos/quilmes.webp",
@@ -421,7 +417,7 @@ const BRAND_LOGOS = {
 "Stiegl Goldbräu":"logos/stiegl-goldbrau.webp",
 "Stone IPA":"logos/stone-ipa.webp",
 "Super Bock":"logos/super-bock.svg",
-"Tennent's":"logos/tennents.svg",
+"Tennent's":"logos/tennents.webp",
 "Texels Skuumkoppe":"logos/texels-skuumkoppe.svg",
 "Tiger Beer":"logos/tiger-beer.svg",
 "Tsingtao":"logos/tsingtao.webp",
@@ -432,6 +428,7 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
+
 
 
 
