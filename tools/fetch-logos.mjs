@@ -33,6 +33,13 @@ const args = process.argv.slice(2);
 const FORCE = args.includes('--force');
 const onlyArg = args.indexOf('--only');
 const ONLY = onlyArg >= 0 ? new Set(args[onlyArg + 1].split(',').map(s => s.trim())) : null;
+// For the beers where the brand's own site is the *problem*: cerveceradepr.com
+// is a WordPress site serving the WordPress W, modelousa.com calls a
+// photograph of a man its logo, bitburger.de's touch icon is a picture of a
+// glass. The site is normally the best source and sometimes the worst one, and
+// nothing can tell which from here — so this is a switch, used per beer after
+// looking at the contact sheet.
+const WIKIDATA_FIRST = args.includes('--prefer-wikidata');
 
 const LOGO_DIR = join(ROOT, 'logos');
 const REPORT = join(ROOT, '..', '..', 'logo-fetch-report.json');
@@ -48,7 +55,10 @@ const OUT_PX = 256;
 
 const UA = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36';
 
-async function get(url, { timeout = 20000, accept = 'image/*,*/*' } = {}) {
+// 8 seconds, not 20. A hundred beers times a dozen candidates times a handful
+// of domains is a lot of waiting for sources that are simply not there, and a
+// logo server that needs longer than this is not one to depend on anyway.
+async function get(url, { timeout = 8000, accept = 'image/*,*/*' } = {}) {
   const ac = new AbortController();
   const t = setTimeout(() => ac.abort(), timeout);
   try {
@@ -118,15 +128,22 @@ async function siteCandidates(domain) {
 // The SVG is serialised with its computed fill and stroke written onto every
 // node, because the colours usually live in a stylesheet that is not coming
 // with it, and a wordmark that arrives black renders as a black square.
+// page.evaluate has no timeout of its own: on a site that keeps the main
+// thread busy it waits forever, and one such site would hang the whole run.
+// Everything that touches a page goes through this.
+const withTimeout = (p, ms, label) => Promise.race([
+  p, new Promise((_, rej) => setTimeout(() => rej(new Error(`${label} timed out`)), ms)),
+]);
+
 const headerCache = new Map();
 async function headerLogo(domain, page) {
   if (headerCache.has(domain)) return headerCache.get(domain);
   let out = null;
   for (const base of [`https://${domain}/`, `https://www.${domain}/`]) {
     try {
-      await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 25000 });
+      await page.goto(base, { waitUntil: 'domcontentloaded', timeout: 15000 });
       await page.waitForTimeout(1200);
-      out = await page.evaluate(() => {
+      out = await withTimeout(page.evaluate(() => {
         const LOGOISH = /logo|brand|wordmark|marque/i;
         const label = el => [el.id, el.getAttribute('class') || '', el.getAttribute('alt') || '',
           el.getAttribute('aria-label') || '', el.getAttribute('src') || ''].join(' ');
@@ -171,7 +188,7 @@ async function headerLogo(domain, page) {
         }
         cands.sort((a, b) => b.score - a.score);
         return cands[0] ?? null;
-      });
+      }), 15000, `reading ${base}`);
     } catch { out = null; }
     if (out) break;
   }
@@ -260,19 +277,29 @@ async function wikidataLogo(beerName, domains) {
   let out = null;
   try {
     const search = await api('https://en.wikipedia.org/w/api.php?action=query&format=json&list=search' +
-      `&srsearch=${encodeURIComponent(beerName + ' beer')}&srlimit=6`);
+      `&srsearch=${encodeURIComponent(beerName + ' beer')}&srlimit=4`);
     const titles = (search?.query?.search ?? []).map(r => r.title);
     if (titles.length) {
       const props = await api('https://en.wikipedia.org/w/api.php?action=query&format=json&prop=pageprops' +
         `&titles=${encodeURIComponent(titles.join('|'))}`);
       const ids = Object.values(props?.query?.pages ?? {})
         .map(p => p.pageprops?.wikibase_item).filter(Boolean);
+      const norm = t => String(t).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, ' ').trim();
       for (const id of ids) {
-        const ent = await api(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=${id}&props=claims`);
+        const ent = await api(`https://www.wikidata.org/w/api.php?action=wbgetentities&format=json&ids=${id}&props=claims|labels&languages=en`);
         const claims = ent?.entities?.[id]?.claims;
         const site = claims?.P856?.map(c => c.mainsnak?.datavalue?.value).filter(Boolean) ?? [];
         const hosts = site.map(u => { try { return registrable(new URL(u).host); } catch { return ''; } });
-        if (!hosts.some(h => domains.some(d => h === registrable(d)))) continue;
+        // The domain is the strong match. A label match is the weak one, and
+        // it has to be the whole name either way round — "Modelo Especial"
+        // against the item called Modelo Especial, never "Sol" against
+        // anything in the world that happens to be called Sol.
+        const label = norm(ent?.entities?.[id]?.labels?.en?.value ?? '');
+        const beer = norm(beerName);
+        const byDomain = hosts.some(h => domains.some(d => h === registrable(d)));
+        const byLabel = label.length > 3 && (label === beer || beer.startsWith(label + ' ') || label.startsWith(beer + ' '));
+        if (!byDomain && !byLabel) continue;
         const file = claims?.P154?.[0]?.mainsnak?.datavalue?.value;
         if (!file) continue;
         const info = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +
@@ -288,13 +315,14 @@ async function wikidataLogo(beerName, domains) {
 
 async function tiersFor(domain, page) {
   const site = await siteCandidates(domain);
-  return [
+  const wikidata = { why: 'wikidata', items: [{ wikidata: true, why: 'wikidata P154' }] };
+  const rest = [
     { why: 'site icon', items: site.filter(s => !s.last) },
     { why: 'header',    items: [{ header: true, why: 'site header logo' }] },
     { why: 'service',   items: AGGREGATORS.map(a => ({ url: a.url(domain), why: a.why, reject: a.reject })) },
-    { why: 'wikidata',  items: [{ wikidata: true, why: 'wikidata P154' }] },
     { why: 'og',        items: site.filter(s => s.last), squareOnly: true },
   ];
+  return WIKIDATA_FIRST ? [wikidata, ...rest] : [...rest.slice(0, 3), wikidata, rest[3]];
 }
 
 export async function findLogo(name, domains, page) {

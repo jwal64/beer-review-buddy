@@ -3,10 +3,10 @@
 // line, so "does every beer actually resolve a logo" stops being a question
 // somebody has to remember to answer by hand in a console.
 //
-// `npm run check` can only see whether a beer has a BRAND_DOMAINS entry at all.
-// Whether there is a real logo behind that domain is a question only a browser
-// that can reach Brandfetch, Google and Icon Horse can answer, which is what
-// this does.
+// `npm run check` sees whether a beer has a BRAND_DOMAINS entry and whether the
+// logo file named in BRAND_LOGOS is on disk. Whether that file — or, for a beer
+// that has none, the domain behind it — actually renders is a question only a
+// browser can answer, which is what this does.
 //
 //     npm install && npx playwright install chromium
 //     npm run logos
@@ -16,11 +16,11 @@
 //      below; pass --strict to make that a failure instead)
 //   1  at least one beer showed the placeholder or resolved at favicon size
 //
-// Offline or behind a proxy that blocks those CDNs, every beer "fails" for a
-// reason that has nothing to do with the data. So before auditing anything the
-// run probes a handful of domains that certainly have logos, and if none of
-// them answer it reports the network and stops rather than printing a hundred
-// false positives.
+// Offline or behind a proxy that blocks those CDNs, a beer that falls through
+// to the remote tiers "fails" for a reason that has nothing to do with the
+// data. So before auditing anything the run probes a handful of domains that
+// certainly have logos, and if none of them answer it reports the network and
+// stops rather than printing a hundred false positives.
 import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { join, extname, normalize } from 'node:path';
@@ -62,6 +62,8 @@ await page.waitForFunction(() => typeof auditLogos === 'function', null, { timeo
 // ── Is the network even there? ────────────────────────────────
 // Three brands large enough that all three services know them. If not one of
 // the nine requests answers, the problem is the connection, not the data.
+// (With a committed file for every beer this rarely decides anything — but a
+// run that could not reach the fallbacks still must not read as all-clear.)
 const reachable = await page.evaluate(() => {
   const tryOne = url => new Promise(res => {
     const img = new Image();
@@ -77,7 +79,7 @@ const reachable = await page.evaluate(() => {
 });
 
 if (!reachable) {
-  const msg = 'the logo CDNs (Brandfetch, Google, Icon Horse) are unreachable from here — ' +
+  const msg = 'the logo CDNs (Google, Icon Horse, DuckDuckGo) are unreachable from here — ' +
     'nothing was audited. Run this somewhere with open internet.';
   await browser.close(); server.close();
   if (STRICT) { console.error(`\nLogo audit could not run: ${msg}\n`); process.exit(1); }
@@ -110,8 +112,8 @@ if (JSON_OUT) {
     for (const r of suspect) console.log(`  ? ${r.beer} — ${r.size}, ${r.domains}`);
   }
   if (!bad.length && !suspect.length) console.log('\nEvery beer resolved a real logo.\n');
-  else console.log('\nFix these in BRAND_DOMAINS in data.js, or save the logo into logos/ and\n' +
-    'point the beer\'s `logo` field at it (CLAUDE.md, "Verifying Logos").\n');
+  else console.log('\nEvery beer should have a committed file in logos/ — run `npm run fetch-logos`,\n' +
+    'then `npm run logo-sheet` and look at what came back (CLAUDE.md, "Logos").\n');
 }
 
 process.exit(bad.length || suspect.length ? 1 : 0);

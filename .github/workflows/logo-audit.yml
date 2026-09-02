@@ -20,6 +20,7 @@ permissions:
 jobs:
   audit:
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,17 +35,47 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
-      # The eight whose own sites answer nothing to a datacentre IP, and whose
-      # stale files have been deleted so the fetch picks them up: they need the
-      # Wikidata tier, which identifies the brand by the domain already
-      # recorded for it rather than by guessing at a Wikipedia article.
-      - name: Fetch the logos that are still missing
-        run: node tools/fetch-logos.mjs
+      # Two whose domain was simply wrong: ichnusa.com is not the beer's site
+      # (birraichnusa.it is), and solbeer.com answered with a blue arrow that
+      # is nobody's lager.
+      - name: Re-fetch the two with corrected domains
+        run: node tools/fetch-logos.mjs --force --only "Ichnusa Anima Sarda,Sol"
+
+      # The rest fall into two groups that want the same treatment. Some have
+      # sites that answer nothing at all to a datacentre IP; the others have
+      # sites that answer with the wrong thing — the WordPress W, a photograph
+      # of a man holding a bottle, a picture of a full glass. Either way the
+      # encyclopaedia's logo beats the site's, so it goes first for these.
+      - name: Fetch the rest from Wikidata first
+        run: |
+          node tools/fetch-logos.mjs --force --prefer-wikidata --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
+          Affligem Tripel
+          Almaza Pilsener
+          Augustiner Helles
+          Bitburger Radler
+          Estrella Jalisco
+          Magna
+          Mahou Cinco Estrellas
+          Modelo Especial
+          Modelo Oro
+          Mythos
+          Negra Modelo
+          Newcastle Brown Ale
+          Pacífico Clara
+          Pub Ale
+          Singha
+          Smithwick's
+          Super Bock
+          Tuborg
+          EOF
+          )"
 
       - name: Commit what it found
+        if: always()
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add public/stats/logos public/stats/data.js logo-fetch-report.json
-          git commit -m "Re-fetch the logos that came back as a letter or a photograph" || echo "nothing to commit"
+          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
+          git commit -m "Fetch the remaining logos from each brand's encyclopaedia entry"
           git push origin HEAD:${{ github.ref_name }}
