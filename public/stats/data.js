@@ -394,6 +394,7 @@ const BRAND_LOGOS = {
 "Menabrea":"logos/menabrea.webp",
 "Michelob Ultra":"logos/michelob-ultra.webp",
 "Miller Lite":"logos/miller-lite.webp",
+"Mythos":"logos/mythos.webp",
 "Narragansett Lager":"logos/narragansett-lager.webp",
 "Norrlands Guld":"logos/norrlands-guld.svg",
 "Ocean SJU":"logos/ocean-sju.webp",
@@ -413,6 +414,7 @@ const BRAND_LOGOS = {
 "Sam Adams Boston Lager":"logos/sam-adams-boston-lager.svg",
 "Samuel Adams Summer Ale":"logos/samuel-adams-summer-ale.svg",
 "Sapporo Premium":"logos/sapporo-premium.webp",
+"Singha":"logos/singha.webp",
 "Sol":"logos/sol.webp",
 "Spaten Oktoberfest Ur-Märzen / Winter":"logos/spaten-oktoberfest-ur-marzen-winter.webp",
 "Stella Artois":"logos/stella-artois.webp",
@@ -430,6 +432,7 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
+
 
 
 

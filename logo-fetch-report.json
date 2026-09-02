@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-02T15:38:31.551Z",
+  "at": "2026-09-02T15:44:38.045Z",
   "total": 101,
   "fetched": [
     {
@@ -543,24 +543,14 @@
       "bytes": 14778
     },
     {
-      "beer": "Modelo Especial",
-      "file": "logos/modelo-especial.webp",
-      "source": "site header logo",
-      "domain": "modelousa.com",
-      "from": "330×413 jpg",
-      "stored": "413px",
-      "url": "https://www.modelousa.com/cdn/shop/files/97898_EWH_009_08.jpg?crop=bottom&v=1786717067&width=330",
-      "bytes": 33400
-    },
-    {
-      "beer": "Modelo Oro",
-      "file": "logos/modelo-oro.webp",
-      "source": "site header logo",
-      "domain": "modelousa.com",
-      "from": "330×413 jpg",
-      "stored": "413px",
-      "url": "https://www.modelousa.com/cdn/shop/files/97898_EWH_009_08.jpg?crop=bottom&v=1786717067&width=330",
-      "bytes": 33400
+      "beer": "Mythos",
+      "file": "logos/mythos.webp",
+      "source": "wikidata P154",
+      "domain": "mythosbrewery.gr",
+      "from": "3840×2560 jpg",
+      "stored": "2048px",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/3e/Full_Glass_of_Mythos_Beer_with_Logo_%2848721071253%29.jpg/3840px-Full_Glass_of_Mythos_Beer_with_Logo_%2848721071253%29.jpg?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 364864
     },
     {
       "beer": "Narragansett Lager",
@@ -571,16 +561,6 @@
       "stored": "150px",
       "url": "https://www.narragansettbeer.com/cdn/shop/files/logo.png?v=1665639282&width=150",
       "bytes": 6078
-    },
-    {
-      "beer": "Negra Modelo",
-      "file": "logos/negra-modelo.webp",
-      "source": "site header logo",
-      "domain": "modelousa.com",
-      "from": "330×413 jpg",
-      "stored": "413px",
-      "url": "https://www.modelousa.com/cdn/shop/files/97898_EWH_009_08.jpg?crop=bottom&v=1786717067&width=330",
-      "bytes": 33400
     },
     {
       "beer": "Norrlands Guld",
@@ -761,6 +741,16 @@
       "stored": "240px",
       "url": "https://www.sapporobeer.com/sites/default/files/logo-header.png",
       "bytes": 6894
+    },
+    {
+      "beer": "Singha",
+      "file": "logos/singha.webp",
+      "source": "wikidata P154",
+      "domain": "singhabeer.com",
+      "from": "3840×3840 png",
+      "stored": "2048px",
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/0/08/Singha_Beer_Logo.png/3840px-Singha_Beer_Logo.png?utm_source=commons.wikimedia.org&utm_campaign=index&utm_content=thumbnail",
+      "bytes": 201388
     },
     {
       "beer": "Sol",
@@ -944,22 +934,9 @@
       ]
     },
     {
-      "beer": "Singha",
+      "beer": "Modelo Oro",
       "tried": [
-        "wikidata P154 · Q2140520 is the right brand but has no logo on file",
-        "site /apple-touch-icon.png · singhabeer.com · no",
-        "site /apple-touch-icon-precomposed.png · singhabeer.com · no",
-        "site /favicon.svg · singhabeer.com · no",
-        "site header logo · singhabeer.com · no",
-        "google faviconV2 · singhabeer.com · no",
-        "icon.horse · singhabeer.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · singhabeer.com · no"
-      ]
-    },
-    {
-      "beer": "Negra Modelo",
-      "tried": [
-        "wikidata P154 · no article was this brand",
+        "wikidata P154 · no article, and Commons has no file named for it",
         "site rel=\"icon\" · modelousa.com · no",
         "site og:image · modelousa.com · 1962×1098 rejected, not square",
         "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
@@ -971,7 +948,19 @@
     {
       "beer": "Modelo Especial",
       "tried": [
-        "wikidata P154 · no article was this brand",
+        "wikidata P154 · no article, and Commons has no file named for it",
+        "site rel=\"icon\" · modelousa.com · no",
+        "site og:image · modelousa.com · 1962×1098 rejected, not square",
+        "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
+        "google faviconV2 · modelousa.com · no",
+        "icon.horse · modelousa.com · no",
+        "duckduckgo · modelousa.com · no"
+      ]
+    },
+    {
+      "beer": "Negra Modelo",
+      "tried": [
+        "wikidata P154 · no article, and Commons has no file named for it",
         "site rel=\"icon\" · modelousa.com · no",
         "site og:image · modelousa.com · 1962×1098 rejected, not square",
         "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
@@ -983,7 +972,7 @@
     {
       "beer": "Almaza Pilsener",
       "tried": [
-        "wikidata P154 · no article was this brand",
+        "wikidata P154 · no article, and Commons has no file named for it",
         "site /apple-touch-icon.png · almaza.com · no",
         "site /apple-touch-icon-precomposed.png · almaza.com · no",
         "site /favicon.svg · almaza.com · no",
@@ -994,21 +983,9 @@
       ]
     },
     {
-      "beer": "Modelo Oro",
-      "tried": [
-        "wikidata P154 · no article was this brand",
-        "site rel=\"icon\" · modelousa.com · no",
-        "site og:image · modelousa.com · 1962×1098 rejected, not square",
-        "site header logo · modelousa.com · 330×413 rejected, a JPEG, which is a photograph and not a mark",
-        "google faviconV2 · modelousa.com · no",
-        "icon.horse · modelousa.com · no",
-        "duckduckgo · modelousa.com · no"
-      ]
-    },
-    {
       "beer": "Mahou Cinco Estrellas",
       "tried": [
-        "wikidata P154 · no article was this brand",
+        "wikidata P154 · no article, and Commons has no file named for it",
         "site rel=\"shortcut icon\" · mahou.es · no",
         "site header logo · mahou.es · no",
         "google faviconV2 · mahou.es · no",
@@ -1017,22 +994,9 @@
       ]
     },
     {
-      "beer": "Mythos",
-      "tried": [
-        "wikidata P154 · Q1637028 is the right brand but has no logo on file",
-        "site /apple-touch-icon.png · mythosbrewery.gr · no",
-        "site /apple-touch-icon-precomposed.png · mythosbrewery.gr · no",
-        "site /favicon.svg · mythosbrewery.gr · no",
-        "site header logo · mythosbrewery.gr · no",
-        "google faviconV2 · mythosbrewery.gr · no",
-        "icon.horse · mythosbrewery.gr · 256×256 rejected, a generated lettermark",
-        "duckduckgo · mythosbrewery.gr · no"
-      ]
-    },
-    {
       "beer": "Affligem Tripel",
       "tried": [
-        "wikidata P154 · no article was this brand",
+        "wikidata P154 · no article, and Commons has no file named for it",
         "site /apple-touch-icon.png · affligembeer.be · no",
         "site /apple-touch-icon-precomposed.png · affligembeer.be · no",
         "site /favicon.svg · affligembeer.be · no",
@@ -1071,14 +1035,14 @@
         "site /favicon.svg · newcastlebrown.com · no",
         "site header logo · newcastlebrown.com · no",
         "google faviconV2 · newcastlebrown.com · no",
-        "icon.horse · newcastlebrown.com · no",
+        "icon.horse · newcastlebrown.com · 256×256 rejected, a generated lettermark",
         "duckduckgo · newcastlebrown.com · no",
         "site /apple-touch-icon.png · newcastlebrownale.com · no",
         "site /apple-touch-icon-precomposed.png · newcastlebrownale.com · no",
         "site /favicon.svg · newcastlebrownale.com · no",
         "site header logo · newcastlebrownale.com · no",
         "google faviconV2 · newcastlebrownale.com · no",
-        "icon.horse · newcastlebrownale.com · no",
+        "icon.horse · newcastlebrownale.com · 256×256 rejected, a generated lettermark",
         "duckduckgo · newcastlebrownale.com · no"
       ]
     }
