@@ -34,6 +34,10 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
+      - name: TEMP probe logo sources
+        continue-on-error: true
+        run: node tools/probe-logo-sources.mjs
+
       - name: Audit every logo
         id: audit
         run: |
