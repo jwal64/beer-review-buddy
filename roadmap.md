@@ -20,6 +20,12 @@
       instant offline snapshot — one repo, hosted by Lovable
 - [x] The add-a-beer-via-Claude flow: edit `data.js`, `npm run migration`,
       merge — Lovable applies the migration (SOP in CLAUDE.md)
+- [x] Hold every beer's logo in the repo rather than fetching it from a stranger
+      on every render: 101 files in `public/stats/logos/`, named by a `logo`
+      column on `brand_domains`, fetched by `npm run fetch-logos` from each
+      brand's own site and checked by `npm run check`. Brandfetch had begun
+      refusing the public client ID both surfaces embedded, and 97 of 101 beers
+      had been quietly rendering a grey globe
 - [ ] Archive jwal64/JWAL-BEER-REVIEW and turn off its GitHub Pages once the
       Lovable URL serves `/stats` (user action)
 - [ ] Editing screens for the shortlist, brand domains and Untappd averages —

@@ -72,8 +72,13 @@ export function toRows(D) {
       logo: b.logo ?? null,
     })),
 
+    // One row per beer name, carrying both halves of where its logo comes
+    // from: the file committed for the brand, and the domains to fall back to
+    // when there isn't one. Keyed by name rather than by review, so a beer
+    // drunk six times and a beer only on the shortlist are the same one entry.
     brand_domains: Object.entries(D.BRAND_DOMAINS).map(([beer_name, v]) => ({
       beer_name, domains: Array.isArray(v) ? v : [v],
+      logo: D.BRAND_LOGOS?.[beer_name] ?? null,
     })),
 
     want_to_try: D.WANT_TO_TRY.map((e, i) => ({
@@ -154,10 +159,11 @@ export function fromRows(rows) {
     lat: num(l.lat), lng: num(l.lng),
   }));
 
-  const BRAND_DOMAINS = {};
+  const BRAND_DOMAINS = {}, BRAND_LOGOS = {};
   for (const d of rows.brand_domains ?? []) {
     const list = (d.domains ?? []).filter(Boolean);
     if (list.length) BRAND_DOMAINS[d.beer_name] = list.length === 1 ? list[0] : list;
+    if (d.logo) BRAND_LOGOS[d.beer_name] = d.logo;
   }
 
   const UNTAPPD_GLOBAL_AVGS = {};
@@ -172,7 +178,7 @@ export function fromRows(rows) {
   const meta = Object.fromEntries((rows.app_meta ?? []).map(m => [m.key, m.value]));
 
   return {
-    FLAGS, CNAMES, beers, drunkLocs, breweries, BRAND_DOMAINS,
+    FLAGS, CNAMES, beers, drunkLocs, breweries, BRAND_DOMAINS, BRAND_LOGOS,
     UNTAPPD_GLOBAL_AVGS, WANT_TO_TRY,
     UNTAPPD_LAST_REFRESHED: meta.untappd_last_refreshed ?? '',
     UNTAPPD_REFRESH_INTERVAL_DAYS: Number(meta.untappd_refresh_interval_days ?? 14),

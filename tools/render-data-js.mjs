@@ -138,6 +138,22 @@ export function renderDataJs(D) {
     push(`${q(name)}:${Array.isArray(v) ? `[${v.map(q).join(',')}]` : q(v)},`);
   push('};', '');
 
+  // ── Brand logos
+  push(
+    rule,
+    "// BRAND LOGOS — the committed file each beer's logo is drawn from",
+    rule,
+    '// A path under public/stats/, one per beer name, fetched once by',
+    '// `npm run fetch-logos` and held in the repo. This is where a logo comes',
+    '// from: the same picture on every render, working offline, and nobody',
+    "// else's to withdraw. The domains above are the fallback for a beer that",
+    '// has no file yet.',
+    rule,
+    'const BRAND_LOGOS = {',
+  );
+  for (const [name, v] of Object.entries(D.BRAND_LOGOS ?? {})) push(`${q(name)}:${q(v)},`);
+  push('};', '');
+
   // ── Untappd consensus
   push(
     rule,

@@ -132,7 +132,7 @@ const sql = [
     update: ['location', 'country', 'cc', 'lang', 'native_name', 'lat', 'lng'],
   }),
   seedBeers(rows.beers),
-  upsert('brand_domains', rows.brand_domains, { update: ['domains'] }),
+  upsert('brand_domains', rows.brand_domains, { update: ['domains', 'logo'] }),
   upsert('want_to_try', rows.want_to_try, {
     update: ['style', 'origin', 'abv', 'region', 'untappd', 'method', 'aka', 'seq'],
   }),

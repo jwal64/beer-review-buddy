@@ -1,0 +1,78 @@
+name: Fetch logos
+
+# Fetches a logo for every beer that has no file yet, and commits it.
+#
+# `npm run fetch-logos` needs open internet and a browser, which a laptop has
+# and a sandboxed agent session generally does not — the logo services are the
+# first thing an egress policy blocks. This is the way to run it anyway.
+#
+# It is deliberately not scheduled. A beer that has a logo does not need a new
+# one, and re-fetching on a timer would let a brand's redesign, or a bad answer
+# from a source, quietly replace a logo somebody had already looked at. Run it
+# when `npm run check` says a beer has no file.
+
+on:
+  workflow_dispatch:
+    inputs:
+      only:
+        description: 'Comma-separated beer names to re-fetch (blank = everything missing)'
+        required: false
+        default: ''
+      force:
+        description: 'Re-fetch beers that already have a file'
+        type: boolean
+        required: false
+        default: false
+
+permissions:
+  contents: write
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright and Chromium
+        run: |
+          npm install
+          npx playwright install --with-deps chromium
+
+      - name: Fetch
+        run: |
+          ARGS=""
+          [ "${{ inputs.force }}" = "true" ] && ARGS="$ARGS --force"
+          [ -n "${{ inputs.only }}" ] && ARGS="$ARGS --only ${{ inputs.only }}"
+          node tools/fetch-logos.mjs $ARGS
+
+      # The data has to name the files or nothing reads them, and the check
+      # that every beer has one is the point of the whole exercise. A run that
+      # leaves data.js failing its own rules should not be committed.
+      - name: Check the data still passes
+        run: npm run check
+
+      - name: Commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/stats/logos public/stats/data.js logo-fetch-report.json
+          git diff --cached --quiet && { echo "Nothing to commit — every beer already had a logo."; exit 0; }
+          git commit -m "Fetch logos for beers that had none"
+          git push origin HEAD:${{ github.ref_name }}
+
+      # Whatever came back still has to be looked at: nothing here can tell a
+      # brand's mark from a photograph of a bottle. The sheet is an artifact
+      # rather than a commit — it goes stale the moment a logo changes.
+      - name: Render the contact sheet
+        run: npm run logo-sheet
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: logo-sheet
+          path: logo-sheet.png

@@ -11,27 +11,35 @@
 // added here carries its logo to both.
 //
 // The source chain is the stats site's, tier for tier:
-//   local logos/ override → Brandfetch CDN → Google favicons → Icon Horse → monogram
+//   committed logos/ file → Google favicons → Icon Horse → DuckDuckGo → monogram
 // Tiered by SOURCE, not by domain: every domain a beer lists is tried at each
-// tier before dropping to the next, because a real Brandfetch logo for a
-// beer's second domain beats a 16px favicon for its first.
+// tier before dropping to the next, because a real logo for a beer's second
+// domain beats a 16px favicon for its first.
+//
+// Brandfetch used to lead the chain and no longer appears in it: it answers
+// 403 to the public client ID both surfaces embedded, for every domain and
+// every URL shape, so it resolved nothing for anybody while looking like a
+// working tier. The committed file took its place — a logo we hold cannot be
+// withdrawn by the service that was lending it.
 import type { BreweryRow } from "@/lib/beer-data";
 
 export type DomainMap = Map<string, string[]>;
+/** Beer name → the logo file committed for that brand, under the static site. */
+export type LogoMap = Map<string, string>;
 
-// Brandfetch's public dev client ID — the same one the stats site embeds.
-const BRANDFETCH_CLIENT_ID = "1idIddY24o2pZE9n2hu";
-
-const brandfetch = (domain: string) =>
-  `https://cdn.brandfetch.io/${domain}/w/1024/h/1024?c=${BRANDFETCH_CLIENT_ID}`;
-const favicon = (domain: string) => `https://www.google.com/s2/favicons?domain=${domain}&sz=512`;
+// 256 because that is a size Google serves. Asked for one it does not serve
+// (512, as this was) it answers its 16px default rather than failing, which
+// reads as a resolved logo and renders as a grey globe.
+const favicon = (domain: string) =>
+  `https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://${domain}&size=256`;
 const iconHorse = (domain: string) => `https://icon.horse/icon/${domain}`;
+const duckduckgo = (domain: string) => `https://icons.duckduckgo.com/ip3/${domain}.ico`;
 
 /** Google's favicon service answers a generic globe for domains it doesn't
  * know — at 16px, whatever size was asked for. A "loaded" image from that
  * tier at favicon size is a miss, not a hit, and the chain should move on. */
 export function isSuspectFavicon(url: string, naturalWidth: number) {
-  return url.includes("google.com/s2") && naturalWidth > 0 && naturalWidth <= 32;
+  return url.includes("gstatic.com/faviconV2") && naturalWidth > 0 && naturalWidth <= 32;
 }
 
 /** A beer's `logo` column as a URL. `logos/<file>` names a file that lives in
@@ -50,14 +58,14 @@ export function beerLogoSources(
   const sources: string[] = [];
   if (localLogo) sources.push(localLogoUrl(localLogo));
   const doms = domains?.get(beerName) ?? [];
-  for (const d of doms) sources.push(brandfetch(d));
   for (const d of doms) sources.push(favicon(d));
   for (const d of doms) sources.push(iconHorse(d));
+  for (const d of doms) sources.push(duckduckgo(d));
   return sources;
 }
 
 /** The single best-guess logo URL for a beer — for places that can't walk the
- * chain. Prefers the local override, then the first domain's favicon (the
+ * chain. Prefers the committed file, then the first domain's favicon (the
  * tier that essentially never 404s). */
 export function beerLogo(beerName: string, domains?: DomainMap, localLogo?: string | null) {
   if (localLogo) return localLogoUrl(localLogo);
@@ -75,9 +83,10 @@ export function breweryLogo(
   name: string,
   beers?: { name: string; brewery: string | null; logo?: string | null }[],
   domains?: DomainMap,
+  logos?: LogoMap,
 ) {
   const mine = beers?.find((b) => b.brewery === name);
-  return mine ? beerLogo(mine.name, domains, mine.logo) : null;
+  return mine ? beerLogo(mine.name, domains, mine.logo ?? logos?.get(mine.name)) : null;
 }
 
 /** Breweries that have no beer with a known domain — nothing to draw for them. */
@@ -85,6 +94,7 @@ export function breweriesWithoutLogos(
   breweries: BreweryRow[],
   beers: { name: string; brewery: string | null }[],
   domains: DomainMap,
+  logos?: LogoMap,
 ) {
-  return breweries.filter((br) => !breweryLogo(br.name, beers, domains));
+  return breweries.filter((br) => !breweryLogo(br.name, beers, domains, logos));
 }
