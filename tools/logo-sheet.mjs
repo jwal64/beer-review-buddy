@@ -25,7 +25,14 @@ const LOGO_DIR = join(ROOT, 'logos');
 const MIME = { '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp',
                '.jpg': 'image/jpeg', '.gif': 'image/gif', '.ico': 'image/x-icon' };
 
-const files = readdirSync(LOGO_DIR).filter(f => MIME[f.slice(f.lastIndexOf('.'))]).sort();
+// Optional filter: `npm run logo-sheet -- orion sol wrench` draws only those,
+// which is what you want when you are arguing with six of them and not a
+// hundred.
+const only = process.argv.slice(2).filter(a => !a.startsWith('--') && process.argv[process.argv.indexOf(a) - 1] !== '--out');
+const files = readdirSync(LOGO_DIR)
+  .filter(f => MIME[f.slice(f.lastIndexOf('.'))])
+  .filter(f => !only.length || only.some(o => f.startsWith(o)))
+  .sort();
 const tiles = files.map(f => {
   const ext = f.slice(f.lastIndexOf('.'));
   const buf = readFileSync(join(LOGO_DIR, f));
