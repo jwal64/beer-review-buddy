@@ -16,6 +16,7 @@ import {
   type CountryRow,
 } from "@/lib/beer-data";
 import { beerLogo, breweryLogo, type DomainMap, type LogoMap } from "@/lib/logos";
+import { placeLabel } from "@/lib/place";
 import { ClientOnly } from "@tanstack/react-router";
 // Bundled with the app — the map's layout breaks entirely without this
 // stylesheet, so it must not depend on a third-party CDN being up.
@@ -58,7 +59,10 @@ function MapPage() {
   const { data: domains } = useBrandDomains();
   const { data: logos } = useBrandLogos();
   const loading = beers.isLoading || breweries.isLoading || locations.isLoading;
-  const [filter, setFilter] = useState<{ kind: string; label: string } | null>(null);
+  // `label` is what a beer row is matched against; `title` is what the reader
+  // sees. They differ for a city — the heading names the place in full ("Leuven,
+  // Flemish Brabant, Belgium") while the rows are still matched on the city.
+  const [filter, setFilter] = useState<{ kind: string; label: string; title: string } | null>(null);
   const [mode, setMode] = useState<MapMode>("drank");
 
   const setModeAndClear = (m: MapMode) => {
@@ -171,7 +175,7 @@ function MapPage() {
           {filter && (
             <section className="mt-5">
               <div className="mb-3 flex items-center justify-between">
-                <h2 className="font-display text-lg font-semibold">{filter.label}</h2>
+                <h2 className="font-display text-lg font-semibold">{filter.title}</h2>
                 <button
                   onClick={() => setFilter(null)}
                   className="text-xs font-medium text-primary"
@@ -233,21 +237,28 @@ function logoCell(beer: Beer, domains: DomainMap | undefined, logos: LogoMap | u
   return `<span class="bm-pop-logo"><span>${esc(beer.name.charAt(0))}</span>${img}</span>`;
 }
 
-/** One line per pour: logo, name, where it is from, what it is, what it got. */
+/** One line per pour: logo, name, where it is from, what it is, what it got.
+ *  A city pin also names each beer's brewery — the answer to "what is this
+ *  dot" is the beer, the place and who made it. A brewery pin doesn't: it is
+ *  already the brewery, and repeating its name on every row says nothing. */
 function beerRows(
   list: Beer[],
   domains: DomainMap | undefined,
   logos: LogoMap | undefined,
   countries: CountryRow[],
+  withBrewery = false,
 ) {
   if (!list.length) return "";
   return `<div class="bm-pop-list">${list
     .map((b) => {
       const meta = [b.style, b.method].filter(Boolean).join(" · ");
+      const brewery =
+        withBrewery && b.brewery ? `<div class="bm-pop-meta">${esc(b.brewery)}</div>` : "";
       return `<div class="bm-pop-row">
           ${logoCell(b, domains, logos)}
           <div style="min-width:0">
             <div class="bm-pop-name">${esc(b.name)}</div>
+            ${brewery}
             <div class="bm-pop-meta">${flagEmoji(b.origin_cc, countries)} ${esc(meta)}</div>
           </div>
           <div class="bm-pop-rating">${esc(rating2(b.rating))}</div>
@@ -264,14 +275,12 @@ function cityPopup(
   logos: LogoMap | undefined,
   countries: CountryRow[],
 ) {
-  // "Antwerp, Antwerp" — several cities share their region's name, and saying
-  // it twice reads like a mistake.
-  const where = [loc.city, loc.region === loc.city ? null : loc.region].filter(Boolean).join(", ");
+  // City, region and country on one line, the way every other surface writes
+  // a place — the country used to sit on a line of its own here.
   return `<div class="bm-pop">
-      <div class="bm-pop-title">${flagEmoji(loc.cc, countries)} ${esc(where)}</div>
-      <div class="bm-pop-sub">${esc(loc.country)}</div>
+      <div class="bm-pop-title">${flagEmoji(loc.cc, countries)} ${esc(placeLabel(loc))}</div>
       <div class="bm-pop-sub">${esc(tally(poured, "here"))}</div>
-      ${beerRows(poured, domains, logos, countries)}
+      ${beerRows(poured, domains, logos, countries, true)}
     </div>`;
 }
 
@@ -290,7 +299,9 @@ function breweryPopup(
   return `<div class="bm-pop">
       <div class="bm-pop-title">${mark}<span>${flagEmoji(brewery.cc, countries)} ${esc(brewery.name)}</span></div>
       <div class="bm-pop-sub">${esc(
-        [brewery.location, brewery.country].filter(Boolean).join(" · "),
+        // A brewery's `location` is already "City, Region", so the country
+        // completes the same City, Region, Country reading.
+        [brewery.location, brewery.country].filter(Boolean).join(", "),
       )}</div>
       <div class="bm-pop-sub">${esc(tally(made, "yet"))}</div>
       ${beerRows(made, domains, logos, countries)}
@@ -316,7 +327,7 @@ function LeafletMap({
   domains: DomainMap | undefined;
   logos: LogoMap | undefined;
   countries: CountryRow[];
-  onPick: (f: { kind: string; label: string }) => void;
+  onPick: (f: { kind: string; label: string; title: string }) => void;
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const mapRef = useRef<import("leaflet").Map | null>(null);
@@ -410,7 +421,9 @@ function LeafletMap({
             ),
             { maxWidth: 260, minWidth: 208 },
           );
-          marker.on("click", () => pickRef.current({ kind: "brewery", label: b.name }));
+          marker.on("click", () =>
+            pickRef.current({ kind: "brewery", label: b.name, title: b.name }),
+          );
         });
     } else {
       locations
@@ -427,7 +440,9 @@ function LeafletMap({
             ),
             { maxWidth: 260, minWidth: 208 },
           );
-          marker.on("click", () => pickRef.current({ kind: "city", label: l.city }));
+          marker.on("click", () =>
+            pickRef.current({ kind: "city", label: l.city, title: placeLabel(l) }),
+          );
         });
     }
   }, [ready, mode, breweries, locations, beers, domains, logos, countries]);

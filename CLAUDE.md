@@ -367,6 +367,30 @@ verifies the download against the integrity npm published for that version. A
 wrong hash means the browser refuses the file and the charts or the map simply
 never appear — so never hand-write one.
 
+## Location Rule: City, Region, Country
+
+A place is written one way everywhere: **City, State/Region, Country** —
+"New Rochelle, New York, United States". Not "City, Country" in one place and
+"City, Region" with the country on its own line in the next.
+
+Both surfaces have a helper, and neither one should be inlined again:
+
+| Surface | Helper |
+|---------|--------|
+| the app | `placeLabel(row)` in `src/lib/place.ts` — plain text; the caller adds the flag |
+| the stats site | `placeLabel(city, region, country, cc, opts)` in `app.js` — returns escaped HTML with the flag in front of the country |
+
+Both drop a part the row doesn't have rather than leaving a dangling comma, and
+both say a region only once when it repeats its city ("Antwerp, Antwerp"). The
+stats-site helper takes two options: `flag:false` where a flag would be noise,
+and `lead:false` for the two places that have already printed the city in bold
+above — the city is still passed there, because it is what tells the region it
+would be a repeat.
+
+Table **columns** are the exception, and stay split: the beers table's City,
+Region and Country columns already read as the format across the row, and
+folding them into one cell would only make the neighbouring column a repeat.
+
 ## Location Rule: Canonical / Most-Unique Location
 
 When the **same beer** (same `beer` name) has been reviewed in **more than one
