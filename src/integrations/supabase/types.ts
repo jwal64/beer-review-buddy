@@ -106,16 +106,19 @@ export type Database = {
           beer_name: string
           created_at: string
           domains: string[]
+          logo: string | null
         }
         Insert: {
           beer_name: string
           created_at?: string
           domains: string[]
+          logo?: string | null
         }
         Update: {
           beer_name?: string
           created_at?: string
           domains?: string[]
+          logo?: string | null
         }
         Relationships: []
       }
