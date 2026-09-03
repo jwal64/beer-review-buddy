@@ -4,6 +4,7 @@ import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
 import { averageRating, flagEmoji, formatMonth, useBeers, useCountries } from "@/lib/beer-data";
+import { placeLabel } from "@/lib/place";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
 
@@ -111,7 +112,7 @@ function HomePage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{b.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {b.city} · {formatMonth(b.drank_on)}
+                      {placeLabel(b)} · {formatMonth(b.drank_on)}
                     </p>
                   </div>
                   <Rating value={Number(b.rating)} showValue={false} />

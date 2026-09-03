@@ -114,18 +114,31 @@ function brandDomainsQuery() {
   };
 }
 
+// These two live at module scope, and that is load-bearing rather than tidy.
+// React Query memoises a select's result on the select function's *identity*
+// (`options.select === this.#selectFn`), so an inline arrow — a new function
+// on every render — rebuilds the Map every render and hands back an object
+// nothing can compare equal. The map page depends on that identity: its pins
+// are redrawn when the data behind them changes, and a Map that is "new" on
+// every render made every click redraw the pins and close the popup the click
+// had just opened. Declared once, the Map is rebuilt only when the rows are.
+const selectBrandDomains = (rows: BrandDomainRow[]) => {
+  const map = new Map<string, string[]>();
+  for (const row of rows) map.set(row.beer_name, row.domains);
+  return map;
+};
+
+const selectBrandLogos = (rows: BrandDomainRow[]) => {
+  const map = new Map<string, string>();
+  for (const row of rows) if (row.logo) map.set(row.beer_name, row.logo);
+  return map;
+};
+
 // Beer name → the domains its logo is looked up from. A beer with no row here
 // renders a placeholder forever, in this app and on the site both, so the form
 // asks for one when a beer has none.
 export function useBrandDomains() {
-  return useQuery({
-    ...brandDomainsQuery(),
-    select: (rows: BrandDomainRow[]) => {
-      const map = new Map<string, string[]>();
-      for (const row of rows) map.set(row.beer_name, row.domains);
-      return map;
-    },
-  });
+  return useQuery({ ...brandDomainsQuery(), select: selectBrandDomains });
 }
 
 // Beer name → the logo file committed for that brand, under the static site's
@@ -133,14 +146,7 @@ export function useBrandDomains() {
 // every render, it works offline, and no third party can withdraw it. The
 // domains are what happens when a beer has no file yet.
 export function useBrandLogos() {
-  return useQuery({
-    ...brandDomainsQuery(),
-    select: (rows: BrandDomainRow[]) => {
-      const map = new Map<string, string>();
-      for (const row of rows) if (row.logo) map.set(row.beer_name, row.logo);
-      return map;
-    },
-  });
+  return useQuery({ ...brandDomainsQuery(), select: selectBrandLogos });
 }
 
 // The standing shortlist of beers not yet drunk. Nothing is ever deleted from
