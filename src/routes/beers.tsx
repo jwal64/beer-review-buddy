@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
+import { QueryError } from "@/components/QueryError";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -48,9 +49,6 @@ type SortKey = keyof typeof SORTS;
 
 function BeersPage() {
   const { data: beers, isLoading, isError, refetch } = useBeers();
-  // The flags come from this table, not from arithmetic on the letters: the UK
-  // is split into GB-ENG, GB-SCT, GB-WLS and GB-NIR, and no letter pair makes
-  // those. Without it an English or Scottish beer rendered a globe.
   const { data: countries } = useCountries();
   const { isSignedIn } = useSession();
   const [query, setQuery] = useState("");
@@ -80,59 +78,77 @@ function BeersPage() {
       .sort(SORTS[sort]);
   }, [beers, query, style, sort]);
 
-
   return (
-    <Shell title="All beers" subtitle={`${filtered.length} reviews`}>
+    <Shell title="All beers" subtitle={`${filtered.length} of ${beers?.length ?? 0} reviews`}>
       <div className="space-y-4">
         <div className="relative">
           <Search
             size={16}
+            aria-hidden="true"
             className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search beer, brewery or city"
+            aria-label="Search beers"
             className="h-11 rounded-xl pl-9"
           />
         </div>
 
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1">
+        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" role="group" aria-label="Filter by style">
           {styles.map((s) => (
-            <button
+            <Button
               key={s}
+              type="button"
+              variant={s === style ? "default" : "secondary"}
+              aria-pressed={s === style}
               onClick={() => setStyle(s)}
-              className={`shrink-0 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                s === style
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-card text-muted-foreground"
-              }`}
+              className="h-auto shrink-0 rounded-full px-3 py-1.5 text-xs"
             >
               {s}
-            </button>
+            </Button>
           ))}
         </div>
 
+        <div className="flex items-center justify-between gap-3">
+          <p className="text-xs text-muted-foreground" aria-live="polite">
+            {filtered.length} {filtered.length === 1 ? "result" : "results"}
+          </p>
+          <label className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span>Sort</span>
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value as SortKey)}
+              aria-label="Sort beers"
+              className="h-9 rounded-lg border border-input bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+            >
+              {Object.keys(SORTS).map((key) => (
+                <option key={key}>{key}</option>
+              ))}
+            </select>
+          </label>
+        </div>
+
         {isLoading ? (
-          <div className="space-y-2">
+          <div className="space-y-2" aria-label="Loading beers">
             {[...Array(8)].map((_, i) => (
               <Skeleton key={i} className="h-20 w-full rounded-2xl" />
             ))}
           </div>
-        ) : (
+        ) : isError ? (
+          <QueryError what="beers" onRetry={() => void refetch()} />
+        ) : filtered.length ? (
           <ul className="space-y-2">
             {filtered.map((b) => (
               <li key={b.id}>
                 <button
+                  type="button"
                   onClick={() => setSelected(b)}
-                  className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:bg-secondary"
+                  className="flex min-h-20 w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <BeerLogo name={b.name} logo={b.logo} className="h-12 w-12" />
+                  <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-12 w-12" />
                   <div className="min-w-0 flex-1">
-                    {/* A div, not a p: Badge renders a div, and a div inside a
-                        p is invalid HTML — the parser closes the p early, so
-                        the server's markup and the client's tree disagree and
-                        hydration errors on every row carrying the badge. */}
                     <div className="flex items-center gap-2 truncate text-sm font-semibold">
                       {b.name}
                       {b.is_new && <Badge className="h-4 px-1.5 text-[10px] uppercase">New</Badge>}
@@ -141,17 +157,20 @@ function BeersPage() {
                       {flagEmoji(b.origin_cc, countries)} {b.style}
                       {b.abv != null && ` · ${b.abv}%`} · {b.method}
                     </p>
-                    <Rating value={Number(b.rating)} className="mt-1" />
+                    <div className="mt-1 flex items-center gap-2">
+                      <Rating value={Number(b.rating)} />
+                      <span className="text-[11px] text-muted-foreground">{formatMonth(b.drank_on)}</span>
+                    </div>
                   </div>
                 </button>
               </li>
             ))}
-            {!filtered.length && (
-              <p className="py-10 text-center text-sm text-muted-foreground">
-                No beers match that search.
-              </p>
-            )}
           </ul>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-border px-5 py-10 text-center">
+            <p className="text-sm font-medium">No beers found</p>
+            <p className="mt-1 text-xs text-muted-foreground">Try a different search or style.</p>
+          </div>
         )}
       </div>
 
@@ -160,7 +179,7 @@ function BeersPage() {
           {selected && (
             <>
               <SheetHeader className="flex-row items-center gap-3 space-y-0 text-left">
-                <BeerLogo name={selected.name} logo={selected.logo} className="h-14 w-14" />
+                <BeerLogo name={selected.name} logo={selected.logo} style={selected.style} className="h-14 w-14" />
                 <div>
                   <SheetTitle className="font-display">{selected.name}</SheetTitle>
                   <SheetDescription>{selected.brewery ?? "Unknown brewery"}</SheetDescription>
@@ -178,7 +197,7 @@ function BeersPage() {
                       setFormOpen(true);
                     }}
                   >
-                    <Pencil size={14} className="mr-1.5" />
+                    <Pencil size={14} />
                     Edit this beer
                   </Button>
                 )}
@@ -195,16 +214,11 @@ function BeersPage() {
                         "—"
                       }`,
                     ],
-                    [
-                      "Drunk in",
-                      [selected.city, selected.country].filter(Boolean).join(", ") || "—",
-                    ],
+                    ["Drunk in", [selected.city, selected.country].filter(Boolean).join(", ") || "—"],
                     ["When", formatMonth(selected.drank_on)],
                   ].map(([k, v]) => (
                     <div key={k} className="rounded-xl border border-border bg-card p-3">
-                      <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                        {k}
-                      </dt>
+                      <dt className="text-[11px] text-muted-foreground">{k}</dt>
                       <dd className="mt-0.5 font-medium">{v}</dd>
                     </div>
                   ))}
@@ -216,16 +230,18 @@ function BeersPage() {
       </Sheet>
 
       {isSignedIn && (
-        <button
+        <Button
+          type="button"
           onClick={() => {
             setEditingBeer(null);
             setFormOpen(true);
           }}
           aria-label="Add a beer"
-          className="fixed bottom-24 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
+          size="icon"
+          className="fixed bottom-24 right-5 z-50 h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
         >
           <Plus size={26} />
-        </button>
+        </Button>
       )}
 
       <BeerForm
