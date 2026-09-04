@@ -31,3 +31,8 @@
       Lovable URL serves `/stats` (user action)
 - [ ] Editing screens for the shortlist, brand domains and Untappd averages —
       still edited via Claude or the table editor for now
+- [ ] Do not revert the map pop-outs or the canonical/most-unique location
+      standardization — both are intentional and must be preserved in every
+      future pass
+- [ ] Replace the nine drawn-approximation logos with the brands' official
+      artwork where one is publicly available
