@@ -98,10 +98,14 @@ function MapPage() {
     <Shell title="Beer map" subtitle="Where it was brewed, where it was drunk.">
       {loading ? (
         <Skeleton className="h-[420px] w-full rounded-2xl" />
+      ) : failed.length ? (
+        <QueryError what="map data" onRetry={retry} />
       ) : (
         <>
-          <div className="mb-3 flex gap-2">
+          <div className="mb-3 flex gap-2" role="group" aria-label="Map mode">
             <button
+              type="button"
+              aria-pressed={mode === "drank"}
               onClick={() => setModeAndClear("drank")}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 mode === "drank"
@@ -112,6 +116,8 @@ function MapPage() {
               Where I drank it
             </button>
             <button
+              type="button"
+              aria-pressed={mode === "brewed"}
               onClick={() => setModeAndClear("brewed")}
               className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
                 mode === "brewed"
