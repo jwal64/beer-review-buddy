@@ -390,6 +390,8 @@ function LeafletMap({
     if (!L || !layer) return;
     layer.clearLayers();
 
+    // CSS variables, not hex: a theme change retints the pins with the rest
+    // of the app instead of leaving them the old accent.
     const dot = (color: string) =>
       L.divIcon({
         className: "",
@@ -398,8 +400,8 @@ function LeafletMap({
         iconAnchor: [7, 7],
       });
 
-    const breweryIcon = dot("#3b82f6");
-    const cityIcon = dot("#6fb3e0");
+    const breweryIcon = dot("var(--color-primary)");
+    const cityIcon = dot("var(--color-chart-3)");
 
     // Only the active toggle's markers go on the map — never both sets at
     // once, so a brewery pin is never mistaken for a place it was drunk.
