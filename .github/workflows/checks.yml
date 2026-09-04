@@ -46,5 +46,10 @@ jobs:
       - name: Check bun.lock is in step with package.json
         run: node tools/check-lockfile.mjs
 
+      # Two features have been reverted twice by a pass that never meant to
+      # touch them. This fails on the push that drops them, not weeks later.
+      - name: Check the standing features are still in place
+        run: node tools/check-invariants.mjs
+
       - name: Syntax-check the site scripts
         run: node --check public/stats/data.js && node --check public/stats/app.js && node --check public/stats/live-data.js

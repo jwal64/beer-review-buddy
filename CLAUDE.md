@@ -61,6 +61,36 @@ and looking exactly like a session that needed no dependencies, because the
 `npm run fetch-logos` ever reports a missing module, check `node_modules` exists
 before believing anything else.
 
+### Features that must survive every pass
+
+Two features have now been reverted twice by a Lovable editing pass that never
+set out to touch them, so they are written down here, guarded by a check, and
+repeated for Lovable in `AGENTS.md`:
+
+1. **The map pop-out stays open** — the two module-scope selects in
+   `src/lib/beer-data.ts` ("Map Rule: The Pop-out Stays Open" below).
+2. **One location format everywhere** — `placeLabel` in `src/lib/place.ts` and
+   in `public/stats/app.js` ("Location Rule: City, Region, Country" below).
+
+`node tools/check-invariants.mjs` fails when either one goes missing, and
+`npm run check` runs it, so CI turns red on the push that drops them rather
+than a person noticing weeks later.
+
+**How they were lost, both times.** Not by anyone deleting them. Lovable's
+editing pass branched from a commit *older* than the merge that added them, and
+its merge back into `main` resolved every file it had touched in favour of its
+own copy — so `src/lib/place.ts` was deleted, the hoisted selects were folded
+back inline, and the CLAUDE.md section describing both was dropped, all inside
+a merge commit called "Hardened map & insights" whose stated subject was
+something else entirely. The same pass also deleted an already-applied
+migration file, `supabase/migrations/20260903121905_drop_redundant_logo_constraint.sql`.
+
+**So the rule for any pass, Lovable's or a Claude session's, is:** start from
+the current `main`, and when a merge asks which side of a file to keep, keep
+the side that has these features rather than the side your branch was cut
+from. A change you did not intend to make is not yours to resolve — if you did
+not mean to remove `placeLabel`, don't.
+
 ### Git rules (Lovable)
 
 **Never rewrite pushed history** — no force-push, rebase, amend or squash of
@@ -366,6 +396,55 @@ npm run sri -- --write
 verifies the download against the integrity npm published for that version. A
 wrong hash means the browser refuses the file and the charts or the map simply
 never appear — so never hand-write one.
+
+## Location Rule: City, Region, Country
+
+A place is written one way everywhere: **City, State/Region, Country** —
+"New Rochelle, New York, United States". Not "City, Country" in one place and
+"City, Region" with the country on its own line in the next.
+
+Both surfaces have a helper, and neither one should be inlined again:
+
+| Surface | Helper |
+|---------|--------|
+| the app | `placeLabel(row)` in `src/lib/place.ts` — plain text; the caller adds the flag |
+| the stats site | `placeLabel(city, region, country, cc, opts)` in `app.js` — returns escaped HTML with the flag in front of the country |
+
+Both drop a part the row doesn't have rather than leaving a dangling comma, and
+both say a region only once when it repeats its city ("Antwerp, Antwerp"). The
+stats-site helper takes two options: `flag:false` where a flag would be noise,
+and `lead:false` for the two places that have already printed the city in bold
+above — the city is still passed there, because it is what tells the region it
+would be a repeat.
+
+Table **columns** are the exception, and stay split: the beers table's City,
+Region and Country columns already read as the format across the row, and
+folding them into one cell would only make the neighbouring column a repeat.
+
+## Map Rule: The Pop-out Stays Open
+
+Clicking a dot on the app's map opens its popup and it **stays open**. That is
+not free, and the thing that breaks it is subtle enough to be reintroduced by
+anyone tidying `src/lib/beer-data.ts`:
+
+`selectBrandDomains` and `selectBrandLogos` live at **module scope** in
+`src/lib/beer-data.ts`. React Query memoises a `select`'s result on the select
+function's *identity* (`options.select === this.#selectFn`), so an inline arrow
+— a new function on every render — rebuilds the `Map` on every render and hands
+back an object nothing can compare equal. The map page depends on that
+identity: its pins are redrawn when the data behind them changes, so a `Map`
+that is "new" every render makes every click redraw the pins and `clearLayers()`
+takes the popup the click had just opened. **Do not inline those two selects**,
+and do not add a third inline `select` over the same query.
+
+The city popup also names each beer's brewery (`beerRows(..., withBrewery)`) —
+a dot's answer is the beer, the place and who made it. A brewery pin doesn't
+repeat it, being the brewery already. And the map's filter carries a `title`
+next to its `label`: the heading names the place in full ("Leuven, Flemish
+Brabant, Belgium") while the rows are still matched on the bare city.
+
+Both of these are guarded by `node tools/check-invariants.mjs`, which
+`npm run check` runs — see "Features that must survive every pass" below.
 
 ## Location Rule: Canonical / Most-Unique Location
 

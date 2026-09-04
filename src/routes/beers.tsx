@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import { flagEmoji, formatMonth, useBeers, useCountries, type Beer } from "@/lib/beer-data";
 import { Search, Plus, Pencil } from "lucide-react";
+import { placeLabel } from "@/lib/place";
 import { useSession } from "@/lib/use-session";
 import { BeerForm } from "@/components/BeerForm";
 import { Button } from "@/components/ui/button";
@@ -214,7 +215,7 @@ function BeersPage() {
                         "—"
                       }`,
                     ],
-                    ["Drunk in", [selected.city, selected.country].filter(Boolean).join(", ") || "—"],
+                    ["Drunk in", placeLabel(selected) || "—"],
                     ["When", formatMonth(selected.drank_on)],
                   ].map(([k, v]) => (
                     <div key={k} className="rounded-xl border border-border bg-card p-3">

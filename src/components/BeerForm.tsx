@@ -28,6 +28,7 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
+import { placeLabel } from "@/lib/place";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -437,8 +438,7 @@ export function BeerForm({
                 <SelectContent>
                   {locations.map((l) => (
                     <SelectItem key={l.id} value={l.city}>
-                      {l.city}
-                      {l.region ? `, ${l.region}` : ""} · {l.country}
+                      {placeLabel(l)}
                     </SelectItem>
                   ))}
                   <SelectItem value={NEW}>+ Add a new place…</SelectItem>
