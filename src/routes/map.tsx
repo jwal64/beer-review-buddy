@@ -195,7 +195,7 @@ function MapPage() {
                       key={b.id}
                       className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
                     >
-                      <BeerLogo name={b.name} logo={b.logo} className="h-11 w-11" />
+                      <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
                       <div className="min-w-0 flex-1">
                         <p className="truncate text-sm font-semibold">{b.name}</p>
                         <p className="truncate text-xs text-muted-foreground">

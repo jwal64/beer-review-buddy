@@ -480,7 +480,7 @@ function DivergingList({
 // ── The page ──────────────────────────────────────────────────
 
 function InsightsPage() {
-  const { data: beers, isLoading } = useBeers();
+  const { data: beers, isLoading, isError, refetch } = useBeers();
   const { data: countries } = useCountries();
   const { data: breweries } = useBreweries();
   const { data: shortlist } = useWantToTry();
