@@ -406,7 +406,7 @@ const BRAND_LOGOS = {
 "Norrlands Guld":"logos/norrlands-guld.svg",
 "Ocean SJU":"logos/ocean-sju.webp",
 "Orion":"logos/orion.webp",
-"Pacífico Clara":"logos/pacifico-clara.svg",
+"Pacífico Clara":"logos/pacifico-clara.webp",
 "Paulaner Hefe":"logos/paulaner-hefe.webp",
 "Paulaner Hefe-Weißbier":"logos/paulaner-hefe-weissbier.webp",
 "Peroni Nastro Azzurro":"logos/peroni-nastro-azzurro.webp",
