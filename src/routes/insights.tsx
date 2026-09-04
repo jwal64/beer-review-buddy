@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
+import { QueryError } from "@/components/QueryError";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ExternalLink, ChevronRight } from "lucide-react";
@@ -548,11 +549,19 @@ function InsightsPage() {
   if (isLoading) {
     return (
       <Shell title="Insights" subtitle="What the log says about my taste.">
-        <div className="space-y-3">
+        <div className="space-y-3" aria-label="Loading insights">
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-24 w-full rounded-2xl" />
           ))}
         </div>
+      </Shell>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Shell title="Insights" subtitle="What the log says about my taste.">
+        <QueryError what="insights" onRetry={() => void refetch()} />
       </Shell>
     );
   }
