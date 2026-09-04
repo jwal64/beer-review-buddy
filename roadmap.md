@@ -31,8 +31,12 @@
       Lovable URL serves `/stats` (user action)
 - [ ] Editing screens for the shortlist, brand domains and Untappd averages —
       still edited via Claude or the table editor for now
-- [ ] Do not revert the map pop-outs or the canonical/most-unique location
-      standardization — both are intentional and must be preserved in every
-      future pass
+- [x] Stop the map pop-outs and the City, Region, Country location format
+      being reverted: both restored, written down in AGENTS.md for Lovable and
+      in CLAUDE.md under "Features that must survive every pass", and guarded
+      by `node tools/check-invariants.mjs` so CI fails on the push that drops
+      them. (A standing rule rather than a to-do — it lived here as an
+      unchecked box, which reads as work nobody had done yet, and it was
+      reverted again anyway. Prose in a roadmap is not enforcement.)
 - [ ] Replace the nine drawn-approximation logos with the brands' official
       artwork where one is publicly available
