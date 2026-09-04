@@ -26,6 +26,7 @@
       brand's own site and checked by `npm run check`. Brandfetch had begun
       refusing the public client ID both surfaces embedded, and 97 of 101 beers
       had been quietly rendering a grey globe
+- [x] Finish app optimization pass: resilient query errors, sorted beer diary, accessible controls, and verified committed logo rendering
 - [ ] Archive jwal64/JWAL-BEER-REVIEW and turn off its GitHub Pages once the
       Lovable URL serves `/stats` (user action)
 - [ ] Editing screens for the shortlist, brand domains and Untappd averages —

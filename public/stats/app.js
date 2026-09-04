@@ -26,26 +26,6 @@ const esc = v => String(v ?? '')
   .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
   .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 
-// ── How a place is written ────────────────────────────────────
-// One format everywhere, here and in the app: City, State/Region, Country.
-// Every surface used to invent its own — "City, Region · 🏳 Country" on the
-// map, "City, Region" with no country in the highlights, "Region · 🏳 Country"
-// under a city card — so the same place read three ways on one page.
-//
-// Returns HTML, not text: the parts are escaped here (a place name can carry
-// an apostrophe) and the flag rides in front of the country. A region that
-// repeats its city — Antwerp, Antwerp — is said once, and a missing part is
-// dropped rather than left as a dangling comma.
-// `flag:false` drops the country's flag; `lead:false` drops the city itself,
-// for the two places that have already printed it in bold above — the city
-// still has to be passed there, because it is what tells the region it would
-// be a repeat.
-const placeLabel = (city, region, country, cc, {flag = true, lead = true} = {}) => {
-  const c = String(city ?? '').trim(), r = String(region ?? '').trim(), n = String(country ?? '').trim();
-  const nation = n ? `${flag && FLAGS[cc] ? FLAGS[cc] + ' ' : ''}${esc(n)}` : '';
-  return [lead && c ? esc(c) : '', r && r !== c ? esc(r) : '', nation].filter(Boolean).join(', ');
-};
-
 // ══════════════════════════════════════════════════════════════
 // BEER-NAME NORMALISER
 // ══════════════════════════════════════════════════════════════
@@ -751,7 +731,7 @@ document.getElementById('mktPanel').innerHTML=`
   <div class="insight-row"><span class="insight-key">Best style</span><div><div class="insight-val up">${esc(bestStyle.s)}</div><div class="insight-sub">${bestStyle.a.toFixed(2)} avg · ${bestStyle.c} review${bestStyle.c>1?'s':''}</div></div></div>
   <div class="insight-row"><span class="insight-key">Weakest style</span><div><div class="insight-val dn">${esc(worstStyle.s)}</div><div class="insight-sub">${worstStyle.a.toFixed(2)} avg · ${worstStyle.c} review${worstStyle.c>1?'s':''}</div></div></div>
   <div class="insight-row"><span class="insight-key">Top country</span><div><div class="insight-val">${esc(topCountry.l)}</div><div class="insight-sub">${topCountry.a.toFixed(2)} avg · ${topCountry.c} review${topCountry.c>1?'s':''}</div></div></div>
-  <div class="insight-row"><span class="insight-key">Top city</span><div><div class="insight-val">${placeLabel(topCity.city,topCity.region,topCity.country,topCity.cc,{flag:false})}</div><div class="insight-sub">${topCity.a.toFixed(2)} avg · ${topCity.c} review${topCity.c>1?'s':''}</div></div></div>
+  <div class="insight-row"><span class="insight-key">Top city</span><div><div class="insight-val">${esc(topCity.city)}, ${esc(topCity.region)}</div><div class="insight-sub">${topCity.a.toFixed(2)} avg · ${topCity.c} review${topCity.c>1?'s':''}</div></div></div>
   <div class="insight-row"><span class="insight-key">Best method</span><div><div class="insight-val">${bestMethod}</div><div class="insight-sub">${bestMethodAvg.toFixed(2)} avg · ${bestMethodCt} review${bestMethodCt>1?'s':''}</div></div></div>
   <div class="insight-row"><span class="insight-key">Trend</span><div><div class="insight-val ${trendCls}">${trendLabel}</div><div class="insight-sub">5-review rolling average · ${Object.keys(STATS.countryMap).length} countries · ${Object.keys(STATS.cityMap).length} cities</div></div></div>`;
 
@@ -762,7 +742,7 @@ if(recentEl) recentEl.innerHTML=[...beers].slice(-6).reverse().map(b=>`
     ${logoImg(b.beer,20)}
     <div class="feed-main">
       <span class="feed-name">${esc(b.beer)}${isDisplayNew(b)?'<span class="new-tag">New</span>':''}</span>
-      <span class="feed-meta">${esc(b.style)} · ${esc(b.method)} · ${placeLabel(b.city,b.region,b.country,b.cc,{flag:false})} · ${esc(b.month)} ${b.year}</span>
+      <span class="feed-meta">${esc(b.style)} · ${esc(b.method)} · ${esc(b.city)} · ${esc(b.month)} ${b.year}</span>
     </div>
     <span class="rb ${rbC(b.rating)}">${b.rating.toFixed(2)}</span>
   </div>`).join('');
@@ -876,7 +856,7 @@ function renderTable(data){
         <td>${FLAGS[b.origin]||''} ${esc(b.origin)}</td>
         <td style="color:var(--info)">${b.abv.toFixed(1)}%</td>
         <td style="color:var(--text-3)">${esc(b.method)}</td>
-        <td style="color:var(--text-3)">${placeLabel(b.city,b.region,b.country,b.cc)}</td>
+        <td style="color:var(--text-3)">${esc(b.city)}, ${esc(b.region)} · ${FLAGS[b.cc]||''} ${esc(b.country)}</td>
         <td style="color:var(--text-3)">${esc(b.month)} ${b.year}</td>
         <td><span class="rb ${rbC(b.rating)}">${b.rating.toFixed(2)}</span></td>
         <td style="color:var(--accent-hi);font-size:12px">${strs(b.rating)}</td>
@@ -1076,7 +1056,7 @@ function drawCity(){
   });
   document.getElementById('cityCards').innerHTML=cD.map(d=>`
     <div class="mini-row${thin(d.c)?' rank-thin':''}">
-      <div><div style="font-size:13px;color:var(--text);font-weight:600">${esc(d.city)}</div><div style="font-size:12px;color:var(--text-3)">${placeLabel(d.city,d.region,d.country,d.cc,{lead:false})} · ${d.c} review${d.c>1?'s':''}${thin(d.c)?' · unranked':''}</div></div>
+      <div><div style="font-size:13px;color:var(--text);font-weight:600">${esc(d.city)}</div><div style="font-size:12px;color:var(--text-3)">${esc(d.region)} · ${FLAGS[d.cc]||''} ${esc(d.country)} · ${d.c} review${d.c>1?'s':''}${thin(d.c)?' · unranked':''}</div></div>
       <span class="rb ${rbC(d.a)}">${d.a.toFixed(2)}</span>
     </div>`).join('');
 }
@@ -1647,7 +1627,7 @@ function buildDrankLayer(map){
     const home=HOME_CITIES.has(l.city);
     const rows=d.reviews.map(b=>`<div style="display:flex;justify-content:space-between;gap:12px;padding:1px 0;border-bottom:1px solid var(--border)"><span style="color:var(--text-2)">${esc(b.beer)}</span><span style="color:${rC(b.rating)};font-weight:700">${b.rating.toFixed(2)}</span></div>`).join('');
     const html=popKicker('📍 A city where I drank')+
-      `<span style="color:var(--text);font-weight:700;font-size:13px">${esc(l.city)}</span>, ${placeLabel(l.city,l.region,l.country,l.cc,{lead:false})}${home?' · <span style="color:var(--accent-hi)">⌂ Home turf</span>':''}<br>`+
+      `<span style="color:var(--text);font-weight:700;font-size:13px">${esc(l.city)}</span>, ${esc(l.region)}&nbsp;&nbsp;${FLAGS[l.cc]||''} ${esc(l.country)}${home?' · <span style="color:var(--accent-hi)">⌂ Home turf</span>':''}<br>`+
       `<span style="color:var(--text-2);font-size:13px">${d.c} pour${d.c>1?'s':''} here · my average <span style="color:${rC(a)};font-weight:700">${a.toFixed(2)}/5</span></span>`+
       `<div style="margin-top:6px">${rows}</div>`;
     L.circleMarker([l.lat,l.lng],{radius:r,fillColor:THEME.accent,color:home?THEME.accentHi:THEME.bg,weight:home?2:1,opacity:.9,fillOpacity:.8})
@@ -1669,7 +1649,7 @@ function buildBrewedLayer(map){
     const beerList=b.beers.split(' · ').map(n=>`<span style="color:var(--text-2)">${n}</span>`).join('<span style="color:var(--text-3)"> · </span>');
     const html=popKicker('🏭 A brewery’s hometown')+logoHtml+
       `<span style="color:var(--text);font-weight:700;font-size:13px">${esc(b.name)}</span><br>`+
-      `<span style="color:var(--text-2);font-size:13px">brews in ${placeLabel(b.location,'',b.country,b.cc)}</span><br>`+
+      `<span style="color:var(--text-2);font-size:13px">brews in ${esc(b.location)} · ${FLAGS[b.cc]||''} ${esc(b.country)}</span><br>`+
       `<span style="color:var(--text-3);font-size:12px">What I’ve had:</span> <span style="font-size:13px">${beerList}</span><br>`+
       `my average: <span style="color:${rC(a)};font-weight:700">${a.toFixed(2)}/5 · ${rWord(a)}</span> <span style="color:var(--text-3)">(${b.ratings.length} pour${b.ratings.length>1?'s':''})</span>`;
     L.circleMarker([b.lat,b.lng],{radius:r,fillColor:rC(a),color:THEME.bg,weight:1,opacity:.9,fillOpacity:.85})
@@ -2474,7 +2454,7 @@ function drawWantToTry(){
           <div class="cmd-item" data-brewery="${esc(b.name)}" data-action="brewery">
             <span class="cmd-item-icon">🏭</span>
             <span class="cmd-item-main">${esc(b.name)}</span>
-            <span class="cmd-item-meta">${placeLabel(b.location,'',b.country,b.cc)}</span>
+            <span class="cmd-item-meta">${esc(b.location)} · ${FLAGS[b.cc]||''}</span>
           </div>`).join('');
       }
     }

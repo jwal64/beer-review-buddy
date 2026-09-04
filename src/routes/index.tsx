@@ -3,8 +3,8 @@ import { useMemo } from "react";
 import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
+import { QueryError } from "@/components/QueryError";
 import { averageRating, flagEmoji, formatMonth, useBeers, useCountries } from "@/lib/beer-data";
-import { placeLabel } from "@/lib/place";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
 
@@ -27,29 +27,41 @@ export const Route = createFileRoute("/")({
   component: HomePage,
 });
 
-function StatCard({ label, value }: { label: string; value: string }) {
+function StatCard({
+  label,
+  value,
+  to,
+}: {
+  label: string;
+  value: string;
+  to: "/beers" | "/map" | "/insights";
+}) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-4">
+    <Link
+      to={to}
+      aria-label={`${label}: ${value}. Open ${to.slice(1)}`}
+      className="group rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
       <div className="font-display text-2xl font-semibold text-primary">{value}</div>
-      <div className="mt-0.5 text-xs uppercase tracking-wide text-muted-foreground">{label}</div>
-    </div>
+      <div className="mt-0.5 text-xs text-muted-foreground">{label}</div>
+      <ChevronRight size={14} aria-hidden="true" className="mt-2 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+    </Link>
   );
 }
 
 function HomePage() {
-  const { data: beers, isLoading } = useBeers();
-  // Needed for the UK's constituent-country flags — see the note in beers.tsx.
+  const { data: beers, isLoading, isError, refetch } = useBeers();
   const { data: countries } = useCountries();
 
   const stats = useMemo(() => {
     const list = beers ?? [];
-    const countries = new Set(list.map((b) => b.origin_cc).filter(Boolean));
+    const originCountries = new Set(list.map((b) => b.origin_cc).filter(Boolean));
     const top = [...list].sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 3);
     return {
       total: list.length,
       unique: new Set(list.map((b) => b.name)).size,
       avg: averageRating(list),
-      countries: countries.size,
+      countries: originCountries.size,
       recent: list.slice(0, 5),
       top,
     };
@@ -58,61 +70,67 @@ function HomePage() {
   return (
     <Shell title="JWAL's Brew Reviews" subtitle="Every pint, pour and bottle — rated.">
       {isLoading ? (
-        <div className="space-y-3">
+        <div className="space-y-3" aria-label="Loading home">
           {[...Array(6)].map((_, i) => (
             <Skeleton key={i} className="h-20 w-full rounded-2xl" />
           ))}
         </div>
+      ) : isError ? (
+        <QueryError what="reviews" onRetry={() => void refetch()} />
       ) : (
         <div className="space-y-7">
-          <section className="grid grid-cols-2 gap-3">
-            <StatCard label="Reviews" value={String(stats.total)} />
-            <StatCard label="Unique beers" value={String(stats.unique)} />
-            <StatCard label="Avg rating" value={stats.avg.toFixed(2)} />
-            <StatCard label="Countries" value={String(stats.countries)} />
+          <section className="grid grid-cols-2 gap-3" aria-label="Review summary">
+            <StatCard label="Reviews" value={String(stats.total)} to="/beers" />
+            <StatCard label="Unique beers" value={String(stats.unique)} to="/beers" />
+            <StatCard label="Avg rating" value={stats.avg.toFixed(2)} to="/insights" />
+            <StatCard label="Origin countries" value={String(stats.countries)} to="/map" />
           </section>
 
           <section>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold">Highest rated</h2>
+              <Link to="/insights" className="flex min-h-11 items-center text-xs font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                Explore <ChevronRight size={14} aria-hidden="true" />
+              </Link>
             </div>
-            <ul className="space-y-2">
-              {stats.top.map((b) => (
-                <li
-                  key={b.id}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
-                >
-                  <BeerLogo name={b.name} logo={b.logo} className="h-11 w-11" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{b.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {flagEmoji(b.origin_cc, countries)} {b.style}
-                    </p>
-                  </div>
-                  <Rating value={Number(b.rating)} />
-                </li>
-              ))}
-            </ul>
+            {stats.top.length ? (
+              <ul className="space-y-2">
+                {stats.top.map((b) => (
+                  <li key={b.id} className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3">
+                    <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{b.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {flagEmoji(b.origin_cc, countries)} {b.style}
+                      </p>
+                    </div>
+                    <Rating value={Number(b.rating)} />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="rounded-2xl border border-dashed border-border px-5 py-8 text-center text-sm text-muted-foreground">No reviews yet.</p>
+            )}
           </section>
 
           <section>
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-display text-lg font-semibold">Recent pours</h2>
-              <Link to="/beers" className="flex items-center text-xs font-medium text-primary">
-                See all <ChevronRight size={14} />
+              <div>
+                <h2 className="font-display text-lg font-semibold">Recent pours</h2>
+                {stats.recent[0] && <p className="mt-0.5 text-xs text-muted-foreground">Last poured {formatMonth(stats.recent[0].drank_on)}</p>}
+              </div>
+              <Link to="/beers" className="flex min-h-11 items-center text-xs font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+                See all <ChevronRight size={14} aria-hidden="true" />
               </Link>
             </div>
             <ul className="space-y-2">
               {stats.recent.map((b) => (
-                <li
-                  key={b.id}
-                  className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
-                >
-                  <BeerLogo name={b.name} logo={b.logo} className="h-11 w-11" />
+                <li key={b.id} className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3">
+                  <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{b.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {placeLabel(b)} · {formatMonth(b.drank_on)}
+                      {b.city} · {formatMonth(b.drank_on)}
                     </p>
                   </div>
                   <Rating value={Number(b.rating)} showValue={false} />
