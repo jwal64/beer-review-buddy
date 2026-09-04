@@ -58,6 +58,8 @@ function MapPage() {
   const { data: domains } = useBrandDomains();
   const { data: logos } = useBrandLogos();
   const loading = beers.isLoading || breweries.isLoading || locations.isLoading;
+  const failed = [beers, breweries, locations].filter((q) => q.isError);
+  const retry = () => failed.forEach((q) => void q.refetch());
   const [filter, setFilter] = useState<{ kind: string; label: string } | null>(null);
   const [mode, setMode] = useState<MapMode>("drank");
 
