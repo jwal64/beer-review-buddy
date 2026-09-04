@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
+import { QueryError } from "@/components/QueryError";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   useBeers,
