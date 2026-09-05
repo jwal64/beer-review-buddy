@@ -349,7 +349,7 @@ select s.seq,s.name,s.brewery,s.style,s.origin_cc,s.abv,s.method,s.city,s.region
 insert into public.brand_domains (beer_name,domains,logo) values
   ('Affligem Tripel'::text,array['affligembeer.be']::text[],'logos/affligem-tripel.svg'::text),
   ('Almaza Pilsener',array['almaza.com'],'logos/almaza-pilsener.svg'),
-  ('Amstel Light',array['amstellight.com','amstel.com'],'logos/amstel-light.svg'),
+  ('Amstel Light',array['amstellight.com','amstel.com'],'logos/amstel-light.webp'),
   ('Asahi Super Dry',array['asahibeer.com'],'logos/asahi-super-dry.webp'),
   ('Augustiner Helles',array['augustiner-braeu.de'],'logos/augustiner-helles.svg'),
   ('Big Wave Golden Ale',array['konabrewingco.com'],'logos/big-wave-golden-ale.webp'),

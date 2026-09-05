@@ -346,7 +346,7 @@ const BRAND_DOMAINS = {
 const BRAND_LOGOS = {
 "Affligem Tripel":"logos/affligem-tripel.svg",
 "Almaza Pilsener":"logos/almaza-pilsener.svg",
-"Amstel Light":"logos/amstel-light.svg",
+"Amstel Light":"logos/amstel-light.webp",
 "Asahi Super Dry":"logos/asahi-super-dry.webp",
 "Augustiner Helles":"logos/augustiner-helles.svg",
 "Beck's":"logos/becks.svg",
