@@ -271,7 +271,7 @@ async function wikidataLogo(beerName, domains) {
     }
   } catch { out = null; }
   wdCache.set(key, out ?? { why });
-  return out;
+  return out ?? { why };
 }
 
 // The favicon services, in the order they proved useful when probed.

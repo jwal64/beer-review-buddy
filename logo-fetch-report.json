@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-02T14:58:02.497Z",
-  "total": 101,
+  "at": "2026-09-05T05:21:40.692Z",
+  "total": 102,
   "fetched": [
     {
       "beer": "Asahi Super Dry",
@@ -925,125 +925,54 @@
   ],
   "kept": [
     {
+      "beer": "Affligem Tripel",
+      "file": "logos/affligem-tripel.svg"
+    },
+    {
+      "beer": "Almaza Pilsener",
+      "file": "logos/almaza-pilsener.svg"
+    },
+    {
       "beer": "Daura",
       "file": "logos/daura.svg"
+    },
+    {
+      "beer": "Mahou Cinco Estrellas",
+      "file": "logos/mahou-cinco-estrellas.svg"
+    },
+    {
+      "beer": "Mythos",
+      "file": "logos/mythos.svg"
+    },
+    {
+      "beer": "Newcastle Brown Ale",
+      "file": "logos/newcastle-brown-ale.svg"
+    },
+    {
+      "beer": "Pacífico Clara",
+      "file": "logos/pacifico-clara.webp"
+    },
+    {
+      "beer": "Singha",
+      "file": "logos/singha.svg"
+    },
+    {
+      "beer": "Smithwick's",
+      "file": "logos/smithwicks.svg"
     }
   ],
   "missing": [
     {
-      "beer": "Almaza Pilsener",
+      "beer": "Amstel",
       "tried": [
-        "wikidata P154 · almaza.com · no",
-        "site /apple-touch-icon.png · almaza.com · no",
-        "site /apple-touch-icon-precomposed.png · almaza.com · no",
-        "site /favicon.svg · almaza.com · no",
-        "site header logo · almaza.com · no",
-        "google faviconV2 · almaza.com · no",
-        "icon.horse · almaza.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · almaza.com · no"
-      ]
-    },
-    {
-      "beer": "Mahou Cinco Estrellas",
-      "tried": [
-        "wikidata P154 · mahou.es · no",
-        "site rel=\"shortcut icon\" · mahou.es · no",
-        "site header logo · mahou.es · no",
-        "google faviconV2 · mahou.es · no",
-        "icon.horse · mahou.es · no",
-        "duckduckgo · mahou.es · no"
-      ]
-    },
-    {
-      "beer": "Pacífico Clara",
-      "tried": [
-        "wikidata P154 · drinkpacifico.com · no",
-        "site /apple-touch-icon.png · drinkpacifico.com · no",
-        "site /apple-touch-icon-precomposed.png · drinkpacifico.com · no",
-        "site /favicon.svg · drinkpacifico.com · no",
-        "site header logo · drinkpacifico.com · no",
-        "google faviconV2 · drinkpacifico.com · no",
-        "icon.horse · drinkpacifico.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · drinkpacifico.com · no"
-      ]
-    },
-    {
-      "beer": "Affligem Tripel",
-      "tried": [
-        "wikidata P154 · affligembeer.be · no",
-        "site /apple-touch-icon.png · affligembeer.be · no",
-        "site /apple-touch-icon-precomposed.png · affligembeer.be · no",
-        "site /favicon.svg · affligembeer.be · no",
-        "site header logo · affligembeer.be · no",
-        "google faviconV2 · affligembeer.be · no",
-        "icon.horse · affligembeer.be · no",
-        "duckduckgo · affligembeer.be · no"
-      ]
-    },
-    {
-      "beer": "Singha",
-      "tried": [
-        "wikidata P154 · singhabeer.com · no",
-        "site /apple-touch-icon.png · singhabeer.com · no",
-        "site /apple-touch-icon-precomposed.png · singhabeer.com · no",
-        "site /favicon.svg · singhabeer.com · no",
-        "site header logo · singhabeer.com · no",
-        "google faviconV2 · singhabeer.com · no",
-        "icon.horse · singhabeer.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · singhabeer.com · no"
-      ]
-    },
-    {
-      "beer": "Mythos",
-      "tried": [
-        "wikidata P154 · mythosbrewery.gr · no",
-        "site /apple-touch-icon.png · mythosbrewery.gr · no",
-        "site /apple-touch-icon-precomposed.png · mythosbrewery.gr · no",
-        "site /favicon.svg · mythosbrewery.gr · no",
-        "site header logo · mythosbrewery.gr · no",
-        "google faviconV2 · mythosbrewery.gr · no",
-        "icon.horse · mythosbrewery.gr · no",
-        "duckduckgo · mythosbrewery.gr · no"
-      ]
-    },
-    {
-      "beer": "Smithwick's",
-      "tried": [
-        "wikidata P154 · smithwicks.com · no",
-        "site /apple-touch-icon.png · smithwicks.com · no",
-        "site /apple-touch-icon-precomposed.png · smithwicks.com · no",
-        "site /favicon.svg · smithwicks.com · no",
-        "site header logo · smithwicks.com · no",
-        "google faviconV2 · smithwicks.com · no",
-        "icon.horse · smithwicks.com · 256×256 rejected, a generated lettermark",
-        "duckduckgo · smithwicks.com · no",
-        "site /apple-touch-icon.png · smithwicks.ie · no",
-        "site /apple-touch-icon-precomposed.png · smithwicks.ie · no",
-        "site /favicon.svg · smithwicks.ie · no",
-        "site header logo · smithwicks.ie · no",
-        "google faviconV2 · smithwicks.ie · no",
-        "icon.horse · smithwicks.ie · no",
-        "duckduckgo · smithwicks.ie · no"
-      ]
-    },
-    {
-      "beer": "Newcastle Brown Ale",
-      "tried": [
-        "wikidata P154 · newcastlebrown.com · no",
-        "site /apple-touch-icon.png · newcastlebrown.com · no",
-        "site /apple-touch-icon-precomposed.png · newcastlebrown.com · no",
-        "site /favicon.svg · newcastlebrown.com · no",
-        "site header logo · newcastlebrown.com · no",
-        "google faviconV2 · newcastlebrown.com · no",
-        "icon.horse · newcastlebrown.com · no",
-        "duckduckgo · newcastlebrown.com · no",
-        "site /apple-touch-icon.png · newcastlebrownale.com · no",
-        "site /apple-touch-icon-precomposed.png · newcastlebrownale.com · no",
-        "site /favicon.svg · newcastlebrownale.com · no",
-        "site header logo · newcastlebrownale.com · no",
-        "google faviconV2 · newcastlebrownale.com · no",
-        "icon.horse · newcastlebrownale.com · no",
-        "duckduckgo · newcastlebrownale.com · no"
+        "wikidata P154 · the Wikipedia API did not answer",
+        "site /apple-touch-icon.png · amstel.com · no",
+        "site /apple-touch-icon-precomposed.png · amstel.com · no",
+        "site /favicon.svg · amstel.com · no",
+        "site header logo · amstel.com · no",
+        "google faviconV2 · amstel.com · no",
+        "icon.horse · amstel.com · no",
+        "duckduckgo · amstel.com · no"
       ]
     }
   ]
