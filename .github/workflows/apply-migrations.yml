@@ -1,0 +1,99 @@
+name: Apply migrations
+
+# Carries a new file in supabase/migrations/ into the database.
+#
+# This is the step that was missing. `npm run migration` writes the SQL and a
+# merge to main publishes the file, but nothing in this repository ever ran it
+# — the database only changed when Lovable happened to apply it. So a beer
+# added the documented way appeared on the stats page (which paints from the
+# committed data.js snapshot) and nowhere else: the app reads Supabase, and
+# Supabase had never been told.
+#
+# It runs here for the same reason `npm run fetch-logos` does: a runner has
+# the open internet a sandboxed agent session does not. An agent session
+# cannot reach supabase.co at all — the egress policy blocks it — so an agent
+# can write the migration but never apply it. This closes that loop.
+#
+# The migrations are written to be safe on replay (see CLAUDE.md), and the CLI
+# skips whatever the migration history already records, so a re-run is a
+# no-op rather than a risk.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'supabase/migrations/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Two merges in quick succession must not race each other into the same
+# migration history. Queue the second rather than cancelling it — a skipped
+# migration is a database that quietly disagrees with the file.
+concurrency:
+  group: apply-migrations
+  cancel-in-progress: false
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # The connection string is the one credential this repository needs and
+      # the only one it does not hold: it lives as a GitHub encrypted secret,
+      # never as a value in the tree. Without it this job says so and stops
+      # green, so main is not red for everyone who has not set it yet.
+      - name: Check the secret is set
+        id: secret
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ]; then
+            echo "set=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Migrations not applied"
+              echo
+              echo 'The `SUPABASE_DB_URL` secret is not set, so this run had nothing to connect to.'
+              echo
+              echo 'Add it under Settings → Secrets and variables → Actions, using the'
+              echo '**direct** connection string from Supabase → Project Settings → Database'
+              echo '(`postgresql://postgres:<password>@db.<ref>.supabase.co:5432/postgres`).'
+              echo 'Re-run this workflow afterwards and the pending migrations go in.'
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "set=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: supabase/setup-cli@v1
+        if: steps.secret.outputs.set == 'true'
+        with:
+          version: latest
+
+      - name: Push pending migrations
+        if: steps.secret.outputs.set == 'true'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: supabase db push --db-url "$SUPABASE_DB_URL"
+
+      # What the run is actually for is a row in a table, so say whether there
+      # is one. A green tick on a push that changed nothing is the failure
+      # this whole workflow exists to stop happening quietly.
+      - name: Report what the database now holds
+        if: steps.secret.outputs.set == 'true'
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          {
+            echo "### Database after this run"
+            echo
+            echo '| Reviews | Latest |'
+            echo '|---|---|'
+            psql "$SUPABASE_DB_URL" -At -F '|' -c \
+              "select (select count(*) from public.beers),
+                      (select string_agg(name || ' (' || city || ', ' || drank_on || ')', ', ')
+                         from (select name, city, drank_on from public.beers
+                                order by drank_on desc, seq desc limit 3) t)" \
+              | sed 's/^/| /; s/$/ |/'
+          } >> "$GITHUB_STEP_SUMMARY"

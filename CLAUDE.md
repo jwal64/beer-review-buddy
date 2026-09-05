@@ -44,9 +44,33 @@ follows the same loop, and the loop is what makes it land on Lovable:
    npm run smoke          # if public/stats/ changed (needs a browser)
    ```
 
-4. **Merge to `main`.** That is the publish button: Lovable syncs the commit,
-   applies any new file in `supabase/migrations/`, and redeploys. A branch that
-   is only pushed exists on GitHub and nowhere else.
+4. **Merge to `main`.** That is the publish button: Lovable syncs the commit
+   and redeploys, and the **Apply migrations** workflow carries any new file in
+   `supabase/migrations/` into the database. A branch that is only pushed
+   exists on GitHub and nowhere else.
+
+### The database is applied by a workflow, not by hope
+
+`.github/workflows/apply-migrations.yml` runs `supabase db push` on every push
+to `main` that touches `supabase/migrations/`, and on demand from the Actions
+tab. It needs one repository secret, `SUPABASE_DB_URL` — the **direct**
+connection string from Supabase → Project Settings → Database. Without it the
+job says so in its summary and stops green, so `main` is never red over a
+secret somebody has not set.
+
+This exists because the loop used to have a hole in it, and the hole was
+invisible from inside the repository. `npm run migration` writes the SQL and
+the merge publishes the file, but nothing here ever *ran* it — the database
+changed only if Lovable got around to applying it. A beer added the documented
+way therefore appeared on the stats page, which paints from the committed
+`data.js` snapshot, and nowhere else: the app reads Supabase, and Supabase had
+never been told. Every check in this repository passed the whole time, because
+every one of them was only ever asked whether the *file* was right.
+
+An agent session cannot close this itself: the egress policy blocks
+`supabase.co` outright, so a session can write a migration and never apply one.
+That is the same reason `npm run fetch-logos` runs in a workflow. A runner has
+the open internet a sandboxed session does not.
 
 A remote Claude session gets its dependencies automatically — the
 `SessionStart` hook in `.claude/hooks/session-start.sh` runs `npm install` when
@@ -132,9 +156,16 @@ only.
   hand-write one). `live-data.js` and `supabase-rows.mjs` are the only module
   code, and `supabase-rows.mjs` is shared with the node tools — a change to
   what a column means happens there and nowhere else.
-- **Secrets stay out.** The only key in the tree is Supabase's publishable
-  key, which is public by design. The service-role key never appears in code,
-  migrations, or workflows.
+- **Secrets stay out of the tree.** The only key in the tree is Supabase's
+  publishable key, which is public by design. No privileged credential is ever
+  written into code, migrations, or a workflow file. The one privileged
+  credential this project uses — `SUPABASE_DB_URL`, which the **Apply
+  migrations** workflow connects with — lives as a GitHub encrypted secret and
+  reaches the runner as `${{ secrets.SUPABASE_DB_URL }}`. A reference is not
+  the value: nothing in the repository, and nothing in a workflow's logs,
+  discloses it. Note that the publishable key is genuinely read-only here —
+  the base migration grants `anon` nothing but `select` — so it cannot stand
+  in for this.
 
 ## Standard Operating Procedure: Adding a Beer
 
@@ -282,9 +313,18 @@ npm run migration   # writes supabase/migrations/<stamp>_sync_beer_log.sql
 
 `npm run migration` runs the check itself and refuses to generate from a file
 that fails it. Commit **both** the edited `data.js` and the new migration in
-one commit, and merge to `main` — Lovable applies the migration to the
-database and redeploys. The stats page shows the beer twice over: the snapshot
-already carries it, and the live hydration confirms it against the database.
+one commit, and merge to `main` — the **Apply migrations** workflow puts the
+review in the database and Lovable redeploys. The stats page shows the beer
+twice over: the snapshot already carries it, and the live hydration confirms it
+against the database.
+
+**The app is the surface that proves it landed.** The stats page paints from
+the committed snapshot, so it shows a new beer whether or not the database ever
+heard about it — it cannot tell you the migration ran. Home, Beers and Map read
+Supabase and nothing else, so they can. If a beer shows on `/stats` and not in
+the app, the migration has not been applied: check the **Apply migrations** run
+for that merge, which prints the review count and the three most recent rows in
+its summary.
 
 The generated SQL is the whole file written as add-and-update statements: on a
 match the file wins, a row only the database knows is left alone, nothing
