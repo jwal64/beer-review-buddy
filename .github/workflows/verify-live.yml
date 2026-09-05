@@ -1,0 +1,169 @@
+name: Verify live data
+
+# Does the database actually hold what data.js says it holds?
+#
+# Adding a beer ends with a merge to main, and then with Lovable applying the
+# new file in supabase/migrations/. That last step is not ours and nothing in
+# this repo can force it. When it silently does not happen, the result is not
+# an error anybody sees — public/stats/live-data.js replaces the committed
+# snapshot with the database's version on load, so the new beer appears for a
+# moment and then vanishes, and the app (which reads Supabase and nothing
+# else) never shows it at all. It reads exactly like the edit was never made.
+#
+# So this asks, on every push to main and once a day after: is the database in
+# step with the file? If it is not, it opens an issue saying which rows are
+# missing and which migration to paste into the Supabase SQL editor to fix it
+# in a minute. It closes the issue itself once the answer comes back clean.
+#
+# It only ever reads, with the publishable key that is already in the tree and
+# in every browser. No secret is needed here, and none should be added.
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    # Daily. A push tells you about the beer you just added; this tells you
+    # about the database that changed under you afterwards.
+    - cron: '0 8 * * *'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+# A later push to main supersedes an earlier one — the second run checks the
+# same database against newer data, so finishing the first proves nothing.
+concurrency:
+  group: verify-live
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Lovable applies a migration some minutes after the merge, so a push to
+      # main is given time to come true before it is called a failure. Nothing
+      # else starts that clock, so nothing else waits.
+      - name: Compare the database against data.js
+        id: verify
+        run: |
+          if [ "${{ github.ref_name }}" = "main" ] && [ "${{ github.event_name }}" = "push" ]; then
+            WAIT=1200
+          else
+            WAIT=0
+          fi
+          set +e
+          node tools/verify-live.mjs --wait "$WAIT" --json verify-live.json | tee report.txt
+          # The exit code that matters is node's, not tee's.
+          code=${PIPESTATUS[0]}
+          set -e
+          echo "code=$code" >> "$GITHUB_OUTPUT"
+          echo "verify-live exited $code"
+
+      - name: Name the migration that would fix it
+        id: fix
+        if: steps.verify.outputs.code == '1'
+        run: |
+          NEWEST=$(ls -1 supabase/migrations/*_sync_beer_log.sql | sort | tail -1)
+          echo "migration=$NEWEST" >> "$GITHUB_OUTPUT"
+          {
+            echo "report<<VERIFY_EOF"
+            cat report.txt
+            echo "VERIFY_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Open or update the issue
+        if: steps.verify.outputs.code == '1'
+        uses: actions/github-script@v7
+        env:
+          MIGRATION: ${{ steps.fix.outputs.migration }}
+          REPORT: ${{ steps.fix.outputs.report }}
+        with:
+          script: |
+            const title = 'The database is out of step with data.js';
+            const body = [
+              `The live database does not hold what \`public/stats/data.js\` holds,`,
+              `as of ${new Date().toISOString()} ([run](${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId})).`,
+              ``,
+              `Almost always this means a migration was merged to \`main\` but never`,
+              `applied to Supabase. Nothing in this repo can apply it — that step`,
+              `belongs to Lovable — but you can do it by hand in a minute:`,
+              ``,
+              `1. Open \`${process.env.MIGRATION}\`.`,
+              `2. Paste the whole file into the Supabase SQL editor and run it.`,
+              ``,
+              `It is add-and-update only and deletes nothing, so running it is safe`,
+              `even if Lovable later applies it too — a second run changes nothing.`,
+              ``,
+              `<details><summary>What differs</summary>`,
+              ``,
+              '```',
+              (process.env.REPORT || '(report missing)').slice(0, 55000),
+              '```',
+              ``,
+              `</details>`,
+              ``,
+              `This issue closes itself on the next run that comes back clean.`,
+            ].join('\n');
+
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'live-sync',
+            });
+
+            if (existing.length > 0) {
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: existing[0].number, title, body,
+              });
+              core.info(`Updated issue #${existing[0].number}`);
+            } else {
+              const { data: created } = await github.rest.issues.create({
+                owner: context.repo.owner, repo: context.repo.repo,
+                title, body, labels: ['live-sync'],
+              });
+              core.info(`Opened issue #${created.number}`);
+            }
+
+      - name: Close the issue once it agrees again
+        if: steps.verify.outputs.code == '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: open } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'live-sync',
+            });
+            for (const issue of open) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number,
+                body: 'The database is in step with `data.js` again — closing.',
+              });
+              await github.rest.issues.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                issue_number: issue.number, state: 'closed',
+              });
+            }
+
+      # An unreachable database is not a pass and not a divergence: nothing was
+      # checked. It goes red so it is visible, without opening an issue that
+      # would blame a migration for an outage.
+      - name: Report the outcome
+        run: |
+          case "${{ steps.verify.outputs.code }}" in
+            0) echo "In step." ;;
+            1) echo "::error::The database is out of step with data.js — see the live-sync issue."; exit 1 ;;
+            *) echo "::error::Could not reach the database; nothing was checked."; exit 1 ;;
+          esac

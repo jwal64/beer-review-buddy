@@ -11,8 +11,9 @@
 
 ## Do not revert these features
 
-Two features in this project have already been reverted twice by an editing
-pass that never set out to change them. **They are intentional, they are
+Three things in this project must survive every editing pass — two features
+already reverted twice by a pass that never set out to change them, and the
+check that catches a third kind of loss. **They are intentional, they are
 finished, and no pass may remove, inline, simplify or "harden" them away.**
 Read this list before editing any of the files it names.
 
@@ -44,6 +45,26 @@ A place is written "New Rochelle, New York, United States" on every surface.
 - The beers table's separate City / Region / Country **columns** are the one
   deliberate exception and stay split.
 
+### 3. The live-data check stays wired up
+
+`.github/workflows/verify-live.yml`, `tools/verify-live.mjs` and
+`tools/verify-live-test.mjs` — and the `verify-live-test.mjs` entry in the
+`check` script in `package.json`. Do not delete, rename, disable or unwire any
+of them.
+
+They are the only thing that notices when a migration is merged to `main` and
+then never applied to Supabase. That failure is otherwise completely silent:
+`public/stats/live-data.js` replaces the committed snapshot with the database's
+version on load, so a beer whose migration never ran appears for a moment and
+then disappears, and the app never shows it at all. It has happened, for days,
+with every other check green.
+
+A pass that has already deleted an applied migration file can delete the thing
+that notices. This is the one check whose absence restores exactly the silence
+it was built to end.
+
+`CLAUDE.md`, "Step 6: Verifying the database actually got it", has the detail.
+
 ### How these keep getting lost — and how to stop
 
 Nobody deleted them on purpose. The pass branched from a commit older than the
@@ -65,10 +86,10 @@ So, on every pass:
    history; removing the file desynchronises the migration record. Schema
    changes are new files only.
 4. **Run `npm run check` before pushing.** It runs
-   `node tools/check-invariants.mjs`, which fails when either feature is
+   `node tools/check-invariants.mjs`, which fails when any of the three is
    missing. A red check here means a revert, not a flaky test — restore what
    it names instead of changing the check.
 
 `CLAUDE.md` carries the full reasoning under "Features that must survive every
-pass", "Map Rule: The Pop-out Stays Open" and "Location Rule: City, Region,
-Country".
+pass", "Map Rule: The Pop-out Stays Open", "Location Rule: City, Region,
+Country" and "Step 6: Verifying the database actually got it".

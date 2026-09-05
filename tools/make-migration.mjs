@@ -5,10 +5,11 @@
 //   npm run check       # every rule CLAUDE.md states
 //   npm run migration   # writes supabase/migrations/<stamp>_sync_beer_log.sql
 //
-// Commit both and merge to main; Lovable applies the migration, and the live
-// stats page and the app both read the result. The SQL adds and updates only
-// (see tools/export-supabase-seed.mjs) — a beer logged through the app's own
-// form is never touched by it.
+// Commit both and merge to main. Then check that the database actually got it
+// — `npm run verify-live` — because the merge is not the end and the applying
+// is not ours. See CLAUDE.md, "Step 6: Verifying the database actually got it".
+// The SQL adds and updates only (see tools/export-supabase-seed.mjs) — a beer
+// logged through the app's own form is never touched by it.
 //
 // The check runs first, every time. A migration is applied to the real
 // database by machinery with nobody watching, so a data.js that fails its own
@@ -43,4 +44,16 @@ const stamp = new Date().toISOString().replace(/\D/g, '').slice(0, 14);
 const out = join(MIGRATIONS, `${stamp}_sync_beer_log.sql`);
 writeFileSync(out, sql);
 console.log(`Wrote ${out}`);
+console.log('');
 console.log('Commit it together with public/stats/data.js and merge to main.');
+console.log('');
+console.log('Then make sure the database actually got it:');
+console.log('');
+console.log('  npm run verify-live');
+console.log('');
+console.log('Merging is not the end. Applying the migration is Lovable\'s step,');
+console.log('not this repo\'s, and generated migrations like this one have sat');
+console.log('unapplied for days while every check stayed green — the site does');
+console.log('not show the gap, it shows the beer and then loses it on hydration.');
+console.log('If verify-live reports missing rows, paste this file into the');
+console.log('Supabase SQL editor and run it. That is safe and repeatable.');
