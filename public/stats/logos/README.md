@@ -43,19 +43,21 @@ Ten files are here that way, and every one of them is a **drawn approximation
 in the house idiom** — a brand-coloured field, the wordmark, one characteristic
 device — not the brand's own artwork:
 
-`affligem-tripel` · `almaza-pilsener` · `amstel` · `daura` ·
+`affligem-tripel` · `almaza-pilsener` · `amstel-light` · `daura` ·
 `mahou-cinco-estrellas` · `mythos` · `newcastle-brown-ale` · `pacifico-clara` ·
 `singha` · `smithwicks`
 
 Nine of them exist because the fetcher walked every tier for those brands and
 came back with nothing: dead or unreachable brand sites, no `P154` logo on
 Wikidata, and Icon Horse answering four of them with a generated grey capital,
-which the fetcher now refuses. `amstel` was drawn instead because this session
-had no outbound network access to run the fetcher at all — its ladder was
-never walked, so treat it as the first one to replace once someone can. If one
-of these brands ever publishes a reachable logo, these are the files to
-replace — delete the file *and* its `BRAND_LOGOS` line, then re-fetch, since
-the fetcher will not overwrite a file it did not write.
+which the fetcher now refuses. `amstel-light` was drawn instead because every
+source for `amstellight.com` and `amstel.com` answered 403 in this session —
+the same outbound block that kept the fetcher from running at all the last
+time an Amstel entry was added — so treat it as the first one to replace once
+a session can actually reach those domains. If one of these brands ever
+publishes a reachable logo, these are the files to replace — delete the file
+*and* its `BRAND_LOGOS` line, then re-fetch, since the fetcher will not
+overwrite a file it did not write.
 
 **A file the fetcher did not write is never replaced**, `--force` included: it
 knows which files are its own from `logo-fetch-report.json`, and leaves the

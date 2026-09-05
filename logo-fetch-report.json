@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-05T05:21:40.692Z",
+  "at": "2026-09-05T17:03:21.278Z",
   "total": 102,
   "fetched": [
     {
@@ -963,9 +963,16 @@
   ],
   "missing": [
     {
-      "beer": "Amstel",
+      "beer": "Amstel Light",
       "tried": [
         "wikidata P154 · the Wikipedia API did not answer",
+        "site /apple-touch-icon.png · amstellight.com · no",
+        "site /apple-touch-icon-precomposed.png · amstellight.com · no",
+        "site /favicon.svg · amstellight.com · no",
+        "site header logo · amstellight.com · no",
+        "google faviconV2 · amstellight.com · no",
+        "icon.horse · amstellight.com · no",
+        "duckduckgo · amstellight.com · no",
         "site /apple-touch-icon.png · amstel.com · no",
         "site /apple-touch-icon-precomposed.png · amstel.com · no",
         "site /favicon.svg · amstel.com · no",
