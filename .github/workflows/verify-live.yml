@@ -20,7 +20,7 @@ name: Verify live data
 
 on:
   push:
-    branches: [main, claude/beer-buddy-sync-timing-mz0y7a]  # TEMP: proving the run
+    branches: [main]
   schedule:
     # Daily. A push tells you about the beer you just added; this tells you
     # about the database that changed under you afterwards.

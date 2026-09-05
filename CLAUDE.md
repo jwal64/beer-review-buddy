@@ -63,16 +63,21 @@ before believing anything else.
 
 ### Features that must survive every pass
 
-Two features have now been reverted twice by a Lovable editing pass that never
-set out to touch them, so they are written down here, guarded by a check, and
-repeated for Lovable in `AGENTS.md`:
+Three things have been lost to a Lovable editing pass that never set out to
+touch them, so they are written down here, guarded by a check, and repeated for
+Lovable in `AGENTS.md`:
 
 1. **The map pop-out stays open** — the two module-scope selects in
    `src/lib/beer-data.ts` ("Map Rule: The Pop-out Stays Open" below).
 2. **One location format everywhere** — `placeLabel` in `src/lib/place.ts` and
    in `public/stats/app.js` ("Location Rule: City, Region, Country" below).
+3. **The live-data check** — `.github/workflows/verify-live.yml` and
+   `tools/verify-live.mjs` ("Step 6: Verifying the database actually got it"
+   above). A pass that has already deleted an applied migration file can
+   delete the thing that notices, and this is the one check whose absence
+   restores the exact silence it was built to end.
 
-`node tools/check-invariants.mjs` fails when either one goes missing, and
+`node tools/check-invariants.mjs` fails when any of them goes missing, and
 `npm run check` runs it, so CI turns red on the push that drops them rather
 than a person noticing weeks later.
 
@@ -294,6 +299,81 @@ Two things no check can verify on its own: that the logo which came back is
 actually the brand's logo and not a photograph of a bottle (`npm run logo-sheet`
 and look at it — see "Logos" below), and that a `nativeName` was recorded where
 one exists.
+
+### Step 6: Verifying the database actually got it
+
+**The merge is not the end.** Step 5 finishes with "merge to `main` — Lovable
+applies the migration", and that last step is the one part of adding a beer
+that does not happen in this repo. Nothing here can force it. It has silently
+not happened, for days at a time, while every check in CI stayed green.
+
+The silence is what makes it expensive. `public/stats/live-data.js` paints the
+committed snapshot and then, if the database disagrees, **replaces the whole
+dataset with the database's version** and repaints. So a migration that never
+applied does not leave the new beer sitting on the page — the beer appears for
+a moment and then vanishes, which reads exactly like the edit was never made.
+The app is blunter still: `src/` reads Supabase and nothing else, so the beer
+is simply not there.
+
+```sh
+npm run verify-live                 # is the database in step with data.js?
+npm run verify-live -- --wait 900   # give Lovable up to 15 minutes first
+```
+
+`tools/verify-live.mjs` reads every table with the publishable key — no secret
+is involved, and it never writes — and compares them against `data.js` through
+the same projection the seed and the sync share. It sorts what it finds:
+
+| Verdict | Means | Do |
+|---------|-------|----|
+| **missing** | `data.js` has the row, the database does not | the migration never applied — paste it (below) |
+| **differs** | both have it and disagree | same: the update half never ran |
+| **orphan** | a row a *migration* wrote (`seq` is set; the app's form never sets it) that `data.js` no longer knows | a rename stranded it — add an explicit `delete` to the next migration |
+| **db-only** | a row only the database has, that the app plausibly wrote | normal. `npm run sync` brings it into `data.js` |
+
+Its exit code is the point: `0` in step, `1` diverged, `2` the database could
+not be reached — which is neither a pass nor a failure, because nothing was
+checked. A sandbox with no route to Supabase (this one included) looks exactly
+like an outage.
+
+**When it says rows are missing**, the fix takes a minute and does not need
+Lovable at all: open the newest `supabase/migrations/*_sync_beer_log.sql`,
+paste the whole file into the Supabase SQL editor, run it. That file is the
+entire contents of `data.js` as add-and-update statements, so it repairs every
+divergence at once, and running it is safe even if Lovable later applies it too.
+
+You do not have to remember to run this. `.github/workflows/verify-live.yml`
+runs it on every push to `main` — waiting up to twenty minutes for Lovable
+first — and again daily. On a divergence it opens an issue labelled
+`live-sync` naming the migration to paste, and closes the issue itself once
+the answer comes back clean.
+
+`tools/verify-live-test.mjs` pins the comparison's judgement against a database
+made wrong in each way that has actually happened, and against the one thing it
+must never call wrong: PostgREST returning a `numeric` column as the string
+`"2.50"`. A verifier that quietly says "fine" is worse than no verifier, so
+`npm run check` runs that test on every push. It needs no network and takes
+milliseconds.
+
+### The rename hazard
+
+Reviews are matched on **`name` + `drank_on`** — by the generated SQL, and so
+by the verifier — and the generated SQL **never deletes**. So renaming a beer
+that a migration has already applied inserts the new name and *strands the old
+row*, which then shows up on the site forever as a review that `data.js` has no
+record of.
+
+When you rename or remove anything already in the database, write the delete
+yourself, at the top of the next migration.
+`supabase/migrations/20260905170720_sync_beer_log.sql` is the worked example —
+it opens with two lines cleaning up after "Amstel" became "Amstel Light":
+
+```sql
+delete from public.beers where name = 'Amstel' and drank_on = '2026-09-01';
+delete from public.brand_domains where beer_name = 'Amstel';
+```
+
+`npm run verify-live` reports anything you forget as an **orphan**.
 
 ## Standard Operating Procedure: The Want-To-Try Shortlist
 

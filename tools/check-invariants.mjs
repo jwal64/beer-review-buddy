@@ -74,6 +74,33 @@ const RULES = [
       "The stats site's half of the same format. Without it the map popup, the " +
       "beers table, the city cards and the highlights each invent their own.",
   },
+  {
+    file: ".github/workflows/verify-live.yml",
+    needs: [
+      [/node tools\/verify-live\.mjs/, "a `node tools/verify-live.mjs` run"],
+      [/branches:\s*\[main\]/, "`branches: [main]` — it has to run on the merge"],
+    ],
+    why:
+      "The only thing that notices when a migration is merged to main and then " +
+      "never applied to Supabase. Without it that failure is silent: live-data.js " +
+      "replaces the committed snapshot with the database's version, so the new " +
+      "beer appears for a moment and then vanishes. See CLAUDE.md, " +
+      '"Verifying the database actually got it".',
+  },
+  {
+    file: "tools/verify-live.mjs",
+    needs: [[/export function compareAll/, "`export function compareAll`"]],
+    why:
+      "The comparison the workflow runs, and the export its test drives. " +
+      "Deleting either leaves the workflow green over nothing.",
+  },
+  {
+    file: "package.json",
+    needs: [[/tools\/verify-live-test\.mjs/, "`tools/verify-live-test.mjs` in the check script"]],
+    why:
+      'A verifier that quietly says "fine" is worse than no verifier, so its ' +
+      "judgement is pinned by a test that npm run check runs on every push.",
+  },
   ...["src/routes/beers.tsx", "src/routes/index.tsx", "src/components/BeerForm.tsx"].map(
     (file) => ({
       file,
