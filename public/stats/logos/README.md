@@ -39,23 +39,29 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Ten files are here that way, and every one of them is a **drawn approximation
+Nine files are here that way, and every one of them is a **drawn approximation
 in the house idiom** — a brand-coloured field, the wordmark, one characteristic
 device — not the brand's own artwork:
 
-`affligem-tripel` · `almaza-pilsener` · `amstel` · `daura` ·
-`mahou-cinco-estrellas` · `mythos` · `newcastle-brown-ale` · `pacifico-clara` ·
-`singha` · `smithwicks`
+`affligem-tripel` · `almaza-pilsener` · `daura` · `mahou-cinco-estrellas` ·
+`mythos` · `newcastle-brown-ale` · `pacifico-clara` · `singha` · `smithwicks`
 
-Nine of them exist because the fetcher walked every tier for those brands and
+They exist because the fetcher walked every tier for those nine brands and
 came back with nothing: dead or unreachable brand sites, no `P154` logo on
 Wikidata, and Icon Horse answering four of them with a generated grey capital,
-which the fetcher now refuses. `amstel` was drawn instead because this session
-had no outbound network access to run the fetcher at all — its ladder was
-never walked, so treat it as the first one to replace once someone can. If one
-of these brands ever publishes a reachable logo, these are the files to
-replace — delete the file *and* its `BRAND_LOGOS` line, then re-fetch, since
-the fetcher will not overwrite a file it did not write.
+which the fetcher now refuses. `logo-fetch-report.json` records each ladder in
+full under `missing`. If one of those brands ever publishes a reachable logo,
+these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
+then re-fetch, since the fetcher will not overwrite a file it did not write.
+
+`amstel-light.webp` is hand-placed too, but it is not a drawing: it is the
+brand's own roundel, cut from the owner's Untappd check-in screenshot at the
+tile's own 150px and masked to the tile's rounded corners. Every fetcher tier
+for `amstellight.com` and `amstel.com` answered 403 from the session that
+added it, so there was no ladder to walk. Note that it is the **Amstel Bier**
+roundel — the marketed mark for the light variant is not what the check-in
+carried — so it is a fair candidate to replace if a session ever reaches those
+domains and finds an Amstel Light mark of its own.
 
 **A file the fetcher did not write is never replaced**, `--force` included: it
 knows which files are its own from `logo-fetch-report.json`, and leaves the
