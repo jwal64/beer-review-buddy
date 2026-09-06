@@ -40,3 +40,10 @@
       reverted again anyway. Prose in a roadmap is not enforcement.)
 - [ ] Replace the nine drawn-approximation logos with the brands' official
       artwork where one is publicly available
+- [x] Fix the missing Amstel Light entry: its migration never applied, so the
+      repair was run against the database directly (beer, brewery, Tarrytown,
+      brand domain — plus Sol's domain order and Pacífico's logo file, stranded
+      by two other unapplied migrations). From now on a session applies its
+      own data change to the database in-session and reads it back before
+      closing — the generated migration is the record, not the delivery. The
+      rule is written into CLAUDE.md Step 5 and Step 6 stays as the check.

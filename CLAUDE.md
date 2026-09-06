@@ -289,11 +289,16 @@ npm run migration   # writes supabase/migrations/<stamp>_sync_beer_log.sql
 that fails it. Commit **both** the edited `data.js` and the new migration in
 one commit, and merge to `main`.
 
-**The merge is not the end.** Applying the migration is Lovable's step, not
-this repo's, and in practice it has not been happening for generated
-migrations — see Step 6, which is now a required part of adding a beer, and
+**The merge is not the end — and not even the mechanism any more.** Lovable
+sessions apply the change straight to the database themselves, with the
+built-in database data tools, as part of the same session that edits
+`data.js`, and then read the database back to confirm the new rows are there
+before closing the task. The generated migration is still committed as the
+record of the change (and as the repair file Step 6 pastes when something
+else drifts), but it is no longer the delivery mechanism, because in practice
+it has not been applying — see Step 6, which remains the standing check, and
 "What the first run found" for what the database actually did with the last
-three. Until it is verified, a beer is added in the file and nowhere else.
+three. A beer is not added until a `SELECT` says the database has it.
 
 The generated SQL is the whole file written as add-and-update statements: on a
 match the file wins, a row only the database knows is left alone, nothing
