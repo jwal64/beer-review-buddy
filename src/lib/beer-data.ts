@@ -215,3 +215,16 @@ export function formatMonth(date: string) {
     year: "numeric",
   });
 }
+
+// The "New" badge, mirrored from `isDisplayNew()` in public/stats/app.js:
+// `is_new` marks a beer as never reviewed before, for good — it doesn't
+// expire. Showing that badge forever would make it noise, so the badge only
+// shows while the review is still current-month news. Recomputed on every
+// call (not memoized) so a long-lived tab crossing a month boundary
+// re-flags correctly without a reload.
+export function isDisplayNew(beer: Pick<Beer, "is_new" | "drank_on">) {
+  if (!beer.is_new) return false;
+  const drankOn = new Date(beer.drank_on + "T00:00:00");
+  const now = new Date();
+  return drankOn.getMonth() === now.getMonth() && drankOn.getFullYear() === now.getFullYear();
+}

@@ -14,7 +14,14 @@ import {
   SheetTitle,
   SheetDescription,
 } from "@/components/ui/sheet";
-import { flagEmoji, formatMonth, useBeers, useCountries, type Beer } from "@/lib/beer-data";
+import {
+  flagEmoji,
+  formatMonth,
+  isDisplayNew,
+  useBeers,
+  useCountries,
+  type Beer,
+} from "@/lib/beer-data";
 import { Search, Plus, Pencil } from "lucide-react";
 import { placeLabel } from "@/lib/place";
 import { useSession } from "@/lib/use-session";
@@ -97,7 +104,11 @@ function BeersPage() {
           />
         </div>
 
-        <div className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1" role="group" aria-label="Filter by style">
+        <div
+          className="-mx-5 flex gap-2 overflow-x-auto px-5 pb-1"
+          role="group"
+          aria-label="Filter by style"
+        >
           {styles.map((s) => (
             <Button
               key={s}
@@ -152,7 +163,9 @@ function BeersPage() {
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 truncate text-sm font-semibold">
                       {b.name}
-                      {b.is_new && <Badge className="h-4 px-1.5 text-[10px] uppercase">New</Badge>}
+                      {isDisplayNew(b) && (
+                        <Badge className="h-4 px-1.5 text-[10px] uppercase">New</Badge>
+                      )}
                     </div>
                     <p className="truncate text-xs text-muted-foreground">
                       {flagEmoji(b.origin_cc, countries)} {b.style}
@@ -160,7 +173,9 @@ function BeersPage() {
                     </p>
                     <div className="mt-1 flex items-center gap-2">
                       <Rating value={Number(b.rating)} />
-                      <span className="text-[11px] text-muted-foreground">{formatMonth(b.drank_on)}</span>
+                      <span className="text-[11px] text-muted-foreground">
+                        {formatMonth(b.drank_on)}
+                      </span>
                     </div>
                   </div>
                 </button>
@@ -180,7 +195,12 @@ function BeersPage() {
           {selected && (
             <>
               <SheetHeader className="flex-row items-center gap-3 space-y-0 text-left">
-                <BeerLogo name={selected.name} logo={selected.logo} style={selected.style} className="h-14 w-14" />
+                <BeerLogo
+                  name={selected.name}
+                  logo={selected.logo}
+                  style={selected.style}
+                  className="h-14 w-14"
+                />
                 <div>
                   <SheetTitle className="font-display">{selected.name}</SheetTitle>
                   <SheetDescription>{selected.brewery ?? "Unknown brewery"}</SheetDescription>
