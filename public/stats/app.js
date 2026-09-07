@@ -604,6 +604,13 @@ function showTab(id,btn){
   // Throws on file:// in some browsers — degrade silently.
   try{history.replaceState(null,'','#'+id);}catch(e){}
   const renderers = {
+    // Overview is drawn at boot, so `_inD` is already set and this is a no-op
+    // on an ordinary tab switch. It earns its place after reloadData(), which
+    // clears the flag: the panel is then redrawn either right here (if Overview
+    // is the tab you are on) or the next time you open it.
+    overview: [
+      ['_inD',drawOverview],
+    ],
     maps: [
       ['_dM',()=>{window._dM=true;setTimeout(initWorldMap,80);}],
     ],
@@ -711,6 +718,22 @@ const ttWithN=n=>({...TT,callbacks:{label:c=>{
 // ══════════════════════════════════════════════════════════════
 // OVERVIEW
 // ══════════════════════════════════════════════════════════════
+// Drawn eagerly at boot, and again whenever the data underneath it changes.
+//
+// That second half is the point. This panel used to be a bare `try {}` block
+// that ran once at load and never again, while `reloadData()` cleared a `_inD`
+// flag that nothing read — so when live-data.js found the database disagreed
+// with the committed snapshot and repainted the page, every other surface moved
+// and these KPIs kept showing the snapshot's numbers. That is the same silent
+// divergence CLAUDE.md's Step 6 is about, one layer further in: the page looked
+// consistent and was not.
+//
+// Every `const` below already sat inside the `try`, so it was block-scoped
+// before and is function-scoped now — nothing outside could reference them
+// either way. Re-running is safe: safeChart() destroys and rebuilds each chart
+// by key, and refreshStats() has updated STATS/beers before we are called.
+function drawOverview(){
+window._inD=true;
 try {
 // Use pre-computed statistics. DOM-only panels render first so a Chart.js
 // load failure can't take the text content down with it.
@@ -854,6 +877,8 @@ safeChart('scatterChart',document.getElementById('scatterChart'),{type:'scatter'
 // Insights panels (stat summary / quintiles / taste profile) now live on the
 // Overview tab, which renders eagerly at load — so draw them up front too.
 try { drawInsights(); } catch(e){ console.error('Insights init error:',e); }
+}
+drawOverview();
 
 // ══════════════════════════════════════════════════════════════
 // BEER TABLE + GRID
