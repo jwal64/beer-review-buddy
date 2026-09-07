@@ -52,6 +52,24 @@ export const Route = createFileRoute("/map")({
 
 type MapMode = "drank" | "brewed";
 
+// The fallback a still-loading query renders with, one shared frozen array per
+// table rather than a `?? []` at the call site.
+//
+// This is the same rule as the module-scope selects in lib/beer-data.ts, one
+// step further out, and it is load-bearing for the same reason. `?? []` mints a
+// new array every render, and these four are dependencies of LeafletMap's
+// marker effect — so while any of these queries is in flight, the effect sees a
+// changed dependency on every render, clears its layer group, and rebuilds the
+// pins, taking the popup a click had just opened with it. `countries` is the
+// one that actually reaches that state today: it is not part of the `loading`
+// guard below, so the map renders while it is still fetching.
+//
+// See CLAUDE.md, "Map Rule: The Pop-out Stays Open".
+const NO_BEERS: Beer[] = [];
+const NO_BREWERIES: NonNullable<ReturnType<typeof useBreweries>["data"]> = [];
+const NO_LOCATIONS: NonNullable<ReturnType<typeof useLocations>["data"]> = [];
+const NO_COUNTRIES: CountryRow[] = [];
+
 function MapPage() {
   const beers = useBeers();
   const breweries = useBreweries();
@@ -137,12 +155,12 @@ function MapPage() {
           <ClientOnly fallback={<Skeleton className="h-[420px] w-full rounded-2xl" />}>
             <LeafletMap
               mode={mode}
-              breweries={breweries.data ?? []}
-              beers={beers.data ?? []}
+              breweries={breweries.data ?? NO_BREWERIES}
+              beers={beers.data ?? NO_BEERS}
               domains={domains}
               logos={logos}
-              locations={locations.data ?? []}
-              countries={countries.data ?? []}
+              locations={locations.data ?? NO_LOCATIONS}
+              countries={countries.data ?? NO_COUNTRIES}
               onPick={setFilter}
             />
           </ClientOnly>
