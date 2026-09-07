@@ -1,7 +1,27 @@
 {
-  "at": "2026-09-05T17:03:21.278Z",
+  "at": "2026-09-07T21:17:32.663Z",
   "total": 102,
   "fetched": [
+    {
+      "beer": "Affligem Tripel",
+      "file": "logos/affligem-tripel.svg",
+      "source": "site header logo",
+      "domain": "affligembeer.com",
+      "from": "313×98 svg",
+      "stored": "vector",
+      "url": "https://www.affligembeer.com/media/vrsjywtm/main-logo.svg?rmode=max&width=313&height=98",
+      "bytes": 22321
+    },
+    {
+      "beer": "Almaza Pilsener",
+      "file": "logos/almaza-pilsener.webp",
+      "source": "site og:image",
+      "domain": "almaza.com.lb",
+      "from": "1454×873 png",
+      "stored": "1454px",
+      "url": "https://bucket.almaza.com.lb/www.almaza.com.lb/public/data/files/Almaza.png",
+      "bytes": 48626
+    },
     {
       "beer": "Asahi Super Dry",
       "file": "logos/asahi-super-dry.webp",
@@ -383,6 +403,26 @@
       "bytes": 126135
     },
     {
+      "beer": "Magna",
+      "file": "logos/magna.webp",
+      "source": "google faviconV2",
+      "domain": "cerveceradepr.com",
+      "from": "80×80 png",
+      "stored": "80px",
+      "url": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://cerveceradepr.com&size=256",
+      "bytes": 3268
+    },
+    {
+      "beer": "Mahou Cinco Estrellas",
+      "file": "logos/mahou-cinco-estrellas.webp",
+      "source": "site rel=\"icon\"",
+      "domain": "mahou.com",
+      "from": "192×192 png",
+      "stored": "192px",
+      "url": "https://www.mahou.com/android-icon-192x192.png",
+      "bytes": 2502
+    },
+    {
       "beer": "Medalla Light",
       "file": "logos/medalla-light.webp",
       "source": "site header logo",
@@ -421,6 +461,16 @@
       "stored": "540px",
       "url": "https://www.millerlite.com/sites/millerlite/files/2018-08/av_logo.png",
       "bytes": 14778
+    },
+    {
+      "beer": "Mythos",
+      "file": "logos/mythos.webp",
+      "source": "site header logo",
+      "domain": "mythosbeer.gr",
+      "from": "100×83 png",
+      "stored": "100px",
+      "url": "https://mythosbeer.gr/assets/website/images/logo.png",
+      "bytes": 3890
     },
     {
       "beer": "Narragansett Lager",
@@ -705,6 +755,10 @@
   ],
   "kept": [
     {
+      "beer": "Amstel Light",
+      "file": "logos/amstel-light.webp"
+    },
+    {
       "beer": "Augustiner Helles",
       "file": "logos/augustiner-helles.svg"
     },
@@ -809,26 +863,5 @@
       "file": "logos/wrench.webp"
     }
   ],
-  "missing": [
-    {
-      "beer": "Amstel Light",
-      "tried": [
-        "wikidata P154 · the Wikipedia API did not answer",
-        "site /apple-touch-icon.png · amstellight.com · no",
-        "site /apple-touch-icon-precomposed.png · amstellight.com · no",
-        "site /favicon.svg · amstellight.com · no",
-        "site header logo · amstellight.com · no",
-        "google faviconV2 · amstellight.com · no",
-        "icon.horse · amstellight.com · no",
-        "duckduckgo · amstellight.com · no",
-        "site /apple-touch-icon.png · amstel.com · no",
-        "site /apple-touch-icon-precomposed.png · amstel.com · no",
-        "site /favicon.svg · amstel.com · no",
-        "site header logo · amstel.com · no",
-        "google faviconV2 · amstel.com · no",
-        "icon.horse · amstel.com · no",
-        "duckduckgo · amstel.com · no"
-      ]
-    }
-  ]
+  "missing": []
 }
