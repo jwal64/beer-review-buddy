@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Modelo Oro">
+  <rect width="512" height="512" rx="60" fill="#14161a"/>
+  <g fill="#d4af37">
+    <path d="M132 206 L164 126 L204 176 L256 104 L308 176 L348 126 L380 206 Z"/>
+    <rect x="132" y="206" width="248" height="28" rx="7"/>
+    <circle cx="164" cy="116" r="10"/>
+    <circle cx="256" cy="94" r="11"/>
+    <circle cx="348" cy="116" r="10"/>
+  </g>
+  <g text-anchor="middle">
+    <text x="256" y="336" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="96" fill="#ffffff">Modelo</text>
+    <rect x="126" y="362" width="260" height="5" fill="#d4af37"/>
+    <text x="256" y="418" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="44" letter-spacing="10" fill="#d4af37">ORO</text>
+  </g>
+</svg>

@@ -54,6 +54,35 @@ full under `missing`. If one of those brands ever publishes a reachable logo,
 these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
 then re-fetch, since the fetcher will not overwrite a file it did not write.
 
+Four more are drawn for the **opposite** reason — the fetcher answered for
+these, and answered *wrong*:
+
+`budweiser` · `modelo-especial` · `modelo-oro` · `negra-modelo`
+
+`logo-fetch-report.json` still records the two bad ladders, because they are
+worth recognising:
+
+- **The three Modelos** all resolved to `site header logo` on their shared
+  domain `modelousa.com`, and what that header held was
+  `cdn/shop/files/97898_EWH_009_08.jpg` — a 330×413 storefront **photograph of
+  a man in a room**. One domain for three beers meant one identical photo for
+  three beers. The fetcher refuses photographs now (`clear < 0.02 &&
+  colours > 1200`), so this particular answer cannot come back; the drawings
+  give the three the distinct marks a shared domain never could.
+- **Budweiser** resolved to `wikidata P154` for `budweiser.com` and came back
+  with `Budejovicky_Budvar_logo.png` — the mark of **Budějovický Budvar**, the
+  Czech brewery, on a beer this repo records as `origin:"US"`, brewed by
+  Anheuser-Busch in St. Louis. "Budweiser" is Budvar's trademark across much of
+  Europe, so the two brands genuinely collide on Wikidata. **This is a trap, not
+  a one-off:** deleting `budweiser.svg` and re-fetching is likely to put the
+  Czech logo straight back. Leave the hand-placed file unless you have checked
+  by eye that what replaces it is Anheuser-Busch's bowtie.
+
+The session that drew these could not have fetched anything anyway — its egress
+policy denied every logo source (the brand sites, Wikimedia, Google, Icon Horse
+and DuckDuckGo all refused `CONNECT`), which is its own reason a drawing was the
+only way to get four correct logos into the tree.
+
 `amstel-light.webp` is hand-placed too, but it is not a drawing: it is the
 brand's own roundel, cut from the owner's Untappd check-in screenshot at the
 tile's own 150px and masked to the tile's rounded corners. Every fetcher tier
