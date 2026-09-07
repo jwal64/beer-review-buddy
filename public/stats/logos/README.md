@@ -39,20 +39,50 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Nine files are here that way, and every one of them is a **drawn approximation
-in the house idiom** — a brand-coloured field, the wordmark, one characteristic
-device — not the brand's own artwork:
+Eighteen files are here that way, and every one of them is a **drawn
+approximation in the house idiom** — a brand-coloured field, the wordmark, one
+characteristic device — not the brand's own artwork:
 
-`affligem-tripel` · `almaza-pilsener` · `daura` · `mahou-cinco-estrellas` ·
-`mythos` · `newcastle-brown-ale` · `pacifico-clara` · `singha` · `smithwicks`
+`affligem-tripel` · `almaza-pilsener` · `augustiner-helles` ·
+`estrella-jalisco` · `guinness-draught` · `hop-commander` · `daura` · `magna` ·
+`mahou-cinco-estrellas` · `mythos` · `newcastle-brown-ale` · `pacifico-clara` ·
+`pilsner-urquell` · `pub-ale` · `singha` · `smithwicks` · `sol` ·
+`stiegl-goldbrau`
 
-They exist because the fetcher walked every tier for those nine brands and
+The first nine exist because the fetcher walked every tier for those brands and
 came back with nothing: dead or unreachable brand sites, no `P154` logo on
 Wikidata, and Icon Horse answering four of them with a generated grey capital,
 which the fetcher now refuses. `logo-fetch-report.json` records each ladder in
 full under `missing`. If one of those brands ever publishes a reachable logo,
 these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
 then re-fetch, since the fetcher will not overwrite a file it did not write.
+
+The other nine were added later, when a pass over the whole contact sheet found
+each of them rendering something that was not the brand's mark. What was there
+before, and why the answer had to be a drawing:
+
+| Beer | What the file held | Why |
+|------|--------------------|-----|
+| `augustiner-helles` | a 179-byte SVG wrapper | `<use xlink:href="#icon-logo">` — the artwork is a sprite symbol on the brand's page, and does not travel with the file |
+| `pilsner-urquell` | a 222-byte SVG wrapper | the same, `#shape-logo-pilsner` |
+| `stiegl-goldbrau` | a valid 300×300 WebP | **every pixel of it transparent.** The worst kind: it decodes, so the `onerror` chain never fires and no fallback is tried |
+| `magna` | the **WordPress logo** | `cerveceradepr.com` is a WordPress site with no custom favicon, and Google's favicon service handed back the CMS default |
+| `pub-ale` | a 112-byte blue dot | DuckDuckGo's generic answer for `boddingtons.co.uk`, not the barrel-and-bee |
+| `sol` | a blue-violet chevron | Google's favicon for `solbeer.com`; Sol's mark is a red-and-yellow sun |
+| `guinness-draught` | a 375 KB photograph | Wikidata `P154` answered with a **photo of the St James's Gate facade** |
+| `hop-commander` | a 1536×415 photograph | the "site header logo" tier took a dark brewery interior shot |
+| `estrella-jalisco` | the real wordmark, 256×22 | correct artwork, unusable shape: `object-fit:contain` letterboxes it into a ~24×2px hairline in the 24px inline box |
+
+Two of those are failure shapes the sheet had not caught before, and both are
+worth recognising because **no check catches them**: an SVG whose artwork lives
+in a sprite the file does not carry, and a file that is entirely transparent.
+The first at least fails to decode and falls down the remote chain; the second
+renders as nothing, forever, while passing every check there is.
+
+The session that drew these could not have fetched anything either — the same
+egress wall as before, and wider: every brand site, both Wikimedia hosts, and
+all three favicon services answered `403` at `CONNECT`. `npm run fetch-logos`
+is the right tool the moment a session can reach them again.
 
 Four more beers were wrong for the **opposite** reason — the fetcher answered
 for these, and answered *wrong*:
@@ -130,9 +160,70 @@ roundel — the marketed mark for the light variant is not what the check-in
 carried — so it is a fair candidate to replace if a session ever reaches those
 domains and finds an Amstel Light mark of its own.
 
+## Marks that were right, and still did not render
+
+A logo can be the brand's own artwork, decode perfectly, be the right size, and
+still show the reader nothing. Five files were drawn for a light label — dark
+ink on transparent — and this site's ground is `--bg: #0f0f11`. Composited
+there they measured **0–1.7% readable**: `leffe-blonde` (near-black),
+`wrench` (black), `la-fin-du-monde` (Unibroue's navy `U`),
+`ringnes` (dark green) and `bloodline-blood-orange-ipa` (Flying Dog's black
+wings).
+
+All five now sit on a **white rounded tile**, which is exactly what
+`modelo-especial.webp` and `amstel-light.webp` already do, for the same reason.
+It is presentation, not redrawing: the mark is trimmed to its own bounding box
+and centred with a 10% margin, at a corner radius of ⅙ the side — matching
+`.beer-logo-inline`'s 4px on 24px — and is never recoloured or cropped. The
+tile follows the source's own resolution rather than always hitting 256px,
+because upscaling a 48px icon only softens it (`la-fin-du-monde` is 96×96). All
+five now read at **77–97%**.
+
+Reach for the tile only when the mark genuinely disappears. `harp-lager` and
+`budweiser` are hand-placed and need no tile — red and gold read on charcoal
+perfectly well, and a tile behind them would be noise.
+
+## Two beers wearing their parent brand's mark
+
+`grolsch-puur-weizen` and `frisse-lentebok` both had grolsch.com's 144×144
+apple-touch-icon, which is the Grolsch wordmark **cropped to "Gro"** — and in
+dark green, so unreadable on the ground as well as truncated. Both are now
+byte-identical copies of `grolsch.webp`, the full wordmark with the red seal.
+
+Same trade as the two Modelos, and the same reason they are separate files
+rather than three `BRAND_LOGOS` entries pointing at one path: `fetch-logos`
+finds a beer's file by `slug(name)`, so a beer with no `<slug>.<ext>` of its
+own reads as having no file at all.
+
+## One repair rather than a replacement
+
+`tennents.svg` carried Tennent's real artwork all along and still would not
+decode: the fetcher wrote `<use xlink:href="…">` without ever declaring
+`xmlns:xlink`, which is a fatal XML error when an SVG is loaded as an `<img>`
+source rather than inlined. Adding the one namespace declaration was the whole
+fix. Worth trying first on any SVG here that renders as a broken image —
+`augustiner-helles` and `pilsner-urquell` were checked the same way and were
+genuinely empty, which is what sent them to the drawing pile.
+
+## Four that look odd and are staying
+
+`zywiec` (a red `Ż`), `michelob-ultra` (a bare red ribbon), `ocean-sju` (a black
+porthole ring) and `big-wave-golden-ale` (a 48px teal hibiscus) all read as
+thin answers, and all four are **the brand's own site favicon**, fetched from
+the brand's own domain. `zywiec.svg` in particular is a hand-authored path in
+Żywiec's brand red `#E4002B` — not one of the generated grey capitals the
+fetcher now refuses.
+
+They are the brands' digital marks rather than their label art, which is a real
+limitation but not a wrong answer. Replacing a brand's own icon with someone's
+drawing of what the label looks like would be the confidently-wrong trade this
+file keeps warning about, so they stay.
+
 **A file the fetcher did not write is never replaced**, `--force` included: it
 knows which files are its own from `logo-fetch-report.json`, and leaves the
-rest alone.
+rest alone. Everything described above is recorded under `kept` there, which is
+what makes that true — **if you hand-place or hand-edit a file, add it to
+`kept`**, or the next `fetch-logos` run will overwrite the work.
 
 ## What to check before trusting one
 

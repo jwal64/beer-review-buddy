@@ -250,10 +250,19 @@ npm run fetch-logos -- --force --only "Sol"
 
 For a brand that no source has, draw or save the logo into
 `public/stats/logos/` yourself and add the entry to `BRAND_LOGOS` by hand. The
-fetcher leaves a file it did not write alone, `--force` included. Nine logos
-are here that way and are drawn approximations rather than the brand's own
-artwork — `public/stats/logos/README.md` lists them and says why each one had
-to be drawn.
+fetcher leaves a file it did not write alone, `--force` included — but only
+because `logo-fetch-report.json` records which files are its own, so **a file
+you hand-place or hand-edit has to be added to `kept` there** or the next run
+overwrites it. Eighteen logos are here that way and are drawn approximations
+rather than the brand's own artwork — `public/stats/logos/README.md` lists them
+and says why each one had to be drawn.
+
+Three things that file also records, because no check can catch any of them: a
+logo can be the brand's real artwork and still render as nothing (an SVG whose
+art lives in a sprite it does not carry; a WebP that is entirely transparent),
+a mark drawn for a light label can measure invisible against this site's
+charcoal ground and needs the white tile `modelo-especial.webp` already uses,
+and a brand's own favicon is still a better answer than a drawing of its label.
 
 A single beer can still override its brand's file with `logo:"logos/<file>"`
 on its own `beers[]` entry — that is the per-review escape hatch, for artwork

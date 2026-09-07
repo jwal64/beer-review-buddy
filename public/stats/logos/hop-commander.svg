@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Hop Commander IPA, Captain Lawrence Brewing">
+  <rect width="512" height="512" rx="60" fill="#12304f"/>
+  <!-- a hop cone, for the IPA -->
+  <g stroke="#12304f" stroke-width="7" stroke-linejoin="round">
+    <path d="M256 96 c62 0 96 46 96 100 c0 62 -46 110 -96 138 c-50 -28 -96 -76 -96 -138 c0 -54 34 -100 96 -100 Z" fill="#9ccc57"/>
+    <g fill="none" stroke-linecap="round">
+      <path d="M168 158 c34 30 54 30 88 0 c34 30 54 30 88 0"/>
+      <path d="M162 208 c36 32 58 32 94 0 c36 32 58 32 94 0"/>
+      <path d="M172 258 c32 30 52 30 84 0 c32 30 52 30 84 0"/>
+      <path d="M196 306 c24 22 40 22 60 0 c24 22 40 22 60 0"/>
+    </g>
+    <path d="M256 96 c0 -22 -14 -36 -34 -42 c4 22 14 36 34 42 Z" fill="#7fae42"/>
+    <path d="M256 96 c0 -22 14 -36 34 -42 c-4 22 -14 36 -34 42 Z" fill="#7fae42"/>
+  </g>
+  <g text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="256" y="404" font-size="70" fill="#ffffff" letter-spacing="2">HOP</text>
+  </g>
+  <g text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="256" y="452" font-size="42" fill="#9ccc57" letter-spacing="3">COMMANDER</text>
+  </g>
+  <rect x="140" y="466" width="232" height="4" fill="#9ccc57"/>
+  <g text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="256" y="496" font-size="22" fill="#c7dc9a" letter-spacing="3">CAPTAIN LAWRENCE</text>
+  </g>
+</svg>

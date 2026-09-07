@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Magna, Cerveceria de Puerto Rico">
+  <rect width="512" height="512" rx="60" fill="#d99c1c"/>
+  <!-- banner device, and the single star of Puerto Rico -->
+  <g fill="#a4161a">
+    <path d="M110 150 h292 l-30 44 l30 44 H110 l30 -44 Z"/>
+  </g>
+  <g fill="#f6d98a">
+    <path d="M256 162 l14 30 h32 l-26 20 l10 32 l-30 -20 l-30 20 l10 -32 l-26 -20 h32 Z"/>
+  </g>
+  <g text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="256" y="352" font-size="112" fill="#a4161a" letter-spacing="4">MAGNA</text>
+  </g>
+  <rect x="120" y="376" width="272" height="6" fill="#a4161a"/>
+  <g text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="256" y="422" font-size="28" fill="#6d1013" letter-spacing="3">CERVECER&#205;A</text>
+    <text x="256" y="462" font-size="28" fill="#6d1013" letter-spacing="3">DE PUERTO RICO</text>
+  </g>
+</svg>
