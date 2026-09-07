@@ -231,31 +231,49 @@ const GENERIC_WORD = new Set(['beer', 'beers', 'lager', 'pilsener', 'pilsner', '
 const nameTokens = name => name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
   .toLowerCase().split(/[^a-z0-9]+/).filter(t => t.length >= 4 && !GENERIC_WORD.has(t));
 
+// Where a brewery files a beer, when its front door will not say. A splash
+// screen or an age gate is what answers the bare domain on a great many
+// brewery sites, and it carries no links at all — cerveceradepr.com is one,
+// which is why following links from the homepage found nothing and its real
+// content lives under /home/. So the usual sections are tried directly as well
+// as followed, and the beer's own page is guessed at each of them.
+const SECTIONS = ['home', 'marcas', 'productos', 'brands', 'products',
+  'cervezas', 'beers', 'our-products', 'nuestras-marcas'];
+
 const brandPageCache = new Map();
 async function brandPageLogo(beerName, domain, page) {
   const key = `${beerName}|${domain}`;
   if (brandPageCache.has(key)) return brandPageCache.get(key);
   const toks = nameTokens(beerName);
   let out = null;
-  if (toks.length) {
-    try {
-      await page.goto(`https://${domain}/`, { waitUntil: 'domcontentloaded', timeout: 15000 });
-      await page.waitForTimeout(1200);
-      const links = await withTimeout(page.evaluate(ts => {
-        const named = s => ts.some(t => (s || '').toLowerCase().includes(t));
-        const here = location.host;
-        const same = a => { try { return new URL(a.href).host === here; } catch { return false; } };
-        return [...new Set([...document.querySelectorAll('a[href]')]
-          .filter(a => same(a) && (named(a.getAttribute('href')) || named(a.textContent)))
-          .map(a => a.href))].slice(0, 3);
-      }, toks), 15000, `links naming ${beerName} on ${domain}`);
 
-      for (const url of links) {
-        await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
-        await page.waitForTimeout(1000);
-        out = await withTimeout(page.evaluate(ts => {
+  if (toks.length) {
+    const seen = new Set();
+    const queue = [`https://${domain}/`, `https://www.${domain}/`];
+    // The beer's own page, guessed: /magna/, /marcas/magna/, and so on. A
+    // guess costs one request and a 404 costs nothing, which is a better
+    // trade than a favicon service's confident wrong answer.
+    for (const t of toks.slice(0, 2)) {
+      queue.push(`https://${domain}/${t}/`);
+      for (const s of SECTIONS) queue.push(`https://${domain}/${s}/${t}/`);
+    }
+    for (const s of SECTIONS) queue.push(`https://${domain}/${s}/`);
+
+    // Bounded: a brand with nothing to find should not spend a beer's whole
+    // budget proving it.
+    let visits = 0;
+    while (queue.length && visits < 12 && !out) {
+      const url = queue.shift();
+      if (seen.has(url)) continue;
+      seen.add(url);
+      visits++;
+      try {
+        const res = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 12000 });
+        if (!res || !res.ok()) continue;
+        await page.waitForTimeout(800);
+        const found = await withTimeout(page.evaluate(ts => {
           const named = s => ts.some(t => (s || '').toLowerCase().includes(t));
-          const cands = [];
+          const imgs = [];
           for (const i of document.querySelectorAll('img')) {
             const src = i.currentSrc || i.src;
             if (!src || src.startsWith('data:image/gif')) continue;
@@ -263,16 +281,26 @@ async function brandPageLogo(beerName, domain, page) {
             const r = i.getBoundingClientRect();
             // The file's own size is what gets saved; the drawn size only
             // separates a mark the page actually shows from one it hides.
-            cands.push({ url: src,
+            imgs.push({ url: src,
               score: (i.naturalWidth || 0) * (i.naturalHeight || 0) + r.width * r.height });
           }
-          cands.sort((a, b) => b.score - a.score);
-          return cands[0] ? { kind: 'img', url: cands[0].url } : null;
-        }, toks), 15000, `images naming ${beerName} on ${url}`);
-        if (out) break;
-      }
-    } catch { out = null; }
+          imgs.sort((a, b) => b.score - a.score);
+          const here = location.host;
+          const same = a => { try { return new URL(a.href).host === here; } catch { return false; } };
+          const links = [...new Set([...document.querySelectorAll('a[href]')]
+            .filter(a => same(a) && (named(a.getAttribute('href')) || named(a.textContent)))
+            .map(a => a.href))].slice(0, 3);
+          return { img: imgs[0] ?? null, links };
+        }, toks), 12000, `reading ${url}`);
+
+        if (found?.img) { out = { kind: 'img', url: found.img.url }; break; }
+        // A page that names the beer in a link is a better lead than the next
+        // guess, so it goes to the front.
+        for (const l of found?.links ?? []) if (!seen.has(l)) queue.unshift(l);
+      } catch { /* a page that will not load is simply not an answer */ }
+    }
   }
+
   brandPageCache.set(key, out);
   return out;
 }
