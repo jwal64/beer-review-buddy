@@ -215,7 +215,7 @@ let breweries=[
   {name:"Bitburger Braugruppe",              location:"Bitburg, Rhineland-Palatinate",           country:"Germany",           cc:"DE",    lang:"de",beers:"Bitburger Radler",                                                                         lat:49.9739,lng:6.5334,   ratings:[4.00]},
   {name:"Radeberger Exportbierbrauerei",     location:"Radeberg, Saxony",                        country:"Germany",           cc:"DE",    lang:"de",beers:"Radeberger Pilsner",                                                                       lat:51.1136,lng:13.9169,  ratings:[3.00]},
   {name:"Cervecería Nacional Dominicana",    location:"Santo Domingo, Distrito Nacional",        country:"Dominican Republic",cc:"DO",    lang:"es",beers:"Presidente",                                                                               lat:18.4861,lng:-69.9312, ratings:[3.00]},
-  {name:"Amstel Brouwerij (Heineken)",       location:"Amsterdam, Noord-Holland",                country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Amstel Light",                                                                              lat:52.3578,lng:4.8918,   ratings:[2.50]},
+  {name:"Amstel Brouwerij (Heineken)",       location:"Amsterdam, Noord-Holland",                country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Amstel Light",                                                                             lat:52.3578,lng:4.8918,   ratings:[2.50]},
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -334,15 +334,15 @@ const BRAND_DOMAINS = {
 "Żywiec":"zywiec.com.pl",
 };
 
-// ════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 // BRAND LOGOS — the committed file each beer's logo is drawn from
-// ════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 // A path under public/stats/, one per beer name, fetched once by
 // `npm run fetch-logos` and held in the repo. This is where a logo comes
 // from: the same picture on every render, working offline, and nobody
 // else's to withdraw. The domains above are the fallback for a beer that
 // has no file yet.
-// ════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 const BRAND_LOGOS = {
 "Affligem Tripel":"logos/affligem-tripel.svg",
 "Almaza Pilsener":"logos/almaza-pilsener.webp",
@@ -447,17 +447,6 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
-
-
-
-
-
-
-
-
-
-
-
 
 // ══════════════════════════════════════════════════════════════
 // UNTAPPD CONSENSUS — the world's average, for the contrarian index

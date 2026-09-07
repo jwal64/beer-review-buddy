@@ -10,6 +10,13 @@
 // that shifted a space.
 
 const q = s => JSON.stringify(String(s));
+
+// The section rule. Exported because tools/fetch-logos.mjs rewrites one of
+// these sections on its own and has to draw the same line: it used to carry its
+// own copy, two characters shorter, so `npm run fetch-logos` and `npm run sync`
+// each reverted the other's formatting every time they ran. One constant, one
+// width, no argument.
+export const RULE = '// ══════════════════════════════════════════════════════════════';
 const fixed = (n, dp) => (n === null || n === undefined ? 'null' : Number(n).toFixed(dp));
 const pad = (s, w) => s + ' '.repeat(Math.max(0, w - s.length));
 const widest = (rows, f) => rows.reduce((w, r) => Math.max(w, f(r).length), 0);
@@ -25,10 +32,41 @@ function table(rows, spec) {
       pad(render(r), i === spec.length - 1 ? 0 : widths[i])).join('') + '},');
 }
 
+// The BRAND LOGOS section, as lines.
+//
+// Two commands write this block — `npm run sync` through renderDataJs below,
+// and `npm run fetch-logos` after it has fetched new files — so it lives in one
+// function that both call rather than in two implementations that agree only
+// while nobody looks. They did not agree: the rule was 63 characters on one
+// side and 65 on the other, which is why lines 337, 339 and 345 of data.js were
+// six bytes shorter than every other rule in the file.
+//
+// Keys are sorted, explicitly. Insertion order would follow whatever order
+// BRAND_DOMAINS happens to be in, which is alphabetical today and need not stay
+// that way once a beer is appended out of order — and the moment it isn't, the
+// two commands start reverting each other again by a different route.
+export function brandLogosBlock(logos) {
+  return [
+    RULE,
+    "// BRAND LOGOS — the committed file each beer's logo is drawn from",
+    RULE,
+    '// A path under public/stats/, one per beer name, fetched once by',
+    '// `npm run fetch-logos` and held in the repo. This is where a logo comes',
+    '// from: the same picture on every render, working offline, and nobody',
+    "// else's to withdraw. The domains above are the fallback for a beer that",
+    '// has no file yet.',
+    RULE,
+    'const BRAND_LOGOS = {',
+    ...Object.keys(logos ?? {}).sort().map(k => `${q(k)}:${q(logos[k])},`),
+    '};',
+    '',
+  ];
+}
+
 export function renderDataJs(D) {
   const out = [];
   const push = (...lines) => out.push(...lines);
-  const rule = '// ══════════════════════════════════════════════════════════════';
+  const rule = RULE;
 
   push(
     rule,
@@ -139,20 +177,7 @@ export function renderDataJs(D) {
   push('};', '');
 
   // ── Brand logos
-  push(
-    rule,
-    "// BRAND LOGOS — the committed file each beer's logo is drawn from",
-    rule,
-    '// A path under public/stats/, one per beer name, fetched once by',
-    '// `npm run fetch-logos` and held in the repo. This is where a logo comes',
-    '// from: the same picture on every render, working offline, and nobody',
-    "// else's to withdraw. The domains above are the fallback for a beer that",
-    '// has no file yet.',
-    rule,
-    'const BRAND_LOGOS = {',
-  );
-  for (const [name, v] of Object.entries(D.BRAND_LOGOS ?? {})) push(`${q(name)}:${q(v)},`);
-  push('};', '');
+  push(...brandLogosBlock(D.BRAND_LOGOS));
 
   // ── Untappd consensus
   push(
