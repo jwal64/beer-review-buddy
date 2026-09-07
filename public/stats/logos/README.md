@@ -54,27 +54,26 @@ full under `missing`. If one of those brands ever publishes a reachable logo,
 these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
 then re-fetch, since the fetcher will not overwrite a file it did not write.
 
-Two more are drawn for the **opposite** reason — the fetcher answered for
-these, and answered *wrong*:
+Four more beers were wrong for the **opposite** reason — the fetcher answered
+for these, and answered *wrong*:
 
-`modelo-oro` · `negra-modelo`
+`budweiser` · `modelo-especial` · `modelo-oro` · `negra-modelo`
 
-Four beers were wrong that way. Two of them, Modelo Especial and Budweiser,
-now carry the brand's own artwork instead (below); these two are still drawn.
-All four are listed under `kept` in `logo-fetch-report.json` rather than
-`fetched`, which is what stops the fetcher overwriting them — so the two bad
-ladders no longer survive in that file, and this is the record of them:
+All four carry the brand's own artwork now (below), so none of them is a
+drawing any more. They stay listed under `kept` in `logo-fetch-report.json`
+rather than `fetched`, which is what stops the fetcher overwriting them — so
+the two bad ladders no longer survive in that file, and this is the record of
+them:
 
 - **The three Modelos** all resolved to `site header logo` on their shared
   domain `modelousa.com`, and what that header held was
   `cdn/shop/files/97898_EWH_009_08.jpg` — a 330×413 storefront **photograph of
   a man in a room**. One domain for three beers meant one identical photo for
   three beers. The fetcher refuses photographs now (`clear < 0.02 &&
-  colours > 1200`), so this particular answer cannot come back; a drawing gives
-  each of them the distinct mark a shared domain never could. Modelo Especial
-  has since been replaced by the brand's own artwork, but the other two are
-  still drawn, because that shared domain has no separate mark to fetch for
-  them.
+  colours > 1200`), so this particular answer cannot come back. All three carry
+  the supplied Modelo crest now. Note what that shared domain still means: no
+  source here has a separate mark for Negra Modelo or Modelo Oro, so the three
+  share one picture by decision rather than by accident — see below.
 - **Budweiser** resolved to `wikidata P154` for `budweiser.com` and came back
   with `Budejovicky_Budvar_logo.png` — the mark of **Budějovický Budvar**, the
   Czech brewery, on a beer this repo records as `origin:"US"`, brewed by
@@ -85,12 +84,13 @@ ladders no longer survive in that file, and this is the record of them:
   straight back. Leave the hand-placed file unless you have checked by eye that
   what replaces it is the bowtie.
 
-The session that drew these could not have fetched anything anyway — its egress
-policy denied every logo source (the brand sites, Wikimedia, Google, Icon Horse
-and DuckDuckGo all refused `CONNECT`), which is its own reason a drawing was the
-only way to get a correct logo into the tree for any of them.
+The sessions that drew the stand-ins could not have fetched anything anyway —
+their egress policy denied every logo source (the brand sites, Wikimedia,
+Google, Icon Horse and DuckDuckGo all refused `CONNECT`), which is its own
+reason a drawing was the only way to get a correct logo into the tree at the
+time. The drawings are in this branch's history if one is ever wanted back.
 
-Three files are hand-placed but are **the brands' own artwork**, supplied by the
+Five files are hand-placed but are **the brands' own artwork**, supplied by the
 owner rather than drawn or fetched:
 
 - `modelo-especial.webp` — the Modelo crest, replacing the storefront
@@ -106,6 +106,20 @@ owner rather than drawn or fetched:
 - `budweiser.webp` — the bowtie, replacing the drawn stand-in that replaced
   Budvar's mark. Same border-only flood as Harp, which is what keeps the white
   script inside the bowtie; red on charcoal needs no tile behind it.
+- `negra-modelo.webp` and `modelo-oro.webp` — **byte-identical copies of
+  `modelo-especial.webp`**, at the owner's instruction, because no source has a
+  separate mark for either beer. Know what this costs: the crest carries the
+  *Especial* script, so both beers display a mark naming a different product.
+  That was a deliberate trade against the drawings they replaced. If a distinct
+  Negra Modelo or Modelo Oro mark ever turns up, these are the two files to
+  replace.
+
+  They are separate files rather than three `BRAND_LOGOS` entries pointing at
+  one path, and that is load-bearing: `fetch-logos` finds a beer's file by
+  `slug(name)`, so a beer with no `<slug>.<ext>` of its own reads as having no
+  file at all — it would be queued for fetching, and `--data-only` would
+  rewrite `BRAND_LOGOS` from what is on disk and drop the shared entry. The two
+  Peronis already duplicate one mark the same way.
 
 `amstel-light.webp` is hand-placed too, but it is not a drawing: it is the
 brand's own roundel, cut from the owner's Untappd check-in screenshot at the
