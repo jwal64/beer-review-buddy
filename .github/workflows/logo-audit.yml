@@ -1,12 +1,16 @@
 name: Logo audit
 
-# TEMPORARY — this file is the audit workflow, borrowed for one run.
+# TEMPORARY — borrowed again, for one run, exactly as the note below describes.
 #
-# Fetching a hundred logos needs open internet, and the sandbox this branch is
-# being developed in cannot reach any of the logo services. `workflow_dispatch`
-# only offers workflows that exist on the default branch, so the fetch borrows
-# this one to get onto a runner. The real audit workflow comes back in the same
-# branch, before anything is merged.
+# The three Modelo beers list one domain, modelousa.com, and the fetcher has
+# now walked all seven tiers against it and come back with nothing usable:
+# no declared icon, an og:image that is not square, a header "logo" that is a
+# JPEG photograph, and silence from every favicon service. The question this
+# run answers is which domain Modelo's mark actually lives on, so that the
+# domain in BRAND_DOMAINS can be corrected rather than guessed at — a guessed
+# domain is how a brand ends up wearing another company's logo.
+#
+# It writes nothing. It only reports what each candidate serves.
 
 on:
   schedule:
@@ -14,13 +18,12 @@ on:
   workflow_dispatch:
 
 permissions:
-  issues: write
-  contents: write
+  contents: read
 
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 55
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
         with:
@@ -30,47 +33,23 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Install Playwright and Chromium
+      # Ownership first. A domain that serves a logo is no use if the logo is
+      # not Modelo's, so print where each candidate lands and what it calls
+      # itself before asking any source for a picture.
+      - name: Who owns these domains
         run: |
-          npm install
-          npx playwright install --with-deps chromium
-
-      # The ones the sheet and the report still argue with: eight whose logo
-      # Wikidata holds but whose file would not download, and the three Modelo
-      # beers whose "header logo" is a JPEG cutout of a man holding a bottle.
-      # Everything else keeps the file it has.
-      - name: Re-fetch the ones still wrong
-        run: |
-          node tools/fetch-logos.mjs --force --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
-          Affligem Tripel
-          Almaza Pilsener
-          Mahou Cinco Estrellas
-          Modelo Especial
-          Modelo Oro
-          Mythos
-          Negra Modelo
-          Newcastle Brown Ale
-          Pacífico Clara
-          Singha
-          Smithwick's
-          EOF
-          )"
-
-      - name: Commit what it found
-        if: always()
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/stats/logos public/stats/data.js logo-fetch-report.json
-          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
-          git commit -m "Re-fetch every logo at the best resolution anyone has"
-          # Half an hour of fetching should not be thrown away because somebody
-          # pushed a comment to the branch while it ran. Rebase onto whatever
-          # is there and try again; the logos are the only thing this commit
-          # touches, so there is nothing for it to conflict with.
-          for attempt in 1 2 3; do
-            git push origin HEAD:${{ github.ref_name }} && exit 0
-            git pull --rebase origin ${{ github.ref_name }}
+          for d in modelousa.com modelo.com grupomodelo.com gmodelo.com.mx \
+                   cervezamodelo.com.mx negramodelo.com modelooro.com \
+                   modeloespecial.com corona.com; do
+            out=$(curl -sSL --max-time 20 -o /tmp/page.html \
+                  -w '%{http_code} %{url_effective}' "https://$d/" 2>/dev/null) || out="--- unreachable"
+            title=$(tr '\n' ' ' < /tmp/page.html 2>/dev/null \
+                    | grep -oiP '<title[^>]*>\K.*?(?=</title>)' | head -c 90)
+            printf '%-24s %s\n%*s   title: %s\n' "$d" "$out" 24 "" "${title:-(none)}"
           done
-          echo "could not push after three tries" >&2
-          exit 1
+
+      - name: What each candidate actually serves
+        run: |
+          node tools/probe-logo-sources.mjs \
+            modelousa.com modelo.com grupomodelo.com gmodelo.com.mx \
+            cervezamodelo.com.mx negramodelo.com modelooro.com || true
