@@ -54,21 +54,25 @@ full under `missing`. If one of those brands ever publishes a reachable logo,
 these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
 then re-fetch, since the fetcher will not overwrite a file it did not write.
 
-Four more are drawn for the **opposite** reason — the fetcher answered for
+Three more are drawn for the **opposite** reason — the fetcher answered for
 these, and answered *wrong*:
 
-`budweiser` · `modelo-especial` · `modelo-oro` · `negra-modelo`
+`budweiser` · `modelo-oro` · `negra-modelo`
 
-`logo-fetch-report.json` still records the two bad ladders, because they are
-worth recognising:
+They are listed under `kept` in `logo-fetch-report.json` now rather than
+`fetched`, which is what stops the fetcher overwriting them — so the two bad
+ladders no longer survive in that file, and this is the record of them:
 
 - **The three Modelos** all resolved to `site header logo` on their shared
   domain `modelousa.com`, and what that header held was
   `cdn/shop/files/97898_EWH_009_08.jpg` — a 330×413 storefront **photograph of
   a man in a room**. One domain for three beers meant one identical photo for
   three beers. The fetcher refuses photographs now (`clear < 0.02 &&
-  colours > 1200`), so this particular answer cannot come back; the drawings
-  give the three the distinct marks a shared domain never could.
+  colours > 1200`), so this particular answer cannot come back; a drawing gives
+  each of them the distinct mark a shared domain never could. Modelo Especial
+  has since been replaced by the brand's own artwork (below), but the other two
+  are still drawn, because that shared domain has no separate mark to fetch for
+  them.
 - **Budweiser** resolved to `wikidata P154` for `budweiser.com` and came back
   with `Budejovicky_Budvar_logo.png` — the mark of **Budějovický Budvar**, the
   Czech brewery, on a beer this repo records as `origin:"US"`, brewed by
@@ -81,7 +85,21 @@ worth recognising:
 The session that drew these could not have fetched anything anyway — its egress
 policy denied every logo source (the brand sites, Wikimedia, Google, Icon Horse
 and DuckDuckGo all refused `CONNECT`), which is its own reason a drawing was the
-only way to get four correct logos into the tree.
+only way to get a correct logo into the tree for any of them.
+
+Two files are hand-placed but are **the brands' own artwork**, supplied by the
+owner rather than drawn or fetched:
+
+- `modelo-especial.webp` — the Modelo crest, replacing the storefront
+  photograph above. The crest is navy on transparent, drawn for a light label,
+  and on this site's charcoal ground the wordmark disappeared while only the
+  gold lions read, so it is masked onto a white tile with the corner radius the
+  other tiles use. That is presentation, not redrawing: the mark itself is
+  untouched.
+- `harp-lager.webp` — the Harp badge, replacing an `icon.horse` answer that was
+  a generic blue-and-white glyph, not Harp's mark at all. Its white surround is
+  flooded out from the border, so the badge sits on the ground like every other
+  logo while the white *inside* the badge stays part of the mark.
 
 `amstel-light.webp` is hand-placed too, but it is not a drawing: it is the
 brand's own roundel, cut from the owner's Untappd check-in screenshot at the

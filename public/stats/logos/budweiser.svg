@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Budweiser King of Beers">
+  <rect width="512" height="512" rx="60" fill="#c8102e"/>
+  <path d="M104 128 L256 180 L408 128 L408 250 L256 198 L104 250 Z" fill="#ffffff"/>
+  <g text-anchor="middle">
+    <text x="256" y="338" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-style="italic" font-size="84" fill="#ffffff">Budweiser</text>
+    <rect x="136" y="364" width="240" height="5" fill="#f0d48a"/>
+    <text x="256" y="414" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="30" letter-spacing="4" fill="#f0d48a">KING OF BEERS</text>
+  </g>
+</svg>
