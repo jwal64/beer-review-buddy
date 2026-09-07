@@ -240,6 +240,19 @@ async function wikidataLogo(beerName, domains) {
         `&titles=${encodeURIComponent(titles.join('|'))}`);
       const ids = Object.values(props?.query?.pages ?? {})
         .map(p => p.pageprops?.wikibase_item).filter(Boolean);
+      // Every candidate is weighed before any is taken, because the two kinds
+      // of evidence are not equal and the search order is not meaningful. A
+      // domain match is proof: P856 is "official website", so an item whose
+      // site is a domain already in BRAND_DOMAINS is that brand by definition.
+      // A label match is a guess — and a prefix guess is how this went wrong.
+      // "Budweiser Budvar" starts with "Budweiser ", so the Czech brewery
+      // matched the St. Louis beer, sat earlier in the Wikipedia results than
+      // Anheuser-Busch's own item, and won on order alone; the site rendered
+      // Budvar's mark on an American lager for as long as nobody looked.
+      // Trademark collisions are exactly where a label is least trustworthy,
+      // so a label match is now only allowed to win when nothing matched by
+      // domain at all.
+      const matched = [];
       for (const id of ids) {
         const ent = await api('https://www.wikidata.org/w/api.php?action=wbgetentities&format=json' +
           `&ids=${id}&props=claims|labels&languages=en`);
@@ -252,6 +265,10 @@ async function wikidataLogo(beerName, domains) {
         const byLabel = label.length > 3 &&
           (label === beer || beer.startsWith(label + ' ') || label.startsWith(beer + ' '));
         if (!byDomain && !byLabel) continue;
+        matched.push({ id, claims, byDomain });
+      }
+      const byDomainHits = matched.filter(m => m.byDomain);
+      for (const { id, claims } of byDomainHits.length ? byDomainHits : matched) {
         const file = claims?.P154?.[0]?.mainsnak?.datavalue?.value;
         if (!file) { why = `${id} is the right brand but has no logo on file`; continue; }
         const info = await api('https://commons.wikimedia.org/w/api.php?action=query&format=json' +

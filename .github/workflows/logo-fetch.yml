@@ -44,12 +44,23 @@ jobs:
           npm install
           npx playwright install --with-deps chromium
 
+      # `only` is a list of beer names, and beer names have spaces in them.
+      # Built into one string and expanded unquoted, the shell split it on
+      # those spaces: "Budweiser,Modelo Especial,Modelo Oro,Negra Modelo"
+      # reached the tool as four separate words, --only took the first, and a
+      # run asked for four beers fetched one and reported "0 still missing" —
+      # a request half-obeyed, reported as success. An array keeps the list a
+      # single argument, and the inputs come through the environment rather
+      # than being pasted into the script.
       - name: Fetch
+        env:
+          ONLY: ${{ inputs.only }}
+          FORCE: ${{ inputs.force }}
         run: |
-          ARGS=""
-          [ "${{ inputs.force }}" = "true" ] && ARGS="$ARGS --force"
-          [ -n "${{ inputs.only }}" ] && ARGS="$ARGS --only ${{ inputs.only }}"
-          node tools/fetch-logos.mjs $ARGS
+          args=()
+          if [ "$FORCE" = "true" ]; then args+=(--force); fi
+          if [ -n "$ONLY" ]; then args+=(--only "$ONLY"); fi
+          node tools/fetch-logos.mjs "${args[@]}"
 
       # The data has to name the files or nothing reads them, and the check
       # that every beer has one is the point of the whole exercise. A run that
