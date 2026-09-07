@@ -4,7 +4,7 @@ import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
 import { QueryError } from "@/components/QueryError";
-import { averageRating, flagEmoji, formatMonth, useBeers, useCountries } from "@/lib/beer-data";
+import { flagEmoji, formatMonth, useBeers, useCountries, type Beer } from "@/lib/beer-data";
 import { placeLabel } from "@/lib/place";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
@@ -45,7 +45,11 @@ function StatCard({
     >
       <div className="font-display text-2xl font-semibold text-primary">{value}</div>
       <div className="mt-0.5 text-xs text-muted-foreground">{label}</div>
-      <ChevronRight size={14} aria-hidden="true" className="mt-2 text-muted-foreground transition-transform group-hover:translate-x-0.5" />
+      <ChevronRight
+        size={14}
+        aria-hidden="true"
+        className="mt-2 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+      />
     </Link>
   );
 }
@@ -56,12 +60,30 @@ function HomePage() {
 
   const stats = useMemo(() => {
     const list = beers ?? [];
-    const originCountries = new Set(list.map((b) => b.origin_cc).filter(Boolean));
-    const top = [...list].sort((a, b) => Number(b.rating) - Number(a.rating)).slice(0, 3);
+    // One pass for the three tallies, and a linear scan for the top three
+    // rather than copying and sorting the whole log to take the first few.
+    const originCountries = new Set<string>();
+    const names = new Set<string>();
+    let ratingSum = 0;
+    const top: Beer[] = [];
+    for (const b of list) {
+      if (b.origin_cc) originCountries.add(b.origin_cc);
+      names.add(b.name);
+      const rating = Number(b.rating);
+      ratingSum += rating;
+      // Insertion into a list that is never longer than three. Ties keep the
+      // earlier row, which is what a stable sort by rating did.
+      let i = top.length;
+      while (i > 0 && rating > Number(top[i - 1]!.rating)) i--;
+      if (i < 3) {
+        top.splice(i, 0, b);
+        if (top.length > 3) top.pop();
+      }
+    }
     return {
       total: list.length,
-      unique: new Set(list.map((b) => b.name)).size,
-      avg: averageRating(list),
+      unique: names.size,
+      avg: list.length ? ratingSum / list.length : 0,
       countries: originCountries.size,
       recent: list.slice(0, 5),
       top,
@@ -90,14 +112,20 @@ function HomePage() {
           <section>
             <div className="mb-3 flex items-center justify-between">
               <h2 className="font-display text-lg font-semibold">Highest rated</h2>
-              <Link to="/insights" className="flex min-h-11 items-center text-xs font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Link
+                to="/insights"
+                className="flex min-h-11 items-center text-xs font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
                 Explore <ChevronRight size={14} aria-hidden="true" />
               </Link>
             </div>
             {stats.top.length ? (
               <ul className="space-y-2">
                 {stats.top.map((b) => (
-                  <li key={b.id} className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3">
+                  <li
+                    key={b.id}
+                    className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3"
+                  >
                     <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-semibold">{b.name}</p>
@@ -110,7 +138,9 @@ function HomePage() {
                 ))}
               </ul>
             ) : (
-              <p className="rounded-2xl border border-dashed border-border px-5 py-8 text-center text-sm text-muted-foreground">No reviews yet.</p>
+              <p className="rounded-2xl border border-dashed border-border px-5 py-8 text-center text-sm text-muted-foreground">
+                No reviews yet.
+              </p>
             )}
           </section>
 
@@ -118,15 +148,25 @@ function HomePage() {
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <h2 className="font-display text-lg font-semibold">Recent pours</h2>
-                {stats.recent[0] && <p className="mt-0.5 text-xs text-muted-foreground">Last poured {formatMonth(stats.recent[0].drank_on)}</p>}
+                {stats.recent[0] && (
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Last poured {formatMonth(stats.recent[0].drank_on)}
+                  </p>
+                )}
               </div>
-              <Link to="/beers" className="flex min-h-11 items-center text-xs font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+              <Link
+                to="/beers"
+                className="flex min-h-11 items-center text-xs font-medium text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
                 See all <ChevronRight size={14} aria-hidden="true" />
               </Link>
             </div>
             <ul className="space-y-2">
               {stats.recent.map((b) => (
-                <li key={b.id} className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3">
+                <li
+                  key={b.id}
+                  className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3"
+                >
                   <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{b.name}</p>

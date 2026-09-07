@@ -16,7 +16,7 @@ import {
   type Beer,
   type CountryRow,
 } from "@/lib/beer-data";
-import { beerLogo, breweryLogo, type DomainMap, type LogoMap } from "@/lib/logos";
+import { logoForBeer, type DomainMap, type LogoMap } from "@/lib/logos";
 import { placeLabel } from "@/lib/place";
 import { ClientOnly } from "@tanstack/react-router";
 // Bundled with the app — the map's layout breaks entirely without this
@@ -51,6 +51,74 @@ export const Route = createFileRoute("/map")({
 });
 
 type MapMode = "drank" | "brewed";
+
+// The fallback a still-loading query renders with, one shared frozen array per
+// table rather than a `?? []` at the call site.
+//
+// This is the same rule as the module-scope selects in lib/beer-data.ts, one
+// step further out, and it is load-bearing for the same reason. `?? []` mints a
+// new array every render, and these four are dependencies of LeafletMap's
+// marker effect — so while any of these queries is in flight, the effect sees a
+// changed dependency on every render, clears its layer group, and rebuilds the
+// pins, taking the popup a click had just opened with it. `countries` is the
+// one that actually reaches that state today: it is not part of the `loading`
+// guard below, so the map renders while it is still fetching.
+//
+// See CLAUDE.md, "Map Rule: The Pop-out Stays Open".
+const NO_BEERS: Beer[] = [];
+const NO_BREWERIES: NonNullable<ReturnType<typeof useBreweries>["data"]> = [];
+const NO_LOCATIONS: NonNullable<ReturnType<typeof useLocations>["data"]> = [];
+const NO_COUNTRIES: CountryRow[] = [];
+
+// Beers grouped by the pin that shows them, cached on the identity of the array
+// they came from.
+//
+// A WeakMap and deliberately not a useMemo: this must never become a value the
+// marker effect depends on. A memo with a missing or over-wide dependency array
+// is a new object every render, which is the whole mechanism behind "Map Rule:
+// The Pop-out Stays Open" — and eslint's exhaustive-deps is a warning here, so
+// that mistake would ship green. There is no dependency array to get wrong.
+// React Query hands back the same array until the rows change, so each grouping
+// is built once per fetch and read in O(1) after that.
+const byBreweryCache = new WeakMap<readonly Beer[], Map<string, Beer[]>>();
+const byCityCache = new WeakMap<readonly Beer[], Map<string, Beer[]>>();
+
+// A city pin matches on city AND country code, as the filter did. NUL separates
+// them so "A" + "BC" cannot collide with "AB" + "C".
+const cityKey = (city: string, cc: string) => `${city}\u0000${cc}`;
+
+function beersByBrewery(beers: readonly Beer[]) {
+  let g = byBreweryCache.get(beers);
+  if (!g) {
+    g = new Map<string, Beer[]>();
+    // Pushed in the array's own order, which is drank_on descending. filter()
+    // preserved that and the popup rows read as a diary, so the group has to
+    // preserve it too — and the brewery's logo is taken from the first entry.
+    for (const b of beers) {
+      if (!b.brewery) continue;
+      const list = g.get(b.brewery);
+      if (list) list.push(b);
+      else g.set(b.brewery, [b]);
+    }
+    byBreweryCache.set(beers, g);
+  }
+  return g;
+}
+
+function beersByCity(beers: readonly Beer[]) {
+  let g = byCityCache.get(beers);
+  if (!g) {
+    g = new Map<string, Beer[]>();
+    for (const b of beers) {
+      const k = cityKey(b.city, b.cc);
+      const list = g.get(k);
+      if (list) list.push(b);
+      else g.set(k, [b]);
+    }
+    byCityCache.set(beers, g);
+  }
+  return g;
+}
 
 function MapPage() {
   const beers = useBeers();
@@ -137,12 +205,12 @@ function MapPage() {
           <ClientOnly fallback={<Skeleton className="h-[420px] w-full rounded-2xl" />}>
             <LeafletMap
               mode={mode}
-              breweries={breweries.data ?? []}
-              beers={beers.data ?? []}
+              breweries={breweries.data ?? NO_BREWERIES}
+              beers={beers.data ?? NO_BEERS}
               domains={domains}
               logos={logos}
-              locations={locations.data ?? []}
-              countries={countries.data ?? []}
+              locations={locations.data ?? NO_LOCATIONS}
+              countries={countries.data ?? NO_COUNTRIES}
               onPick={setFilter}
             />
           </ClientOnly>
@@ -241,7 +309,7 @@ const tally = (list: Beer[], nothingWord: string) =>
 /** A beer's logo tile: monogram underneath, image over it, letter uncovered
  *  again if the image fails. */
 function logoCell(beer: Beer, domains: DomainMap | undefined, logos: LogoMap | undefined) {
-  const src = beerLogo(beer.name, domains, beer.logo ?? logos?.get(beer.name));
+  const src = logoForBeer(beer, domains, logos);
   const img = src ? `<img src="${esc(src)}" alt="" loading="lazy" onerror="this.remove()" />` : "";
   return `<span class="bm-pop-logo"><span>${esc(beer.name.charAt(0))}</span>${img}</span>`;
 }
@@ -417,19 +485,28 @@ function LeafletMap({
     // Only the active toggle's markers go on the map — never both sets at
     // once, so a brewery pin is never mistaken for a place it was drunk.
     if (mode === "brewed") {
+      const madeBy = beersByBrewery(beers);
       breweries
         .filter((b) => b.lat != null && b.lng != null)
         .forEach((b) => {
           const marker = L.marker([b.lat!, b.lng!], { icon: breweryIcon }).addTo(layer);
+          const made = madeBy.get(b.name) ?? NO_BEERS;
+          // A function, not a string. Leaflet calls it when the popup opens
+          // (Popup.onAdd → update → _updateContent), so the markup for every
+          // pin is no longer built and thrown away on each redraw — only the
+          // one pin the reader actually clicks costs anything.
           marker.bindPopup(
-            breweryPopup(
-              b,
-              beers.filter((x) => x.brewery === b.name),
-              domains,
-              logos,
-              countries,
-              breweryLogo(b.name, beers, domains, logos),
-            ),
+            () =>
+              breweryPopup(
+                b,
+                made,
+                domains,
+                logos,
+                countries,
+                // The same beer `breweryLogo` would have found: it returns the
+                // first match in array order, and the group preserves it.
+                made.length ? logoForBeer(made[0]!, domains, logos) : null,
+              ),
             { maxWidth: 260, minWidth: 208 },
           );
           marker.on("click", () =>
@@ -437,20 +514,20 @@ function LeafletMap({
           );
         });
     } else {
+      const pouredIn = beersByCity(beers);
       locations
         .filter((l) => l.lat != null && l.lng != null)
         .forEach((l) => {
           const marker = L.marker([l.lat!, l.lng!], { icon: cityIcon }).addTo(layer);
-          marker.bindPopup(
-            cityPopup(
-              l,
-              beers.filter((x) => x.city === l.city && x.cc === l.cc),
-              domains,
-              logos,
-              countries,
-            ),
-            { maxWidth: 260, minWidth: 208 },
-          );
+          // `locations.cc` is nullable where `beers.cc` is not, so a location
+          // with no code matched nothing before and must match nothing now —
+          // rather than being given some encoding of null that a real code
+          // could collide with.
+          const poured = (l.cc ? pouredIn.get(cityKey(l.city, l.cc)) : undefined) ?? NO_BEERS;
+          marker.bindPopup(() => cityPopup(l, poured, domains, logos, countries), {
+            maxWidth: 260,
+            minWidth: 208,
+          });
           marker.on("click", () =>
             pickRef.current({ kind: "city", label: l.city, title: placeLabel(l) }),
           );

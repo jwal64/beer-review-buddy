@@ -604,6 +604,13 @@ function showTab(id,btn){
   // Throws on file:// in some browsers — degrade silently.
   try{history.replaceState(null,'','#'+id);}catch(e){}
   const renderers = {
+    // Overview is drawn at boot, so `_inD` is already set and this is a no-op
+    // on an ordinary tab switch. It earns its place after reloadData(), which
+    // clears the flag: the panel is then redrawn either right here (if Overview
+    // is the tab you are on) or the next time you open it.
+    overview: [
+      ['_inD',drawOverview],
+    ],
     maps: [
       ['_dM',()=>{window._dM=true;setTimeout(initWorldMap,80);}],
     ],
@@ -711,6 +718,22 @@ const ttWithN=n=>({...TT,callbacks:{label:c=>{
 // ══════════════════════════════════════════════════════════════
 // OVERVIEW
 // ══════════════════════════════════════════════════════════════
+// Drawn eagerly at boot, and again whenever the data underneath it changes.
+//
+// That second half is the point. This panel used to be a bare `try {}` block
+// that ran once at load and never again, while `reloadData()` cleared a `_inD`
+// flag that nothing read — so when live-data.js found the database disagreed
+// with the committed snapshot and repainted the page, every other surface moved
+// and these KPIs kept showing the snapshot's numbers. That is the same silent
+// divergence CLAUDE.md's Step 6 is about, one layer further in: the page looked
+// consistent and was not.
+//
+// Every `const` below already sat inside the `try`, so it was block-scoped
+// before and is function-scoped now — nothing outside could reference them
+// either way. Re-running is safe: safeChart() destroys and rebuilds each chart
+// by key, and refreshStats() has updated STATS/beers before we are called.
+function drawOverview(){
+window._inD=true;
 try {
 // Use pre-computed statistics. DOM-only panels render first so a Chart.js
 // load failure can't take the text content down with it.
@@ -854,6 +877,8 @@ safeChart('scatterChart',document.getElementById('scatterChart'),{type:'scatter'
 // Insights panels (stat summary / quintiles / taste profile) now live on the
 // Overview tab, which renders eagerly at load — so draw them up front too.
 try { drawInsights(); } catch(e){ console.error('Insights init error:',e); }
+}
+drawOverview();
 
 // ══════════════════════════════════════════════════════════════
 // BEER TABLE + GRID
@@ -868,10 +893,12 @@ function renderTable(data){
           <button type="button" id="beerFilterReset">Clear filters</button></td></tr>`;
       return;
     }
-    document.getElementById('beerBody').innerHTML=data.map(b=>`
-      <tr${isDisplayNew(b)?' class="new-row"':''} style="cursor:pointer" data-beer="${esc(b.beer)}">
+    // isDisplayNew reads the clock, so it costs a Date per call, and it was
+    // called twice per row — once for the row class, once for the tag.
+    document.getElementById('beerBody').innerHTML=data.map(b=>{const isNew=isDisplayNew(b);return `
+      <tr${isNew?' class="new-row"':''} style="cursor:pointer" data-beer="${esc(b.beer)}">
         <td>${logoImg(b.beer,24)}</td>
-        <td style="color:var(--text);font-weight:600"><span class="beer-name-cell">${esc(b.beer)}</span>${isDisplayNew(b)?`<span class="new-tag">New</span>`:''}</td>
+        <td style="color:var(--text);font-weight:600"><span class="beer-name-cell">${esc(b.beer)}</span>${isNew?`<span class="new-tag">New</span>`:''}</td>
         <td style="color:var(--text-3);font-size:12px">${esc(b.style)}</td>
         <td>${FLAGS[b.origin]||''} ${esc(b.origin)}</td>
         <td style="color:var(--info)">${b.abv.toFixed(1)}%</td>
@@ -880,7 +907,7 @@ function renderTable(data){
         <td style="color:var(--text-3)">${esc(b.month)} ${b.year}</td>
         <td><span class="rb ${rbC(b.rating)}">${b.rating.toFixed(2)}</span></td>
         <td style="color:var(--accent-hi);font-size:12px">${strs(b.rating)}</td>
-      </tr>`).join('');
+      </tr>`;}).join('');
   } catch(e){ console.error('renderTable error:',e); }
 }
 // Column sorting state — clicking a table header sorts by that column,
@@ -1702,10 +1729,19 @@ function buildJourneyLayer(map,journeys){
 
 function buildPassportLayer(map){
   const group=L.layerGroup(),bounds=[];
+  // breweries_BY_CC is built by buildIndexes() for exactly this and had no
+  // reader; the loop below was re-scanning every brewery and every location
+  // once per country instead. drunkLocs has no such index, so one is made here.
+  const locsByCc=new Map();
+  for(const l of drunkLocs){
+    let arr=locsByCc.get(l.cc);
+    if(!arr){arr=[];locsByCc.set(l.cc,arr);}
+    arr.push(l);
+  }
   passportCountries().forEach(r=>{
     const pts=[];
-    breweries.filter(b=>b.cc===r.cc).forEach(b=>pts.push([b.lat,b.lng]));
-    drunkLocs.filter(l=>l.cc===r.cc).forEach(l=>pts.push([l.lat,l.lng]));
+    for(const b of breweries_BY_CC.get(r.cc)||[]) pts.push([b.lat,b.lng]);
+    for(const l of locsByCc.get(r.cc)||[]) pts.push([l.lat,l.lng]);
     if(!pts.length) return;
     const lat=pts.reduce((s,p)=>s+p[0],0)/pts.length,lng=pts.reduce((s,p)=>s+p[1],0)/pts.length;
     const color=r.brewed&&r.drank?THEME.pos:r.brewed?THEME.purple:THEME.accent;
@@ -2114,7 +2150,9 @@ function drawContrarian(){
   const rows=STATS.brandList.filter(b=>UNTAPPD_GLOBAL_AVGS[b.n]!==undefined).map(b=>{
     const global=UNTAPPD_GLOBAL_AVGS[b.n], jwal=b.avg, delta=jwal-global;
     return {name:b.n,jwal,global,delta};
-  }).sort((a,b)=>Math.abs(b.delta)-Math.abs(a.delta));
+  });
+  // Not sorted here: the only reader below copies this and sorts it by signed
+  // delta, so ordering it by absolute delta first was work nothing looked at.
 
   // Freshness indicator — turns yellow once Untappd data is older than the refresh interval.
   const freshEl=document.getElementById('ciFreshness');
@@ -2497,7 +2535,17 @@ function drawWantToTry(){
   });
 
   const inp=document.getElementById('cmd-input');
-  if(inp) inp.addEventListener('input',e=>renderResults(e.target.value));
+  // Debounced like the beers table's search, and for the same reason:
+  // renderResults scans every beer and every brewery, lowercasing three or four
+  // fields on each, and it was doing that on every keystroke.
+  if(inp){
+    let t;
+    inp.addEventListener('input',e=>{
+      const v=e.target.value;
+      clearTimeout(t);
+      t=setTimeout(()=>renderResults(v),160);
+    });
+  }
 
   window.closePalette=closePalette;
   window.openPalette=openPalette;

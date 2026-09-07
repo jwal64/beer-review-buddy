@@ -38,6 +38,7 @@
 import { mkdirSync, writeFileSync, readFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
 import { ROOT, loadData } from './load-data.mjs';
+import { brandLogosBlock } from './render-data-js.mjs';
 import { imageSize } from './probe-logo-sources.mjs';
 
 const args = process.argv.slice(2);
@@ -555,33 +556,27 @@ export async function findLogo(name, domains, page, lab = page) {
 
 // ── data.js ───────────────────────────────────────────────────
 // The files are only half of it: data.js has to name them, or nothing reads
-// them. The block is written in the same shape tools/render-data-js.mjs writes,
-// so the next `npm run sync` produces identical text and the file does not
-// churn.
+// them. The block comes from tools/render-data-js.mjs — the same function
+// `npm run sync` renders it with — so the two commands cannot write it
+// differently.
+//
+// They used to. This file carried its own copy of the block, and its rule was
+// '// ' + 60 '═' where the renderer's was 62, so every fetch-logos run left
+// three lines in data.js six bytes short of every other rule in the file and
+// every sync put them back. Nothing failed; the two commands just quietly
+// undid each other. If this block ever needs to change shape, change it there.
 const DATA_JS = join(ROOT, 'data.js');
-const RULE = '// ' + '═'.repeat(60);
 
 export function writeBrandLogos(map) {
-  const q = v => JSON.stringify(String(v));
-  const block = [
-    RULE,
-    "// BRAND LOGOS — the committed file each beer's logo is drawn from",
-    RULE,
-    '// A path under public/stats/, one per beer name, fetched once by',
-    '// `npm run fetch-logos` and held in the repo. This is where a logo comes',
-    '// from: the same picture on every render, working offline, and nobody',
-    "// else's to withdraw. The domains above are the fallback for a beer that",
-    '// has no file yet.',
-    RULE,
-    'const BRAND_LOGOS = {',
-    ...Object.keys(map).sort().map(k => `${q(k)}:${q(map[k])},`),
-    '};',
-    '',
-  ].join('\n');
+  // The block's last entry is '', so the join already ends in the newline that
+  // closes `};` — appending another one is what made every run of this command
+  // add a blank line to data.js that the next run added to again. The regex
+  // below stops at that same `};\n`, so the replacement has to end there too.
+  const block = brandLogosBlock(map).join('\n');
 
   let src = readFileSync(DATA_JS, 'utf8');
   const existing = src.match(/(?:^\/\/ ═+\n\/\/ BRAND LOGOS[\s\S]*?)^const BRAND_LOGOS = \{[\s\S]*?^\};\n/m);
-  if (existing) src = src.replace(existing[0], block + '\n');
+  if (existing) src = src.replace(existing[0], block);
   else {
     const anchor = src.match(/^const BRAND_DOMAINS = \{[\s\S]*?^\};\n\n/m);
     if (!anchor) throw new Error('could not find the BRAND_DOMAINS block in data.js');
