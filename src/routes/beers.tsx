@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useDeferredValue, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
@@ -71,8 +71,16 @@ function BeersPage() {
     [beers],
   );
 
+  // The typed value drives the input; a deferred copy drives the list.
+  //
+  // Every keystroke re-renders every matching row, and a row is not cheap: a
+  // logo, a formatted month and ten star SVGs from <Rating>. Deferring lets
+  // React paint the character you just typed first and re-filter after, which
+  // keeps the field responsive without a timer to tune or cancel.
+  const deferredQuery = useDeferredValue(query);
+
   const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = deferredQuery.trim().toLowerCase();
     return (beers ?? [])
       .filter((b) => {
         const matchesStyle = style === "All" || b.style === style;
@@ -84,7 +92,7 @@ function BeersPage() {
         return matchesStyle && matchesQuery;
       })
       .sort(SORTS[sort]);
-  }, [beers, query, style, sort]);
+  }, [beers, deferredQuery, style, sort]);
 
   return (
     <Shell title="All beers" subtitle={`${filtered.length} of ${beers?.length ?? 0} reviews`}>
@@ -265,13 +273,21 @@ function BeersPage() {
         </Button>
       )}
 
-      <BeerForm
-        key={editingBeer?.id ?? "new"}
-        open={formOpen}
-        onOpenChange={setFormOpen}
-        beer={editingBeer}
-        onDeleted={() => setEditingBeer(null)}
-      />
+      {/* Only for someone who can actually use it. The form subscribes to
+          breweries, locations, countries and brand domains the moment it
+          mounts, so rendering it for a signed-out reader fetched three tables
+          nothing on this page can show — and rebuilt a <SelectItem> for all 66
+          breweries and every location on each render, which for this component
+          means on every keystroke typed into the search box above. */}
+      {isSignedIn && (
+        <BeerForm
+          key={editingBeer?.id ?? "new"}
+          open={formOpen}
+          onOpenChange={setFormOpen}
+          beer={editingBeer}
+          onDeleted={() => setEditingBeer(null)}
+        />
+      )}
     </Shell>
   );
 }

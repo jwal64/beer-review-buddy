@@ -74,10 +74,27 @@ export function beerLogo(beerName: string, domains?: DomainMap, localLogo?: stri
 }
 
 /**
+ * The logo URL for one beer: the file committed for the review or for its
+ * brand, else the first domain's favicon. The review's own `logo` wins — it is
+ * set for one beer in particular, where the brand's file is set for the brand.
+ */
+export function logoForBeer(
+  beer: { name: string; logo?: string | null },
+  domains?: DomainMap,
+  logos?: LogoMap,
+) {
+  return beerLogo(beer.name, domains, beer.logo ?? logos?.get(beer.name));
+}
+
+/**
  * The logo for a brewery. Brand domains are keyed by beer, not by brewery, so
  * this borrows the domain of a beer that brewery makes — which is the right
  * answer for the many breweries named after their one beer, and a reasonable
  * one for the rest.
+ *
+ * The map does not call this: it already holds the brewery's beers grouped, and
+ * the first of that group is the same row this `find` returns. `breweriesWithoutLogos`
+ * below still does, over the whole list, which is what the scan is for.
  */
 export function breweryLogo(
   name: string,
@@ -86,7 +103,7 @@ export function breweryLogo(
   logos?: LogoMap,
 ) {
   const mine = beers?.find((b) => b.brewery === name);
-  return mine ? beerLogo(mine.name, domains, mine.logo ?? logos?.get(mine.name)) : null;
+  return mine ? logoForBeer(mine, domains, logos) : null;
 }
 
 /** Breweries that have no beer with a known domain — nothing to draw for them. */

@@ -192,13 +192,40 @@ export function averageRating(beers: Beer[]) {
   return beers.reduce((sum, b) => sum + Number(b.rating), 0) / beers.length;
 }
 
+// cc → flag, cached on the identity of the countries array it came from.
+//
+// Same idea as the two selects above, and cached the same way for the same
+// reason: a WeakMap keyed on the array is invisible to React, so unlike a
+// useMemo it cannot appear in — or perturb — anybody's dependency array. React
+// Query hands back the same array until the rows change, so this is built once
+// per fetch. Every caller passes the array the query gave it and calls
+// flagEmoji once per rendered row, so the find below was O(rows × countries)
+// on four pages.
+const flagIndexes = new WeakMap<CountryRow[], Map<string, string>>();
+
+function flagIndex(countries: CountryRow[]) {
+  let idx = flagIndexes.get(countries);
+  if (!idx) {
+    idx = new Map<string, string>();
+    // First row wins and a null flag is stored as "", so this answers exactly
+    // what `countries.find(c => c.cc === cc)?.flag` answered — including
+    // falling through to the codepoint arithmetic when a row has no flag.
+    for (const c of countries) if (!idx.has(c.cc)) idx.set(c.cc, c.flag ?? "");
+    flagIndexes.set(countries, idx);
+  }
+  return idx;
+}
+
 // The flag for a country code. Prefer the one the countries table stores —
 // it is what the site renders, and the codes are not all two letters: the UK is
 // split into GB-ENG, GB-SCT, GB-WLS and GB-NIR, which no arithmetic on letters
 // can turn into a flag.
 export function flagEmoji(cc?: string | null, countries?: CountryRow[]) {
   if (!cc) return "🌍";
-  const known = countries?.find((c) => c.cc === cc)?.flag;
+  // Skipping empty arrays matters: a caller writing `countries.data ?? []`
+  // hands over a new array every render while the query is in flight, and
+  // caching those would churn one WeakMap entry per render for no answer.
+  const known = countries?.length ? flagIndex(countries).get(cc) : undefined;
   if (known) return known;
   if (cc.length !== 2) return "🌍";
   return String.fromCodePoint(
@@ -209,11 +236,14 @@ export function flagEmoji(cc?: string | null, countries?: CountryRow[]) {
   );
 }
 
+// One formatter, built once. `toLocaleDateString` with an options object
+// constructs a fresh Intl.DateTimeFormat on every call, which is the expensive
+// part — and this is called once per row of the beers list, on every keystroke
+// typed into its search box.
+const MONTH_FORMAT = new Intl.DateTimeFormat("en-US", { month: "long", year: "numeric" });
+
 export function formatMonth(date: string) {
-  return new Date(date + "T00:00:00").toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
+  return MONTH_FORMAT.format(new Date(date + "T00:00:00"));
 }
 
 // The "New" badge, mirrored from `isDisplayNew()` in public/stats/app.js:
@@ -224,7 +254,13 @@ export function formatMonth(date: string) {
 // re-flags correctly without a reload.
 export function isDisplayNew(beer: Pick<Beer, "is_new" | "drank_on">) {
   if (!beer.is_new) return false;
-  const drankOn = new Date(beer.drank_on + "T00:00:00");
+  // `drank_on` is a Postgres date, so it arrives as exactly "YYYY-MM-DD" —
+  // the same assumption the "T00:00:00" concatenation used to make. Reading
+  // the calendar month off the string is identical to parsing it at local
+  // midnight and calling getMonth()/getFullYear(), and does not allocate a
+  // Date per row. `now` is still read per call, so a tab left open across a
+  // month boundary re-flags without a reload.
   const now = new Date();
-  return drankOn.getMonth() === now.getMonth() && drankOn.getFullYear() === now.getFullYear();
+  const month = now.getMonth() + 1;
+  return +beer.drank_on.slice(0, 4) === now.getFullYear() && +beer.drank_on.slice(5, 7) === month;
 }
