@@ -39,17 +39,17 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Eighteen files are here that way, and every one of them is a **drawn
+Thirteen files are here that way, and every one of them is a **drawn
 approximation in the house idiom** — a brand-coloured field, the wordmark, one
 characteristic device — not the brand's own artwork:
 
-`affligem-tripel` · `almaza-pilsener` · `augustiner-helles` ·
-`estrella-jalisco` · `guinness-draught` · `hop-commander` · `daura` · `magna` ·
-`mahou-cinco-estrellas` · `mythos` · `newcastle-brown-ale` · `pacifico-clara` ·
+`augustiner-helles` · `estrella-jalisco` · `guinness-draught` ·
+`hop-commander` · `daura` · `newcastle-brown-ale` · `pacifico-clara` ·
 `pilsner-urquell` · `pub-ale` · `singha` · `smithwicks` · `sol` ·
 `stiegl-goldbrau`
 
-The first nine exist because the fetcher walked every tier for those brands and
+Five of them — `daura`, `newcastle-brown-ale`, `pacifico-clara`, `singha` and
+`smithwicks` — exist because the fetcher walked every tier for those brands and
 came back with nothing: dead or unreachable brand sites, no `P154` logo on
 Wikidata, and Icon Horse answering four of them with a generated grey capital,
 which the fetcher now refuses. `logo-fetch-report.json` records each ladder in
@@ -57,7 +57,47 @@ full under `missing`. If one of those brands ever publishes a reachable logo,
 these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
 then re-fetch, since the fetcher will not overwrite a file it did not write.
 
-The other nine were added later, when a pass over the whole contact sheet found
+## Five drawings that became the real thing
+
+`affligem-tripel` · `almaza-pilsener` · `magna` · `mahou-cinco-estrellas` ·
+`mythos` were all on the list above, all recorded as brands whose ladder came
+back empty. Four of them had never been walked down the right road: the domain
+in `BRAND_DOMAINS` was not the brand's.
+
+| Beer | was | is | what answered |
+|------|-----|----|---------------|
+| Affligem Tripel | `affligembeer.be` | `affligembeer.com` | site header logo, SVG |
+| Almaza Pilsener | `almaza.com` | `almaza.com.lb` | site `og:image` |
+| Mahou Cinco Estrellas | `mahou.es` | `mahou.com` | site `rel="icon"`, 192px |
+| Mythos | `mythosbrewery.gr` | `mythosbeer.gr` | site header logo |
+
+`almaza.com` was dropped rather than kept as a fallback: it is not the
+brewery's, and a logo from whoever does own it is exactly the confidently-wrong
+answer this file keeps warning about.
+
+**Magna is the one worth reading twice.** Its domain was right all along, and
+it still came back with the WordPress logo — the same CMS default recorded
+further down this file, fetched again, years later, by a run that was supposed
+to fix it. `cerveceradepr.com` declares no icon, and its header mark is the
+brewery's rather than any one beer's, so the ladder fell through to the favicon
+services, and what Google holds for a WordPress site with no icon of its own is
+WordPress's.
+
+That is what the **brand page image** tier in `tools/fetch-logos.mjs` is for. A
+brewery that makes several beers keeps each beer's mark on that beer's page, so
+the fetcher now follows the site's own links to a page naming the beer — and
+tries `/magna/`, `/marcas/magna/` and the rest directly, because
+`cerveceradepr.com` answers its bare domain with a splash that carries no links
+at all. Magna's file is now `Magna-01.png` from the brewery's own uploads: the
+crowned lion, the wordmark, the *Premium Lager* ribbon.
+
+The tier ranks with the site's declared icons and above the header, and it
+refuses JPEGs exactly as the header and `og:image` tiers do. It is the general
+answer to a specific shape of wrong: **a brewery's own domain is not the same
+thing as a beer's own mark**, and a favicon service asked about a multi-brand
+site will answer confidently about the wrong one — or about its CMS.
+
+The other eight were added later, when a pass over the whole contact sheet found
 each of them rendering something that was not the brand's mark. What was there
 before, and why the answer had to be a drawing:
 
@@ -66,7 +106,6 @@ before, and why the answer had to be a drawing:
 | `augustiner-helles` | a 179-byte SVG wrapper | `<use xlink:href="#icon-logo">` — the artwork is a sprite symbol on the brand's page, and does not travel with the file |
 | `pilsner-urquell` | a 222-byte SVG wrapper | the same, `#shape-logo-pilsner` |
 | `stiegl-goldbrau` | a valid 300×300 WebP | **every pixel of it transparent.** The worst kind: it decodes, so the `onerror` chain never fires and no fallback is tried |
-| `magna` | the **WordPress logo** | `cerveceradepr.com` is a WordPress site with no custom favicon, and Google's favicon service handed back the CMS default |
 | `pub-ale` | a 112-byte blue dot | DuckDuckGo's generic answer for `boddingtons.co.uk`, not the barrel-and-bee |
 | `sol` | a blue-violet chevron | Google's favicon for `solbeer.com`; Sol's mark is a red-and-yellow sun |
 | `guinness-draught` | a 375 KB photograph | Wikidata `P154` answered with a **photo of the St James's Gate facade** |

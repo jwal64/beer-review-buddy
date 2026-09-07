@@ -230,8 +230,8 @@ let breweries=[
 // actually resolves to.
 // ══════════════════════════════════════════════════════════════
 const BRAND_DOMAINS = {
-"Affligem Tripel":"affligembeer.be",
-"Almaza Pilsener":"almaza.com",
+"Affligem Tripel":["affligembeer.com","affligembeer.be"],
+"Almaza Pilsener":"almaza.com.lb",
 "Amstel Light":["amstellight.com","amstel.com"],
 "Asahi Super Dry":"asahibeer.com",
 "Augustiner Helles":"augustiner-braeu.de",
@@ -280,7 +280,7 @@ const BRAND_DOMAINS = {
 "La Fin Du Monde":"unibroue.com",
 "Leffe Blonde":"leffe.com",
 "Magna":"cerveceradepr.com",
-"Mahou Cinco Estrellas":"mahou.es",
+"Mahou Cinco Estrellas":["mahou.com","mahou.es"],
 "Medalla Light":"medallalight.com",
 "Menabrea":"birramenabrea.com",
 "Michelob Ultra":"michelobultra.com",
@@ -288,7 +288,7 @@ const BRAND_DOMAINS = {
 "Modelo Especial":"modelousa.com",
 "Negra Modelo":"modelousa.com",
 "Modelo Oro":"modelousa.com",
-"Mythos":"mythosbrewery.gr",
+"Mythos":"mythosbeer.gr",
 "Hofbräu Dunkel":"hofbraeu-muenchen.de",
 "Hop Commander":"captainlawrencebrewing.com",
 "Hofbräu Münchner Weiße":"hofbraeu-muenchen.de",
@@ -345,7 +345,7 @@ const BRAND_DOMAINS = {
 // ════════════════════════════════════════════════════════════
 const BRAND_LOGOS = {
 "Affligem Tripel":"logos/affligem-tripel.svg",
-"Almaza Pilsener":"logos/almaza-pilsener.svg",
+"Almaza Pilsener":"logos/almaza-pilsener.webp",
 "Amstel Light":"logos/amstel-light.webp",
 "Asahi Super Dry":"logos/asahi-super-dry.webp",
 "Augustiner Helles":"logos/augustiner-helles.svg",
@@ -397,15 +397,15 @@ const BRAND_LOGOS = {
 "La Chouffe Blonde":"logos/la-chouffe-blonde.svg",
 "La Fin Du Monde":"logos/la-fin-du-monde.webp",
 "Leffe Blonde":"logos/leffe-blonde.webp",
-"Magna":"logos/magna.svg",
-"Mahou Cinco Estrellas":"logos/mahou-cinco-estrellas.svg",
+"Magna":"logos/magna.webp",
+"Mahou Cinco Estrellas":"logos/mahou-cinco-estrellas.webp",
 "Medalla Light":"logos/medalla-light.webp",
 "Menabrea":"logos/menabrea.webp",
 "Michelob Ultra":"logos/michelob-ultra.webp",
 "Miller Lite":"logos/miller-lite.webp",
 "Modelo Especial":"logos/modelo-especial.webp",
 "Modelo Oro":"logos/modelo-oro.webp",
-"Mythos":"logos/mythos.svg",
+"Mythos":"logos/mythos.webp",
 "Narragansett Lager":"logos/narragansett-lager.webp",
 "Negra Modelo":"logos/negra-modelo.webp",
 "Newcastle Brown Ale":"logos/newcastle-brown-ale.svg",
@@ -447,6 +447,9 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
+
+
+
 
 
 

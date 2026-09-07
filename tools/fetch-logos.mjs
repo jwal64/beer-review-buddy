@@ -204,6 +204,107 @@ async function headerLogo(domain, page) {
   return out;
 }
 
+// ── an image the brand's own site labels with this beer's name ─
+// A company that brews several beers puts one mark in its header — its own —
+// and each beer's mark on that beer's page. cerveceradepr.com is exactly that
+// case, and it is why Magna had no logo anyone could fetch: the site declares
+// no icon at all, its header is the brewery's, and so the run fell through to
+// the favicon services, which answer for it with the WordPress logo, because a
+// WordPress site with no icon of its own is what Google is being asked about.
+// A CMS's logo on a beer is the same confidently-wrong answer as a photograph
+// of a bottle, and it has now reached this repo twice.
+//
+// So: follow the site's own links to a page that names the beer, and take an
+// image there that names the beer too. Naming is the claim — the same rule the
+// header tier uses, moved from the company to the brand. `<img>` only: a brand
+// page draws its product marks as files, and the inline-SVG case belongs to
+// the header, where a site's own wordmark actually lives.
+//
+// Matching is on the *distinctive* words of the name. "Magna" names a beer;
+// "Pilsener" describes one, and matching on it would take any beer's picture
+// off any brewery's page.
+const GENERIC_WORD = new Set(['beer', 'beers', 'lager', 'pilsener', 'pilsner', 'ale',
+  'stout', 'weizen', 'weisse', 'weiss', 'wheat', 'cerveza', 'cervezas', 'birra', 'bier',
+  'light', 'premium', 'special', 'craft', 'original', 'classic', 'extra', 'draught',
+  'draft', 'blonde', 'blond', 'golden', 'gold', 'dark', 'brown', 'especial', 'clara']);
+
+const nameTokens = name => name.normalize('NFD').replace(/\p{Diacritic}/gu, '')
+  .toLowerCase().split(/[^a-z0-9]+/).filter(t => t.length >= 4 && !GENERIC_WORD.has(t));
+
+// Where a brewery files a beer, when its front door will not say. A splash
+// screen or an age gate is what answers the bare domain on a great many
+// brewery sites, and it carries no links at all — cerveceradepr.com is one,
+// which is why following links from the homepage found nothing and its real
+// content lives under /home/. So the usual sections are tried directly as well
+// as followed, and the beer's own page is guessed at each of them.
+const SECTIONS = ['home', 'marcas', 'productos', 'brands', 'products',
+  'cervezas', 'beers', 'our-products', 'nuestras-marcas'];
+
+const brandPageCache = new Map();
+async function brandPageLogo(beerName, domain, page) {
+  const key = `${beerName}|${domain}`;
+  if (brandPageCache.has(key)) return brandPageCache.get(key);
+  const toks = nameTokens(beerName);
+  let out = null;
+
+  if (toks.length) {
+    const seen = new Set();
+    const queue = [`https://${domain}/`, `https://www.${domain}/`];
+    // The beer's own page, guessed: /magna/, /marcas/magna/, and so on. A
+    // guess costs one request and a 404 costs nothing, which is a better
+    // trade than a favicon service's confident wrong answer.
+    for (const t of toks.slice(0, 2)) {
+      queue.push(`https://${domain}/${t}/`);
+      for (const s of SECTIONS) queue.push(`https://${domain}/${s}/${t}/`);
+    }
+    for (const s of SECTIONS) queue.push(`https://${domain}/${s}/`);
+
+    // Bounded: a brand with nothing to find should not spend a beer's whole
+    // budget proving it.
+    let visits = 0;
+    while (queue.length && visits < 12 && !out) {
+      const url = queue.shift();
+      if (seen.has(url)) continue;
+      seen.add(url);
+      visits++;
+      try {
+        const res = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 12000 });
+        if (!res || !res.ok()) continue;
+        await page.waitForTimeout(800);
+        const found = await withTimeout(page.evaluate(ts => {
+          const named = s => ts.some(t => (s || '').toLowerCase().includes(t));
+          const imgs = [];
+          for (const i of document.querySelectorAll('img')) {
+            const src = i.currentSrc || i.src;
+            if (!src || src.startsWith('data:image/gif')) continue;
+            if (!named(src) && !named(i.alt) && !named(i.getAttribute('class'))) continue;
+            const r = i.getBoundingClientRect();
+            // The file's own size is what gets saved; the drawn size only
+            // separates a mark the page actually shows from one it hides.
+            imgs.push({ url: src,
+              score: (i.naturalWidth || 0) * (i.naturalHeight || 0) + r.width * r.height });
+          }
+          imgs.sort((a, b) => b.score - a.score);
+          const here = location.host;
+          const same = a => { try { return new URL(a.href).host === here; } catch { return false; } };
+          const links = [...new Set([...document.querySelectorAll('a[href]')]
+            .filter(a => same(a) && (named(a.getAttribute('href')) || named(a.textContent)))
+            .map(a => a.href))].slice(0, 3);
+          return { img: imgs[0] ?? null, links };
+        }, toks), 12000, `reading ${url}`);
+
+        if (found?.img) { out = { kind: 'img', url: found.img.url }; break; }
+        // A page that names the beer in a link is a better lead than the next
+        // guess, so it goes to the front.
+        for (const l of found?.links ?? []) if (!seen.has(l)) queue.unshift(l);
+      } catch { /* a page that will not load is simply not an answer */ }
+    }
+  }
+
+  brandPageCache.set(key, out);
+  return out;
+}
+
 // ── Wikidata ──────────────────────────────────────────────────
 // Property P154 is "logo image" — the mark itself, not a photograph of the
 // product and not an article's lead image — and Commons holds most of them as
@@ -367,7 +468,10 @@ async function looksLikeAPhotograph(buf, fmt, page) {
 // than a rendering of one. Among rasters the answer is simply how big it is —
 // which is the point, since 180px is not HD and 2048 is. The source only
 // breaks ties.
-const KIND_RANK = { wikidata: 5, 'site-icon': 4, header: 3, service: 2, og: 1 };
+// 'brand-page' ranks with the site's own declared icons and above the header:
+// on a brewery that makes several beers, a picture the site files under this
+// beer's name is a better answer about this beer than the company's wordmark.
+const KIND_RANK = { wikidata: 5, 'site-icon': 4, 'brand-page': 4, header: 3, service: 2, og: 1 };
 const scoreOf = (s, kind) => (s.fmt === 'svg' ? 1e9 : Math.min(s.w, s.h) * 10) + (KIND_RANK[kind] ?? 0);
 const squareness = s => (s.fmt === 'svg' ? 1 : Math.min(s.w, s.h) / Math.max(s.w, s.h, 1));
 
@@ -381,6 +485,7 @@ async function candidatesFor(name, domains, page) {
   for (const d of domains) {
     for (const c of await siteCandidates(d)) out.push({ ...c, domain: d });
     out.push({ header: true, why: 'site header logo', kind: 'header', domain: d });
+    out.push({ brandPage: true, why: 'brand page image', kind: 'brand-page', domain: d });
     for (const a of AGGREGATORS)
       out.push({ url: a.url(d), why: a.why, reject: a.reject, kind: 'service', domain: d });
   }
@@ -413,6 +518,9 @@ export async function findLogo(name, domains, page, lab = page) {
       if (hit?.kind === 'svg')
         got = { buf: Buffer.from(hit.markup, 'utf8'), type: 'image/svg+xml', url: `${cand.domain} (inline svg)` };
       else if (hit?.kind === 'img') got = await get(hit.url);
+    } else if (cand.brandPage) {
+      const hit = await brandPageLogo(name, cand.domain, page);
+      if (hit?.kind === 'img') got = await get(hit.url);
     } else {
       got = await get(cand.url);
     }
@@ -430,7 +538,8 @@ export async function findLogo(name, domains, page, lab = page) {
       // product. modelousa.com's is a cutout of a man holding a bottle — 19%
       // transparent and 860 colours, which is to say indistinguishable by
       // measurement from Paulaner's crest at 930.
-      ?? ((cand.kind === 'header' || cand.kind === 'og') && size.fmt === 'jpg'
+      ?? ((cand.kind === 'header' || cand.kind === 'og' || cand.kind === 'brand-page')
+          && size.fmt === 'jpg'
           ? 'a JPEG, which is a photograph and not a mark' : null)
       ?? await looksLikeAPhotograph(got.buf, size.fmt, lab);
     if (no) { tried.push(`${where} · ${size.w}×${size.h} rejected, ${no}`); continue; }
