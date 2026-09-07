@@ -705,14 +705,6 @@
   ],
   "kept": [
     {
-      "beer": "Affligem Tripel",
-      "file": "logos/affligem-tripel.svg"
-    },
-    {
-      "beer": "Almaza Pilsener",
-      "file": "logos/almaza-pilsener.svg"
-    },
-    {
       "beer": "Augustiner Helles",
       "file": "logos/augustiner-helles.svg"
     },
@@ -761,24 +753,12 @@
       "file": "logos/leffe-blonde.webp"
     },
     {
-      "beer": "Magna",
-      "file": "logos/magna.svg"
-    },
-    {
-      "beer": "Mahou Cinco Estrellas",
-      "file": "logos/mahou-cinco-estrellas.svg"
-    },
-    {
       "beer": "Modelo Especial",
       "file": "logos/modelo-especial.webp"
     },
     {
       "beer": "Modelo Oro",
       "file": "logos/modelo-oro.webp"
-    },
-    {
-      "beer": "Mythos",
-      "file": "logos/mythos.svg"
     },
     {
       "beer": "Negra Modelo",
