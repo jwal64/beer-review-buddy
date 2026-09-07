@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-07T21:31:00.495Z",
+  "at": "2026-09-07T21:34:57.865Z",
   "total": 102,
   "fetched": [
     {
@@ -405,12 +405,12 @@
     {
       "beer": "Magna",
       "file": "logos/magna.webp",
-      "source": "google faviconV2",
+      "source": "brand page image",
       "domain": "cerveceradepr.com",
-      "from": "80×80 png",
-      "stored": "80px",
-      "url": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://cerveceradepr.com&size=256",
-      "bytes": 3268
+      "from": "236×300 png",
+      "stored": "300px",
+      "url": "https://i0.wp.com/cerveceradepr.com/wp-content/uploads/2019/07/Magna-01.png?resize=236%2C300&ssl=1",
+      "bytes": 17464
     },
     {
       "beer": "Mahou Cinco Estrellas",
