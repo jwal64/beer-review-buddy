@@ -236,8 +236,9 @@ npm run logo-sheet         # renders every logo onto one sheet — then look at 
 
 `fetch-logos` walks a ladder for the beer's brand domains and takes the first
 tier that answers: the icons the site declares, then the logo drawn in its
-header (inline SVG included), then the favicon services, then a square-ish
-`og:image`. It writes the file, and writes the `BRAND_LOGOS` entry.
+header (inline SVG included), then an image on the brand's own site that names
+this beer, then the favicon services, then a square-ish `og:image`. It writes
+the file, and writes the `BRAND_LOGOS` entry.
 
 **Look at the sheet.** No check can tell a brand's mark from a photograph of a
 bottle or a generated grey letter — both load, both are the right size, both
@@ -717,8 +718,18 @@ what a thing is, not how big it is:
    reading the HTML as text would never find; serialised with its computed fill
    written onto every node, because those colours live in a stylesheet that is
    not coming with it
-3. **the favicon services** — the same icons, second-hand
-4. **`og:image`, only if roughly square** — usually a hero photograph, so it is
+3. **an image on the brand's own site that names this beer** — a brewery that
+   makes several beers puts one mark in its header, its own, and each beer's
+   mark on that beer's page. So the site's links are followed to a page naming
+   the beer, and `/magna/`, `/marcas/magna/` and the rest are tried directly,
+   because a splash screen or age gate is what answers the bare domain on a
+   good many brewery sites and carries no links at all. Naming is the claim,
+   which is the rule tier 2 already uses — moved from the company to the brand.
+   JPEGs are refused here as they are there
+4. **the favicon services** — the same icons, second-hand. Note what they
+   answer for a multi-brand site: asked about `cerveceradepr.com`, which
+   declares no icon, Google returns the **WordPress logo**, twice now
+5. **`og:image`, only if roughly square** — usually a hero photograph, so it is
    fenced and last
 
 Rasters are re-encoded to WebP at the image's own longest edge, capped at
