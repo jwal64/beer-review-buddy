@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Guinness Draught, St James's Gate Dublin">
+  <rect width="512" height="512" rx="60" fill="#0a0a0a"/>
+  <rect x="10" y="10" width="492" height="492" rx="52" fill="none" stroke="#c9a227" stroke-width="7"/>
+  <g stroke="#c9a227" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- Brian Boru harp: forepillar, curved neck, soundboard, strings, base -->
+    <path d="M168 320 C158 236 172 158 206 108" stroke-width="26"/>
+    <path d="M206 108 C272 122 328 162 356 216" stroke-width="24"/>
+    <path d="M356 216 C316 258 250 300 178 322" stroke-width="22"/>
+    <g stroke-width="7" opacity="0.9">
+      <path d="M218 126 L196 296"/>
+      <path d="M248 138 L221 288"/>
+      <path d="M277 156 L247 278"/>
+      <path d="M303 178 L273 267"/>
+      <path d="M326 202 L299 255"/>
+    </g>
+    <path d="M140 336 C192 356 258 356 300 334" stroke-width="18"/>
+  </g>
+  <g text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="256" y="424" font-size="72" fill="#ffffff" letter-spacing="2">GUINNESS</text>
+  </g>
+  <rect x="142" y="444" width="228" height="6" fill="#c9a227"/>
+  <g text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="256" y="484" font-size="34" fill="#c9a227" letter-spacing="8">DRAUGHT</text>
+  </g>
+</svg>

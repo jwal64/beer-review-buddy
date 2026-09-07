@@ -1,3 +1,21 @@
-<svg id="af96d53a-5224-4591-af5d-5735d2457585" fill="rgb(0, 0, 0)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 288 173" width="288" height="173">
-	<use xlink:href="#shape-logo-pilsner" fill="rgb(0, 0, 0)"></use>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Pilsner Urquell, Plzensky Prazdroj">
+  <rect width="512" height="512" rx="60" fill="#00563f"/>
+  <!-- the Plzen brewery gate: twin arches under a pediment -->
+  <g fill="none" stroke="#d8a53a" stroke-width="12">
+    <path d="M156 232 v-46 a100 100 0 0 1 200 0 v46"/>
+    <path d="M196 232 v-40 a60 60 0 0 1 120 0 v40"/>
+    <path d="M140 232 h232"/>
+  </g>
+  <g fill="#d8a53a">
+    <rect x="150" y="238" width="212" height="10" rx="5"/>
+    <circle cx="256" cy="150" r="15"/>
+  </g>
+  <g text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="256" y="330" font-size="70" fill="#ffffff" letter-spacing="2">PILSNER</text>
+    <text x="256" y="396" font-size="70" fill="#ffffff" letter-spacing="2">URQUELL</text>
+  </g>
+  <rect x="136" y="418" width="240" height="5" fill="#d8a53a"/>
+  <g text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="256" y="462" font-size="30" fill="#d8a53a" letter-spacing="2">PLZE&#328;SK&#221; PRAZDROJ</text>
+  </g>
 </svg>

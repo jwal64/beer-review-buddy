@@ -5,7 +5,7 @@
 //
 // Zero dependencies, nothing to install: `node tools/validate-data.mjs`.
 // Errors fail the run; warnings are printed and tolerated.
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { loadData, loadStyleColors, loadAppConst, ROOT } from './load-data.mjs';
 
@@ -180,6 +180,47 @@ for (const name of logoBeers)
   if (!BRAND_LOGOS[name])
     err('BRAND_LOGOS', `"${name}" has no committed logo file — run \`npm run fetch-logos\`, ` +
       'or draw one into public/stats/logos/ and add it here');
+
+// ── LOGO FILES THAT ARE PRESENT AND STILL RENDER NOTHING ──────
+// The check above asks only whether a file is there. Three beers passed it for
+// weeks while showing the reader nothing, because a file can exist, be the
+// right size and still draw zero pixels. These are the shapes that did it —
+// all cheap to spot in the bytes, none of them visible to any other check.
+// The colour and contrast failures need a browser and live in `npm run logos`
+// and `npm run logo-sheet`; these do not, so they run on every push.
+const svgStub = (src) => {
+  // An SVG fetched out of a page often keeps a <use> pointing at a sprite
+  // symbol that stayed behind on the site. It is a valid document and it
+  // paints nothing.
+  const refs = [...src.matchAll(/<use\b[^>]*?\b(?:xlink:)?href\s*=\s*["']#([^"']+)["']/g)].map(m => m[1]);
+  if (!refs.length) return null;
+  const missing = refs.filter(id => !new RegExp(`\\bid\\s*=\\s*["']${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`).test(src));
+  if (missing.length !== refs.length) return null;
+  return `every <use> points at a symbol the file does not carry (#${missing.join(', #')}) — ` +
+    'the artwork stayed on the brand\'s page; re-fetch it or draw one';
+};
+for (const [name, file] of Object.entries(BRAND_LOGOS)) {
+  if (!isStr(file) || !file.startsWith('logos/')) continue;
+  const path = join(ROOT, file);
+  if (!existsSync(path)) continue;
+  const where = `BRAND_LOGOS["${name}"]`;
+  const buf = readFileSync(path);
+  if (!buf.length) { err(where, `"${file}" is empty`); continue; }
+  if (!file.endsWith('.svg')) {
+    // A raster this small is a stub, not a logo — the smallest real one here
+    // is well over a kilobyte.
+    if (buf.length < 512) err(where, `"${file}" is only ${buf.length} bytes — too small to be a logo`);
+    continue;
+  }
+  const src = buf.toString('utf8');
+  // xlink: without its namespace is fatal when an SVG is loaded as an <img>
+  // source, which is how both surfaces load these. Inlined it would be fine,
+  // which is why it survives a casual look.
+  if (/\bxlink:[a-z]+\s*=/.test(src) && !/\bxmlns:xlink\s*=/.test(src))
+    err(where, `"${file}" uses xlink: without declaring xmlns:xlink — the browser refuses it as malformed XML`);
+  const stub = svgStub(src);
+  if (stub) err(where, `"${file}" ${stub}`);
+}
 
 // ── UNTAPPD CONSENSUS ─────────────────────────────────────────
 for (const [name, v] of Object.entries(UNTAPPD_GLOBAL_AVGS)) {

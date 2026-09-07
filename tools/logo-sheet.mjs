@@ -67,8 +67,52 @@ const page = await browser.newPage({ viewport: { width: 1240, height: 900 }, dev
 await page.setContent(html, { waitUntil: 'load' });
 await page.waitForTimeout(500);
 writeFileSync(OUT, await page.screenshot({ fullPage: true }));
+
+// The sheet answers "is this the brand's mark?", which only a person can. This
+// answers the two questions underneath it that a person reading a light sheet
+// will miss, and that no other check here can see at all: does the file draw
+// anything, and does what it draws survive the ground the site actually paints
+// it on. Both have shipped: a WebP with every pixel transparent (renders
+// nothing, forever, and decodes cleanly so no fallback is ever tried), and
+// marks drawn for a light label that measure 0% readable on --bg.
+const ground = await page.evaluate(async (tiles) => {
+  const c = document.createElement('canvas'); c.width = c.height = 96;
+  const x = c.getContext('2d', { willReadFrequently: true });
+  const lum = (r, g, b) => { const f = v => { v /= 255; return v <= .03928 ? v / 12.92 : Math.pow((v + .055) / 1.055, 2.4); };
+    return .2126 * f(r) + .7152 * f(g) + .0722 * f(b); };
+  const BG = [15, 15, 17], BGL = lum(...BG);        // --bg #0f0f11
+  const out = [];
+  for (const t of tiles) {
+    const img = new Image();
+    const ok = await new Promise(r => { img.onload = () => r(true); img.onerror = () => r(false); img.src = t.src; });
+    if (!ok) { out.push({ name: t.name, why: 'will not decode' }); continue; }
+    x.clearRect(0, 0, 96, 96);
+    const s = Math.min(96 / img.naturalWidth, 96 / img.naturalHeight);
+    const w = img.naturalWidth * s, h = img.naturalHeight * s;
+    x.drawImage(img, (96 - w) / 2, (96 - h) / 2, w, h);
+    const d = x.getImageData(0, 0, 96, 96).data;
+    let drawn = 0, readable = 0;
+    for (let i = 0; i < d.length; i += 4) {
+      const a = d[i + 3] / 255; if (a < 0.15) continue; drawn++;
+      const L = lum(d[i] * a + BG[0] * (1 - a), d[i + 1] * a + BG[1] * (1 - a), d[i + 2] * a + BG[2] * (1 - a));
+      if ((Math.max(L, BGL) + .05) / (Math.min(L, BGL) + .05) > 1.6) readable++;
+    }
+    if (drawn < 92) out.push({ name: t.name, why: 'draws nothing — every pixel transparent' });
+    else if (readable / 9216 < 0.02) out.push({ name: t.name, why: `invisible on --bg (${(readable / 9216 * 100).toFixed(1)}% readable)` });
+  }
+  return out;
+}, tiles);
 await browser.close();
+
 console.log(`${tiles.length} logos → ${OUT}`);
 console.log(`${tiles.filter(t => t.px === 'vector').length} vector · ` +
   `${tiles.length - tiles.filter(t => t.px === 'vector').length} raster · ` +
   `${small.length} under 512px${small.length ? `: ${small.map(t => `${t.name} (${t.px})`).join(', ')}` : ''}`);
+if (ground.length) {
+  console.log(`\n${ground.length} render nothing a reader can see:`);
+  for (const g of ground) console.log(`  ✗ ${g.name} — ${g.why}`);
+  console.log('A mark drawn for a light label needs the white tile logos/README.md describes.');
+} else {
+  console.log('Every logo draws, and every one of them reads on the site\'s ground.');
+}
+process.exitCode = ground.length ? 1 : 0;

@@ -1,1 +1,17 @@
-<svg title="logo" fill="rgb(0, 0, 0)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 76 126" width="76" height="126"><use xlink:href="#icon-logo" fill="rgb(0, 0, 0)"></use></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Augustiner Brau Munchen, Lagerbier Hell">
+  <rect width="512" height="512" rx="60" fill="#00583a"/>
+  <!-- founding-year medallion, the device the Helles label carries -->
+  <g fill="none" stroke="#e3c164" stroke-width="8">
+    <circle cx="256" cy="150" r="74"/>
+    <circle cx="256" cy="150" r="60"/>
+  </g>
+  <g text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="256" y="170" font-size="52" fill="#e3c164" letter-spacing="2">1328</text>
+    <text x="256" y="308" font-size="72" fill="#ffffff" font-style="italic">Augustiner</text>
+  </g>
+  <rect x="128" y="330" width="256" height="5" fill="#e3c164"/>
+  <g text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="256" y="378" font-size="32" fill="#e3c164" letter-spacing="7">BR&#196;U M&#220;NCHEN</text>
+    <text x="256" y="452" font-size="54" fill="#ffffff" letter-spacing="10">HELLES</text>
+  </g>
+</svg>

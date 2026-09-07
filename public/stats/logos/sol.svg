@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Sol, cerveza original de Mexico">
+  <rect width="512" height="512" rx="60" fill="#f0b323"/>
+  <!-- the sun the brand is named for -->
+  <g stroke="#d5342b" stroke-width="15" stroke-linecap="round">
+    <path d="M256 44 v40 M256 268 v40 M144 176 h-40 M408 176 h40"/>
+    <path d="M177 97 l-28 -28 M335 255 l28 28 M335 97 l28 -28 M177 255 l-28 28"/>
+  </g>
+  <circle cx="256" cy="176" r="66" fill="none" stroke="#d5342b" stroke-width="17"/>
+  <circle cx="256" cy="176" r="38" fill="#d5342b"/>
+  <g text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="256" y="392" font-size="130" fill="#d5342b" font-style="italic">Sol</text>
+  </g>
+  <rect x="156" y="414" width="200" height="6" fill="#8c1d17"/>
+  <g text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="256" y="460" font-size="30" fill="#8c1d17" letter-spacing="5">CERVEZA M&#201;XICO</text>
+  </g>
+</svg>
