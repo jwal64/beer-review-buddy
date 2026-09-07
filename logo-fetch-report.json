@@ -113,16 +113,6 @@
       "bytes": 8994
     },
     {
-      "beer": "Budweiser",
-      "file": "logos/budweiser.webp",
-      "source": "wikidata P154",
-      "domain": "budweiser.com",
-      "from": "931×931 png",
-      "stored": "931px",
-      "url": "https://upload.wikimedia.org/wikipedia/commons/e/e1/Budejovicky_Budvar_logo.png?utm_source=commons.wikimedia.org&utm_campaign=imageinfo&utm_content=thumbnail_unscaled",
-      "bytes": 46526
-    },
-    {
       "beer": "Carlsberg",
       "file": "logos/carlsberg.svg",
       "source": "site header logo",
@@ -333,16 +323,6 @@
       "bytes": 383504
     },
     {
-      "beer": "Harp Lager",
-      "file": "logos/harp-lager.webp",
-      "source": "icon.horse",
-      "domain": "harplager.com",
-      "from": "180×180 png",
-      "stored": "180px",
-      "url": "https://icon.horse/icon/harplager.com",
-      "bytes": 2454
-    },
-    {
       "beer": "Hatuey Lager",
       "file": "logos/hatuey-lager.svg",
       "source": "site header logo",
@@ -543,26 +523,6 @@
       "bytes": 14778
     },
     {
-      "beer": "Modelo Especial",
-      "file": "logos/modelo-especial.webp",
-      "source": "site header logo",
-      "domain": "modelousa.com",
-      "from": "330×413 jpg",
-      "stored": "413px",
-      "url": "https://www.modelousa.com/cdn/shop/files/97898_EWH_009_08.jpg?crop=bottom&v=1786717067&width=330",
-      "bytes": 33400
-    },
-    {
-      "beer": "Modelo Oro",
-      "file": "logos/modelo-oro.webp",
-      "source": "site header logo",
-      "domain": "modelousa.com",
-      "from": "330×413 jpg",
-      "stored": "413px",
-      "url": "https://www.modelousa.com/cdn/shop/files/97898_EWH_009_08.jpg?crop=bottom&v=1786717067&width=330",
-      "bytes": 33400
-    },
-    {
       "beer": "Narragansett Lager",
       "file": "logos/narragansett-lager.webp",
       "source": "site header logo",
@@ -571,16 +531,6 @@
       "stored": "150px",
       "url": "https://www.narragansettbeer.com/cdn/shop/files/logo.png?v=1665639282&width=150",
       "bytes": 6078
-    },
-    {
-      "beer": "Negra Modelo",
-      "file": "logos/negra-modelo.webp",
-      "source": "site header logo",
-      "domain": "modelousa.com",
-      "from": "330×413 jpg",
-      "stored": "413px",
-      "url": "https://www.modelousa.com/cdn/shop/files/97898_EWH_009_08.jpg?crop=bottom&v=1786717067&width=330",
-      "bytes": 33400
     },
     {
       "beer": "Norrlands Guld",
@@ -933,16 +883,36 @@
       "file": "logos/almaza-pilsener.svg"
     },
     {
+      "beer": "Budweiser",
+      "file": "logos/budweiser.webp"
+    },
+    {
       "beer": "Daura",
       "file": "logos/daura.svg"
+    },
+    {
+      "beer": "Harp Lager",
+      "file": "logos/harp-lager.webp"
     },
     {
       "beer": "Mahou Cinco Estrellas",
       "file": "logos/mahou-cinco-estrellas.svg"
     },
     {
+      "beer": "Modelo Especial",
+      "file": "logos/modelo-especial.webp"
+    },
+    {
+      "beer": "Modelo Oro",
+      "file": "logos/modelo-oro.webp"
+    },
+    {
       "beer": "Mythos",
       "file": "logos/mythos.svg"
+    },
+    {
+      "beer": "Negra Modelo",
+      "file": "logos/negra-modelo.webp"
     },
     {
       "beer": "Newcastle Brown Ale",
