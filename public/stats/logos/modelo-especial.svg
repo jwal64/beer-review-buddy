@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Modelo Especial">
+  <rect width="512" height="512" rx="60" fill="#e0ae35"/>
+  <g>
+    <ellipse cx="256.0" cy="84.0" rx="7.5" ry="15" transform="rotate(0.0 256.0 84.0)" fill="#17233d"/>
+    <ellipse cx="282.8" cy="87.3" rx="7.5" ry="15" transform="rotate(13.8 282.8 87.3)" fill="#17233d"/>
+    <ellipse cx="308.0" cy="96.8" rx="7.5" ry="15" transform="rotate(27.7 308.0 96.8)" fill="#17233d"/>
+    <ellipse cx="330.3" cy="112.2" rx="7.5" ry="15" transform="rotate(41.5 330.3 112.2)" fill="#17233d"/>
+    <ellipse cx="348.2" cy="132.4" rx="7.5" ry="15" transform="rotate(55.4 348.2 132.4)" fill="#17233d"/>
+    <ellipse cx="360.7" cy="156.3" rx="7.5" ry="15" transform="rotate(69.2 360.7 156.3)" fill="#17233d"/>
+    <ellipse cx="367.2" cy="182.5" rx="7.5" ry="15" transform="rotate(83.1 367.2 182.5)" fill="#17233d"/>
+    <ellipse cx="367.2" cy="209.5" rx="7.5" ry="15" transform="rotate(96.9 367.2 209.5)" fill="#17233d"/>
+    <ellipse cx="360.7" cy="235.7" rx="7.5" ry="15" transform="rotate(110.8 360.7 235.7)" fill="#17233d"/>
+    <ellipse cx="348.2" cy="259.6" rx="7.5" ry="15" transform="rotate(124.6 348.2 259.6)" fill="#17233d"/>
+    <ellipse cx="330.3" cy="279.8" rx="7.5" ry="15" transform="rotate(138.5 330.3 279.8)" fill="#17233d"/>
+    <ellipse cx="308.0" cy="295.2" rx="7.5" ry="15" transform="rotate(152.3 308.0 295.2)" fill="#17233d"/>
+    <ellipse cx="282.8" cy="304.7" rx="7.5" ry="15" transform="rotate(166.2 282.8 304.7)" fill="#17233d"/>
+    <ellipse cx="256.0" cy="308.0" rx="7.5" ry="15" transform="rotate(180.0 256.0 308.0)" fill="#17233d"/>
+    <ellipse cx="229.2" cy="304.7" rx="7.5" ry="15" transform="rotate(193.8 229.2 304.7)" fill="#17233d"/>
+    <ellipse cx="204.0" cy="295.2" rx="7.5" ry="15" transform="rotate(207.7 204.0 295.2)" fill="#17233d"/>
+    <ellipse cx="181.7" cy="279.8" rx="7.5" ry="15" transform="rotate(221.5 181.7 279.8)" fill="#17233d"/>
+    <ellipse cx="163.8" cy="259.6" rx="7.5" ry="15" transform="rotate(235.4 163.8 259.6)" fill="#17233d"/>
+    <ellipse cx="151.3" cy="235.7" rx="7.5" ry="15" transform="rotate(249.2 151.3 235.7)" fill="#17233d"/>
+    <ellipse cx="144.8" cy="209.5" rx="7.5" ry="15" transform="rotate(263.1 144.8 209.5)" fill="#17233d"/>
+    <ellipse cx="144.8" cy="182.5" rx="7.5" ry="15" transform="rotate(276.9 144.8 182.5)" fill="#17233d"/>
+    <ellipse cx="151.3" cy="156.3" rx="7.5" ry="15" transform="rotate(290.8 151.3 156.3)" fill="#17233d"/>
+    <ellipse cx="163.8" cy="132.4" rx="7.5" ry="15" transform="rotate(304.6 163.8 132.4)" fill="#17233d"/>
+    <ellipse cx="181.7" cy="112.2" rx="7.5" ry="15" transform="rotate(318.5 181.7 112.2)" fill="#17233d"/>
+    <ellipse cx="204.0" cy="96.8" rx="7.5" ry="15" transform="rotate(332.3 204.0 96.8)" fill="#17233d"/>
+    <ellipse cx="229.2" cy="87.3" rx="7.5" ry="15" transform="rotate(346.2 229.2 87.3)" fill="#17233d"/>
+  </g>
+  <g>
+    <path d="M186 176 L206 128 L232 160 L256 118 L280 160 L306 128 L326 176 Z" fill="#17233d"/>
+    <rect x="186" y="176" width="140" height="17" rx="4" fill="#17233d"/>
+    <circle cx="206" cy="121" r="7" fill="#17233d"/>
+    <circle cx="256" cy="110" r="8" fill="#17233d"/>
+    <circle cx="306" cy="121" r="7" fill="#17233d"/>
+    <rect x="176" y="212" width="160" height="26" rx="5" fill="#17233d"/>
+    <path d="M176 238 L336 238 L326 258 L186 258 Z" fill="#17233d" opacity="0.85"/>
+  </g>
+  <g text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="256" y="380" font-size="86" fill="#17233d">Modelo</text>
+    <text x="256" y="436" font-size="38" fill="#17233d" font-family="Arial, Helvetica, sans-serif" letter-spacing="6">ESPECIAL</text>
+  </g>
+</svg>

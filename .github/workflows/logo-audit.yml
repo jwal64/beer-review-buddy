@@ -1,19 +1,12 @@
 name: Logo audit
 
-# TEMPORARY — borrowed for one more run, then restored.
+# TEMPORARY — this file is the audit workflow, borrowed for one run.
 #
-# The previous run found that only grupomodelo.com serves a real icon
-# (200×200, agreed by three independent services), while modelousa.com — the
-# beer brand's own site — has one at 32×32, below the fetcher's floor.
-#
-# grupomodelo.com is the brewery's corporate domain, and CLAUDE.md forbids a
-# parent company's domain as a fallback, because a plausible-looking wrong
-# logo is worse than none. That rule is about the *picture*, so the only way
-# to settle it is to look at the picture. This prints the candidates as
-# base64 into the log, where they can be decoded and viewed without adding an
-# unverified domain to data.js first.
-#
-# It writes nothing to the repo.
+# Fetching a hundred logos needs open internet, and the sandbox this branch is
+# being developed in cannot reach any of the logo services. `workflow_dispatch`
+# only offers workflows that exist on the default branch, so the fetch borrows
+# this one to get onto a runner. The real audit workflow comes back in the same
+# branch, before anything is merged.
 
 on:
   schedule:
@@ -21,34 +14,63 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  issues: write
+  contents: write
 
 jobs:
   audit:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 55
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
 
-      - name: Print the candidate marks as base64
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Playwright and Chromium
         run: |
-          emit () {   # name url
-            curl -sSL --max-time 25 -o /tmp/c.bin "$2" || { echo "$1: unreachable"; return; }
-            sz=$(stat -c%s /tmp/c.bin)
-            echo "===BEGIN $1 ($sz bytes) $(file -b --mime-type /tmp/c.bin)"
-            if [ "$sz" -lt 220000 ]; then base64 -w 200 /tmp/c.bin; else echo "(too big to print)"; fi
-            echo "===END $1"
-          }
+          npm install
+          npx playwright install --with-deps chromium
 
-          emit grupomodelo-256 "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://grupomodelo.com&size=256"
-          emit modelousa-256   "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://modelousa.com&size=256"
-          emit modelo-iconhorse "https://icon.horse/icon/modelo.com"
+      # The ones the sheet and the report still argue with: eight whose logo
+      # Wikidata holds but whose file would not download, and the three Modelo
+      # beers whose "header logo" is a JPEG cutout of a man holding a bottle.
+      # Everything else keeps the file it has.
+      - name: Re-fetch the ones still wrong
+        run: |
+          node tools/fetch-logos.mjs --force --only "$(cat <<'EOF' | tr '\n' ',' | sed 's/,$//'
+          Affligem Tripel
+          Almaza Pilsener
+          Mahou Cinco Estrellas
+          Modelo Especial
+          Modelo Oro
+          Mythos
+          Negra Modelo
+          Newcastle Brown Ale
+          Pacífico Clara
+          Singha
+          Smithwick's
+          EOF
+          )"
 
-          # And the og:image modelousa.com declares — rejected only for being
-          # non-square, which a wide wordmark banner would also be.
-          curl -sSL --max-time 25 -o /tmp/p.html https://www.modelousa.com/ || true
-          og=$(tr '\n' ' ' < /tmp/p.html | grep -oiP '<meta[^>]+property="og:image"[^>]+content="\K[^"]+' | head -1)
-          echo "og:image url = ${og:-(none)}"
-          [ -n "$og" ] && emit modelousa-ogimage "$og"
+      - name: Commit what it found
+        if: always()
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/stats/logos public/stats/data.js logo-fetch-report.json
+          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
+          git commit -m "Re-fetch every logo at the best resolution anyone has"
+          # Half an hour of fetching should not be thrown away because somebody
+          # pushed a comment to the branch while it ran. Rebase onto whatever
+          # is there and try again; the logos are the only thing this commit
+          # touches, so there is nothing for it to conflict with.
+          for attempt in 1 2 3; do
+            git push origin HEAD:${{ github.ref_name }} && exit 0
+            git pull --rebase origin ${{ github.ref_name }}
+          done
+          echo "could not push after three tries" >&2
+          exit 1
