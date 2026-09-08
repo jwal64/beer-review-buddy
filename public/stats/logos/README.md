@@ -54,34 +54,55 @@ full under `missing`. If one of those brands ever publishes a reachable logo,
 these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
 then re-fetch, since the fetcher will not overwrite a file it did not write.
 
-Four more are drawn for the **opposite** reason — the fetcher answered for
+Three more are drawn for the **opposite** reason — the fetcher answered for
 these, and answered *wrong*:
 
-`budweiser` · `modelo-especial` · `modelo-oro` · `negra-modelo`
+`modelo-especial` · `modelo-oro` · `negra-modelo`
 
-`logo-fetch-report.json` still records the two bad ladders, because they are
-worth recognising:
+All three list one domain, `modelousa.com`, and its `site header logo` was
+`cdn/shop/files/97898_EWH_009_08.jpg` — a 330×413 storefront **photograph of a
+man in a room**. One domain for three beers meant one identical photo for three
+beers, on the site and in the app.
 
-- **The three Modelos** all resolved to `site header logo` on their shared
-  domain `modelousa.com`, and what that header held was
-  `cdn/shop/files/97898_EWH_009_08.jpg` — a 330×413 storefront **photograph of
-  a man in a room**. One domain for three beers meant one identical photo for
-  three beers. The fetcher refuses photographs now (`clear < 0.02 &&
-  colours > 1200`), so this particular answer cannot come back; the drawings
-  give the three the distinct marks a shared domain never could.
-- **Budweiser** resolved to `wikidata P154` for `budweiser.com` and came back
-  with `Budejovicky_Budvar_logo.png` — the mark of **Budějovický Budvar**, the
-  Czech brewery, on a beer this repo records as `origin:"US"`, brewed by
-  Anheuser-Busch in St. Louis. "Budweiser" is Budvar's trademark across much of
-  Europe, so the two brands genuinely collide on Wikidata. **This is a trap, not
-  a one-off:** deleting `budweiser.svg` and re-fetching is likely to put the
-  Czech logo straight back. Leave the hand-placed file unless you have checked
-  by eye that what replaces it is Anheuser-Busch's bowtie.
+That answer cannot come back: a JPEG in a header or `og:image` slot is now
+refused outright, on format rather than on measurement, because this picture
+measures 19% transparent with 860 colours — indistinguishable from Paulaner's
+crest at 930. But refusing it left nothing, and a later run proved nothing else
+is there either. Every tier, and every plausible Modelo domain:
 
-The session that drew these could not have fetched anything anyway — its egress
-policy denied every logo source (the brand sites, Wikimedia, Google, Icon Horse
-and DuckDuckGo all refused `CONNECT`), which is its own reason a drawing was the
-only way to get four correct logos into the tree.
+| Source | What it gives |
+|--------|---------------|
+| `modelousa.com` favicon | 32×32 — under the 48px floor |
+| `modelousa.com` header | the JPEG photograph above |
+| `modelousa.com` og:image | `Modelo_BWS_KV_5….png`, 1.8MB, a marketing key visual |
+| `modelousa.com` apple-touch / favicon.svg | 404 |
+| `grupomodelo.com` | a real 200×200 — but the brewing company's **lion crest**, not the beer's mark |
+| `modelo.com` | a generated grey "M" lettermark |
+| `gmodelo.com.mx`, `cervezamodelo.com.mx`, `negramodelo.com`, `modelooro.com`, `modeloespecial.com` | unreachable or 403; lettermarks only |
+| wikidata `P154` | "no article was this brand" |
+
+`grupomodelo.com` is the one that looks like an answer and is not. It belongs
+to the brewery, so it passes a glance, but its logo is the *company's* crest
+and would put one lion on three different beers — the same mistake as a parent
+company's domain, which is why that rule exists.
+
+So these are drawn, and drawn from the real mark rather than from memory: the
+32×32 favicon **is** Modelo's crest, and enlarged it resolves to a laurel
+wreath around a crown above a ribbon. That is what the three reproduce, one
+colourway each so they are no longer one picture three times. If Modelo ever
+publishes a logo above 48px, replace them — delete the files *and* their
+`BRAND_LOGOS` lines, then re-fetch.
+
+**Budweiser is no longer among these**, and the reason is worth keeping. It
+used to resolve through `wikidata P154` to `Budejovicky_Budvar_logo.png` — the
+mark of **Budějovický Budvar**, the Czech brewery, on a beer this repo records
+as `origin:"US"`, brewed by Anheuser-Busch in St. Louis. "Budweiser" is
+Budvar's trademark across much of Europe, so the two genuinely collide, and
+`norm("Budweiser Budvar Brewery")` starts with `"budweiser "` — enough for the
+old label rule, which was resolved by Wikipedia search order. `wikidataLogo()`
+now weighs every candidate before taking one and lets a label match win only
+when nothing matched by `P856` domain. With that in place the beer resolves to
+`budweiser.com`'s own 512×512 icon: Anheuser-Busch's bowtie, from Anheuser-Busch.
 
 `amstel-light.webp` is hand-placed too, but it is not a drawing: it is the
 brand's own roundel, cut from the owner's Untappd check-in screenshot at the

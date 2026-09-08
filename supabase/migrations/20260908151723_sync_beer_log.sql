@@ -348,7 +348,7 @@ insert into public.brand_domains (beer_name,domains,logo) values
   ('De Koninck',array['dekoninck.be'],'logos/de-koninck.svg'),
   ('Brahma',array['brahma.com.br'],'logos/brahma.webp'),
   ('Bud Light',array['budlight.com'],'logos/bud-light.webp'),
-  ('Budweiser',array['budweiser.com'],'logos/budweiser.svg'),
+  ('Budweiser',array['budweiser.com'],'logos/budweiser.webp'),
   ('Carlsberg',array['carlsberg.com'],'logos/carlsberg.svg'),
   ('Carlsberg Elephant',array['carlsberg.com'],'logos/carlsberg-elephant.svg'),
   ('Castle Lager',array['castlelager.co.za','castlelager.com'],'logos/castle-lager.webp'),
