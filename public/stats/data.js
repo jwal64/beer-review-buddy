@@ -358,6 +358,7 @@ const BRAND_LOGOS = {
 "Blue Moon":"logos/blue-moon.webp",
 "Brahma":"logos/brahma.webp",
 "Bud Light":"logos/bud-light.webp",
+"Budweiser":"logos/budweiser.webp",
 "Carlsberg":"logos/carlsberg.svg",
 "Carlsberg Elephant":"logos/carlsberg-elephant.svg",
 "Castle Lager":"logos/castle-lager.webp",
@@ -446,6 +447,7 @@ const BRAND_LOGOS = {
 "Wrench":"logos/wrench.webp",
 "Żywiec":"logos/zywiec.svg",
 };
+
 
 
 
