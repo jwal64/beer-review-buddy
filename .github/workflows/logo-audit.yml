@@ -1,16 +1,19 @@
 name: Logo audit
 
-# TEMPORARY — borrowed again, for one run, exactly as the note below describes.
+# TEMPORARY — borrowed for one more run, then restored.
 #
-# The three Modelo beers list one domain, modelousa.com, and the fetcher has
-# now walked all seven tiers against it and come back with nothing usable:
-# no declared icon, an og:image that is not square, a header "logo" that is a
-# JPEG photograph, and silence from every favicon service. The question this
-# run answers is which domain Modelo's mark actually lives on, so that the
-# domain in BRAND_DOMAINS can be corrected rather than guessed at — a guessed
-# domain is how a brand ends up wearing another company's logo.
+# The previous run found that only grupomodelo.com serves a real icon
+# (200×200, agreed by three independent services), while modelousa.com — the
+# beer brand's own site — has one at 32×32, below the fetcher's floor.
 #
-# It writes nothing. It only reports what each candidate serves.
+# grupomodelo.com is the brewery's corporate domain, and CLAUDE.md forbids a
+# parent company's domain as a fallback, because a plausible-looking wrong
+# logo is worse than none. That rule is about the *picture*, so the only way
+# to settle it is to look at the picture. This prints the candidates as
+# base64 into the log, where they can be decoded and viewed without adding an
+# unverified domain to data.js first.
+#
+# It writes nothing to the repo.
 
 on:
   schedule:
@@ -29,27 +32,23 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      # Ownership first. A domain that serves a logo is no use if the logo is
-      # not Modelo's, so print where each candidate lands and what it calls
-      # itself before asking any source for a picture.
-      - name: Who owns these domains
+      - name: Print the candidate marks as base64
         run: |
-          for d in modelousa.com modelo.com grupomodelo.com gmodelo.com.mx \
-                   cervezamodelo.com.mx negramodelo.com modelooro.com \
-                   modeloespecial.com corona.com; do
-            out=$(curl -sSL --max-time 20 -o /tmp/page.html \
-                  -w '%{http_code} %{url_effective}' "https://$d/" 2>/dev/null) || out="--- unreachable"
-            title=$(tr '\n' ' ' < /tmp/page.html 2>/dev/null \
-                    | grep -oiP '<title[^>]*>\K.*?(?=</title>)' | head -c 90)
-            printf '%-24s %s\n%*s   title: %s\n' "$d" "$out" 24 "" "${title:-(none)}"
-          done
+          emit () {   # name url
+            curl -sSL --max-time 25 -o /tmp/c.bin "$2" || { echo "$1: unreachable"; return; }
+            sz=$(stat -c%s /tmp/c.bin)
+            echo "===BEGIN $1 ($sz bytes) $(file -b --mime-type /tmp/c.bin)"
+            if [ "$sz" -lt 220000 ]; then base64 -w 200 /tmp/c.bin; else echo "(too big to print)"; fi
+            echo "===END $1"
+          }
 
-      - name: What each candidate actually serves
-        run: |
-          node tools/probe-logo-sources.mjs \
-            modelousa.com modelo.com grupomodelo.com gmodelo.com.mx \
-            cervezamodelo.com.mx negramodelo.com modelooro.com || true
+          emit grupomodelo-256 "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://grupomodelo.com&size=256"
+          emit modelousa-256   "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://modelousa.com&size=256"
+          emit modelo-iconhorse "https://icon.horse/icon/modelo.com"
+
+          # And the og:image modelousa.com declares — rejected only for being
+          # non-square, which a wide wordmark banner would also be.
+          curl -sSL --max-time 25 -o /tmp/p.html https://www.modelousa.com/ || true
+          og=$(tr '\n' ' ' < /tmp/p.html | grep -oiP '<meta[^>]+property="og:image"[^>]+content="\K[^"]+' | head -1)
+          echo "og:image url = ${og:-(none)}"
+          [ -n "$og" ] && emit modelousa-ogimage "$og"
