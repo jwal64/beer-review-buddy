@@ -417,7 +417,7 @@ const BRAND_LOGOS = {
 "Paulaner Hefe-Weißbier":"logos/paulaner-hefe-weissbier.webp",
 "Peroni Nastro Azzurro":"logos/peroni-nastro-azzurro.webp",
 "Peroni Original":"logos/peroni-original.webp",
-"Pilsner Urquell":"logos/pilsner-urquell.svg",
+"Pilsner Urquell":"logos/pilsner-urquell.webp",
 "Presidente":"logos/presidente.webp",
 "Pub Ale":"logos/pub-ale.svg",
 "Quilmes":"logos/quilmes.webp",

@@ -39,13 +39,13 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Thirteen files are here that way, and every one of them is a **drawn
+Twelve files are here that way, and every one of them is a **drawn
 approximation in the house idiom** — a brand-coloured field, the wordmark, one
 characteristic device — not the brand's own artwork:
 
 `augustiner-helles` · `estrella-jalisco` · `guinness-draught` ·
 `hop-commander` · `daura` · `newcastle-brown-ale` · `pacifico-clara` ·
-`pilsner-urquell` · `pub-ale` · `singha` · `smithwicks` · `sol` ·
+`pub-ale` · `singha` · `smithwicks` · `sol` ·
 `stiegl-goldbrau`
 
 Five of them — `daura`, `newcastle-brown-ale`, `pacifico-clara`, `singha` and
@@ -159,7 +159,7 @@ Google, Icon Horse and DuckDuckGo all refused `CONNECT`), which is its own
 reason a drawing was the only way to get a correct logo into the tree at the
 time. The drawings are in this branch's history if one is ever wanted back.
 
-Five files are hand-placed but are **the brands' own artwork**, supplied by the
+Six files are hand-placed but are **the brands' own artwork**, supplied by the
 owner rather than drawn or fetched:
 
 - `modelo-especial.webp` — the Modelo crest, replacing the storefront
@@ -168,6 +168,15 @@ owner rather than drawn or fetched:
   gold lions read, so it is masked onto a white tile with the corner radius the
   other tiles use. That is presentation, not redrawing: the mark itself is
   untouched.
+- `pilsner-urquell.webp` — the real seal-and-wordmark, replacing the drawn
+  stand-in that replaced the empty sprite-only SVG (`#shape-logo-pilsner`,
+  above). Supplied by the owner from Wikimedia Commons, since
+  `upload.wikimedia.org` and `thumb.wikimedia.org` are both blocked by this
+  environment's egress policy and no session here could have fetched it. The
+  wordmark's forest green and the seal's dark red both measure under 2.5:1
+  contrast against `--bg`, so — same reasoning as `modelo-especial.webp` — it
+  sits on a white tile at the source's own resolution (256×256, content
+  scaled to 80% with a ⅙-side corner radius) rather than being recoloured.
 - `harp-lager.webp` — the Harp badge, replacing an `icon.horse` answer that was
   a generic blue-and-white glyph, not Harp's mark at all. Its white surround is
   flooded out from the border, so the badge sits on the ground like every other
