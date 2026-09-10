@@ -33,17 +33,17 @@ const esc = v => String(v ?? '')
 // under a city card — so the same place read three ways on one page.
 //
 // Returns HTML, not text: the parts are escaped here (a place name can carry
-// an apostrophe) and the flag rides in front of the country. A region that
-// repeats its city — Antwerp, Antwerp — is said once, and a missing part is
+// an apostrophe) and the flag rides in front of the country. A city and its
+// region can share a name by coincidence — New York City in New York State,
+// Antwerp the city in Antwerp the province — and that is not redundancy, so
+// both are printed in full rather than collapsed to one; a missing part is
 // dropped rather than left as a dangling comma.
 // `flag:false` drops the country's flag; `lead:false` drops the city itself,
-// for the two places that have already printed it in bold above — the city
-// still has to be passed there, because it is what tells the region it would
-// be a repeat.
+// for the two places that have already printed it in bold above.
 const placeLabel = (city, region, country, cc, {flag = true, lead = true} = {}) => {
   const c = String(city ?? '').trim(), r = String(region ?? '').trim(), n = String(country ?? '').trim();
   const nation = n ? `${flag && FLAGS[cc] ? FLAGS[cc] + ' ' : ''}${esc(n)}` : '';
-  return [lead && c ? esc(c) : '', r && r !== c ? esc(r) : '', nation].filter(Boolean).join(', ');
+  return [lead && c ? esc(c) : '', r ? esc(r) : '', nation].filter(Boolean).join(', ');
 };
 
 // ══════════════════════════════════════════════════════════════
