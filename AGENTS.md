@@ -65,6 +65,15 @@ it was built to end.
 
 `CLAUDE.md`, "Step 6: Verifying the database actually got it", has the detail.
 
+The repo's two tests — `tools/verify-live-test.mjs` and
+`tools/app-logic-test.mjs`, the second covering the rules inside
+`public/stats/app.js` — are plain Node, need nothing installed and run in
+milliseconds. Each is named in the `check` script **and** has a step in
+`.github/workflows/checks.yml`, and `check-invariants.mjs` fails when a tool
+appears in one and not the other. That is not hypothetical tidiness: the
+live-data test was named in the check script, documented as running on every
+push, and run by nothing in CI.
+
 ### How these keep getting lost — and how to stop
 
 Nobody deleted them on purpose. The pass branched from a commit older than the

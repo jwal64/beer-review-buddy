@@ -37,7 +37,8 @@ follows the same loop, and the loop is what makes it land on Lovable:
 3. **Validate before pushing** — Lovable deploys `main`, so `main` stays green:
 
    ```sh
-   npm run check          # data rules + projection round-trip + bun.lock (always)
+   npm run check          # data rules + round-trip + bun.lock + the tests (always)
+   npm run test           # just the tests, when that is all you changed
    npx tsc --noEmit       # if src/ changed
    npx eslint <files>     # if src/ or tools/ changed; prettier --write first
    npx vite build         # if src/, vite.config.ts or package.json changed
@@ -95,6 +96,51 @@ the current `main`, and when a merge asks which side of a file to keep, keep
 the side that has these features rather than the side your branch was cut
 from. A change you did not intend to make is not yours to resolve — if you did
 not mean to remove `placeLabel`, don't.
+
+### The tests
+
+Two, both plain Node, both run by `npm run check` and by a step of their own in
+CI. `npm run test` runs the pair on their own.
+
+| File | Pins |
+|------|------|
+| `tools/verify-live-test.mjs` | the live-sync comparison, against a database made wrong in each way that has actually happened |
+| `tools/app-logic-test.mjs` | the rules inside `public/stats/app.js` |
+
+`check-invariants.mjs` asks whether a feature is still *there*; the app-logic
+test asks whether it still *behaves*. It covers `esc()`, both halves of the
+location format, `wtNorm()`, the `MIN_N` helpers, the rating ramp,
+`computeCanonLoc()`, `predictRating()` and `isDisplayNew()` — and three of
+those are worth knowing about:
+
+- **The two `placeLabel`s are compared to each other**, over every location in
+  `drunkLocs`. Nothing else does: the format is written twice, once in
+  `src/lib/place.ts` and once in `app.js`, and a check that only asks whether
+  both exist passes happily while they disagree.
+- **`computeCanonLoc()` is dormant** — every beer is currently reviewed in
+  exactly one city, so none of it runs against the committed data. It starts
+  running by itself the first time a beer is logged in a second city, which is
+  the worst moment to discover an untested rule. The test is where the home-city
+  and tie-break rules are actually exercised.
+- **`predictRating()`'s `MIN_N` fallback is invisible.** A wrong one still
+  returns a plausible number, so nothing on the page would look broken.
+
+The declarations are lifted out of `app.js` and evaluated by `loadAppScope()`
+in `tools/load-data.mjs` — the same trick `validate-data.mjs` already used for
+`sC` and `wtNorm`, generalised. So the tests run the site's own definitions
+rather than a copy, and app.js keeps its no-imports, no-exports shape. A test
+that fails with "app.js has no top-level declaration of …" means the
+declaration was renamed or indented, not that the rule broke.
+
+Adding a tool to the `check` script now also requires a step for it in
+`.github/workflows/checks.yml`; `check-invariants.mjs` compares the two and
+fails when they drift. That gap was real: `verify-live-test.mjs` was named in
+the check script, described here as running on every push, and run by nothing
+in CI.
+
+`npx tsc --noEmit` type-checks `src/`, and `npm run smoke` drives the built
+page in a browser. Neither is replaced by this; nothing yet covers the React
+components or the drawing half of `app.js`.
 
 ### Git rules (Lovable)
 
