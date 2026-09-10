@@ -549,12 +549,15 @@ Both surfaces have a helper, and neither one should be inlined again:
 | the app | `placeLabel(row)` in `src/lib/place.ts` — plain text; the caller adds the flag |
 | the stats site | `placeLabel(city, region, country, cc, opts)` in `app.js` — returns escaped HTML with the flag in front of the country |
 
-Both drop a part the row doesn't have rather than leaving a dangling comma, and
-both say a region only once when it repeats its city ("Antwerp, Antwerp"). The
-stats-site helper takes two options: `flag:false` where a flag would be noise,
-and `lead:false` for the two places that have already printed the city in bold
-above — the city is still passed there, because it is what tells the region it
-would be a repeat.
+Both drop a part the row doesn't have rather than leaving a dangling comma. A
+city and its region can share a name by coincidence rather than identity — New
+York City sits in New York State, Antwerp the city in Antwerp the province —
+so neither helper collapses a region that repeats its city: "New York, New
+York, United States" and "Antwerp, Antwerp, Belgium" are both printed in full,
+because dropping the second one made "New York, USA" read as the state rather
+than the city that was actually drunk in. The stats-site helper takes two
+options: `flag:false` where a flag would be noise, and `lead:false` for the two
+places that have already printed the city in bold above.
 
 Table **columns** are the exception, and stay split: the beers table's City,
 Region and Country columns already read as the format across the row, and
