@@ -28,9 +28,14 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
+      # 22, not 20: Node 20 went end-of-life in April 2026, and the app-logic
+      # test imports src/lib/place.ts directly — 22 strips the types itself,
+      # which is what lets one test hold the app's copy of the location format
+      # against the site's without a build step to run first.
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "22"
 
       # No dependencies to install — the tools are plain Node.
       - name: Validate the data
@@ -48,8 +53,21 @@ jobs:
 
       # Two features have been reverted twice by a pass that never meant to
       # touch them. This fails on the push that drops them, not weeks later.
+      # It also checks that every tool in `npm run check` has a step below.
       - name: Check the standing features are still in place
         run: node tools/check-invariants.mjs
+
+      # The verifier that notices an unapplied migration, held against a
+      # database made wrong in each way that has actually happened. It was
+      # named in the check script and run by nothing here until now.
+      - name: Test the live-sync comparison
+        run: node tools/verify-live-test.mjs
+
+      # The rules inside app.js — the location format, when two spellings are
+      # the same beer, MIN_N, the canonical location, the shortlist's guess.
+      # Nothing else asks whether the code that renders the data still behaves.
+      - name: Test the stats-site logic
+        run: node tools/app-logic-test.mjs
 
       - name: Syntax-check the site scripts
         run: node --check public/stats/data.js && node --check public/stats/app.js && node --check public/stats/live-data.js

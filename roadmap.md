@@ -38,6 +38,13 @@
       them. (A standing rule rather than a to-do — it lived here as an
       unchecked box, which reads as work nobody had done yet, and it was
       reverted again anyway. Prose in a roadmap is not enforcement.)
+- [x] Test the rules inside `public/stats/app.js` — `tools/app-logic-test.mjs`
+      lifts the pure declarations out of the file and pins `esc`, both halves
+      of the location format against each other, `wtNorm`, the `MIN_N`
+      helpers, the rating ramp, the dormant canonical-location rule and the
+      shortlist's prediction. Wired into `npm run check` and CI, which also
+      now runs `verify-live-test.mjs` — it had been named in the check script
+      and run by nothing
 - [ ] Replace the nine drawn-approximation logos with the brands' official
       artwork where one is publicly available
 - [x] Fix the missing Amstel Light entry: its migration never applied, so the

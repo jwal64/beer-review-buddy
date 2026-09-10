@@ -29,6 +29,11 @@ const REPO = join(dirname(fileURLToPath(import.meta.url)), "..");
 
 const read = (f) => (existsSync(join(REPO, f)) ? readFileSync(join(REPO, f), "utf8") : null);
 
+// Every tools/*.mjs the `check` script runs, named in the order it runs them.
+const checkScriptTools = () => [
+  ...new Set(JSON.parse(read("package.json")).scripts.check.match(/tools\/[\w-]+\.mjs/g) ?? []),
+];
+
 // Each rule: the file it lives in, what has to be there, and what a person
 // reading the failure needs to know to put it back.
 const RULES = [
@@ -96,10 +101,31 @@ const RULES = [
   },
   {
     file: "package.json",
-    needs: [[/tools\/verify-live-test\.mjs/, "`tools/verify-live-test.mjs` in the check script"]],
+    needs: [
+      [/tools\/verify-live-test\.mjs/, "`tools/verify-live-test.mjs` in the check script"],
+      [/tools\/app-logic-test\.mjs/, "`tools/app-logic-test.mjs` in the check script"],
+    ],
     why:
       'A verifier that quietly says "fine" is worse than no verifier, so its ' +
-      "judgement is pinned by a test that npm run check runs on every push.",
+      "judgement is pinned by a test that npm run check runs on every push. The " +
+      "same goes for the rules inside app.js: the location format, the crossing-off " +
+      "rule, MIN_N, the canonical location and the shortlist's prediction.",
+  },
+  {
+    // The workflow names its steps one at a time rather than running the whole
+    // script, which reads better when one goes red — and drifts in silence when
+    // a tool is added to the script and not to the workflow. It already had:
+    // verify-live-test.mjs was named in the check script, described in CLAUDE.md
+    // as running on every push, and run by nothing. Green ticks over a test that
+    // had never run is the same silence every other check here exists to end.
+    file: ".github/workflows/checks.yml",
+    needs: checkScriptTools().map((tool) => [
+      new RegExp(`node ${tool.replace(/[/.]/g, "\\$&")}`),
+      `a \`node ${tool}\` step — the check script runs it, so CI has to`,
+    ]),
+    why:
+      "Every tool in the check script needs a step here, or `npm run check` " +
+      "passes locally while CI quietly checks less than it claims to.",
   },
   ...["src/routes/beers.tsx", "src/routes/index.tsx", "src/components/BeerForm.tsx"].map(
     (file) => ({
