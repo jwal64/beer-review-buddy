@@ -208,6 +208,17 @@ roundel — the marketed mark for the light variant is not what the check-in
 carried — so it is a fair candidate to replace if a session ever reaches those
 domains and finds an Amstel Light mark of its own.
 
+`rothaus-pils-tannen-zapfle.webp` is the same story: the owner supplied
+Rothaus's actual mark — the Waldmann figure with the two fir trees and the
+`Rothaus` script — directly, at 300×300 with a transparent ground, because
+every fetcher tier for `rothaus.de` (site icons, Wikidata `P154`, the favicon
+services, DuckDuckGo) answered `403` at `CONNECT` from this environment's
+egress policy rather than `404` from the brand, so there was no ladder to
+walk. It replaced a drawn stand-in (a fir cone and wordmark) from the same
+session, which never had the real artwork to work from. Stored at the fetcher's
+own 256px cap; no tile needed — the figure's colours and the red script both
+read on `--bg` at full saturation.
+
 ## Marks that were right, and still did not render
 
 A logo can be the brand's own artwork, decode perfectly, be the right size, and

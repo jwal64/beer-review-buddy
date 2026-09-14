@@ -1,6 +1,6 @@
 {
-  "at": "2026-09-07T21:34:57.865Z",
-  "total": 102,
+  "at": "2026-09-14T00:53:26.845Z",
+  "total": 103,
   "fetched": [
     {
       "beer": "Affligem Tripel",
@@ -837,6 +837,10 @@
     {
       "beer": "Ringnes",
       "file": "logos/ringnes.webp"
+    },
+    {
+      "beer": "Rothaus Pils / Tannen Zäpfle",
+      "file": "logos/rothaus-pils-tannen-zapfle.webp"
     },
     {
       "beer": "Singha",
