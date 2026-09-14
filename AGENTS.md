@@ -69,6 +69,12 @@ Anything under `supabase/` is the remains of that store and is wired to
 nothing. `src/integrations/supabase/` still holds auto-generated files that
 nothing imports; leave them or remove them, but do not wire them back up.
 
+`src/routes/add.tsx` is the phone capture, and it deliberately **writes
+nothing**. It files a GitHub issue against `.github/ISSUE_TEMPLATE/add-a-beer.yml`
+and the entry is written by hand afterwards, because a brewery's coordinates,
+language, native name and logo are research rather than form fields. Do not
+"finish" it by giving it a database, an API route, or a token to commit with.
+
 The repo's tests — `tools/app-logic-test.mjs` (the rules inside
 `public/stats/app.js`) and `tools/roundtrip-snapshot.mjs` (that the projection
 loses nothing and the committed snapshot is in step) — are plain Node, need

@@ -1,0 +1,48 @@
+name: Add a beer
+description: Log a beer from your phone — an Untappd screenshot and where you drank it.
+title: "Add a beer"
+labels: ["beer"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Attach the Untappd screenshot below and say where you drank it. That is
+        everything — the brewery, its city and coordinates, the language, the
+        native name, the brand domain and the logo are all researched when this
+        is turned into a commit.
+
+        The beer goes live once that commit is merged and deployed.
+
+  - type: textarea
+    id: screenshot
+    attributes:
+      label: The Untappd screenshot
+      description: |
+        Tap the paperclip / photo button and pick it from your camera roll. The
+        rating, the beer, the brewery, the style and how it was served are all
+        read off it.
+      placeholder: Attach the screenshot here.
+    validations:
+      required: true
+
+  - type: input
+    id: where
+    attributes:
+      label: Where did you drink it?
+      description: |
+        City is enough if it is somewhere already in the log. Somewhere new —
+        say the region and country too, so the map gets it right.
+      placeholder: New Rochelle
+    validations:
+      required: true
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: Anything else?
+      description: |
+        Optional. Worth saying if the screenshot does not: a beer you have had
+        before (it changes the "new" badge), a different serving than the one
+        shown, or a name to log it under.
+    validations:
+      required: false

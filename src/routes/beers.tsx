@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useDeferredValue, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
@@ -22,7 +22,7 @@ import {
   useCountries,
   type Beer,
 } from "@/lib/beer-data";
-import { Search, Plus, Pencil } from "lucide-react";
+import { Search, Plus } from "lucide-react";
 import { placeLabel } from "@/lib/place";
 import { Button } from "@/components/ui/button";
 
@@ -238,6 +238,17 @@ function BeersPage() {
           )}
         </SheetContent>
       </Sheet>
+      {/* Capture a beer from a phone. It files a GitHub issue rather than
+          writing anywhere: the log is a committed file, so there is nothing to
+          write to, and a brewery's coordinates, language and logo are research
+          rather than form fields. See src/routes/add.tsx. */}
+      <Link
+        to="/add"
+        aria-label="Add a beer"
+        className="fixed bottom-24 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform hover:scale-105 active:scale-95"
+      >
+        <Plus size={26} />
+      </Link>
     </Shell>
   );
 }
