@@ -63,6 +63,12 @@ jobs:
       - name: Test the live-sync comparison
         run: node tools/verify-live-test.mjs
 
+      # The rule that decides what the site actually shows when the database
+      # is behind the file — which is the normal case, not the strange one,
+      # because applying a migration is Lovable's step and not this repo's.
+      - name: Test the snapshot/database merge
+        run: node tools/merge-rows-test.mjs
+
       # The rules inside app.js — the location format, when two spellings are
       # the same beer, MIN_N, the canonical location, the shortlist's guess.
       # Nothing else asks whether the code that renders the data still behaves.

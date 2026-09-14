@@ -34,7 +34,7 @@ import { readFileSync, existsSync, writeFileSync } from "node:fs";
 import { join, dirname, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { loadData } from "./load-data.mjs";
-import { toRows, TABLES } from "../public/stats/supabase-rows.mjs";
+import { toRows, TABLES, KEYS, keyOf } from "../public/stats/supabase-rows.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(HERE, "..");
@@ -53,23 +53,13 @@ const JSON_OUT = arg("--json", null);
 
 // ── Which row is which ────────────────────────────────────────
 //
-// The natural key of each table — what makes two rows the same row. `beers`
-// uses name + drank_on because that is exactly what the generated migration
-// matches on (tools/export-supabase-seed.mjs): checking on a different key
-// than the SQL updates on would report differences the migration could never
-// have fixed.
-const KEYS = {
-  countries: ["cc"],
-  locations: ["city", "cc"],
-  breweries: ["name"],
-  beers: ["name", "drank_on"],
-  brand_domains: ["beer_name"],
-  want_to_try: ["beer"],
-  untappd_averages: ["beer_name"],
-  app_meta: ["key"],
-};
-
-const keyOf = (table, row) => KEYS[table].map((k) => String(row[k])).join(" ␟ ");
+// KEYS and keyOf are imported rather than declared here. The natural key of
+// each table — what makes two rows the same row — is now written once, in
+// public/stats/supabase-rows.mjs, because three things have to agree about it
+// or they are each right about a different question: the generated migration
+// matches on it, the live page's mergeRows() merges on it, and this file
+// reports on it. Checking on a different key than the SQL updates on would
+// report differences the migration could never have fixed.
 const label = (table, row) => KEYS[table].map((k) => row[k]).join(" · ");
 
 // ── Comparing a value ─────────────────────────────────────────

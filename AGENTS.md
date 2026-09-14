@@ -11,9 +11,10 @@
 
 ## Do not revert these features
 
-Three things in this project must survive every editing pass — two features
-already reverted twice by a pass that never set out to change them, and the
-check that catches a third kind of loss. **They are intentional, they are
+Four things in this project must survive every editing pass — two features
+already reverted twice by a pass that never set out to change them, the check
+that catches a third kind of loss, and the merge that makes a newly added beer
+visible at all. **They are intentional, they are
 finished, and no pass may remove, inline, simplify or "harden" them away.**
 Read this list before editing any of the files it names.
 
@@ -53,21 +54,47 @@ A place is written "New Rochelle, New York, United States" on every surface.
 of them.
 
 They are the only thing that notices when a migration is merged to `main` and
-then never applied to Supabase. That failure is otherwise completely silent:
-`public/stats/live-data.js` replaces the committed snapshot with the database's
-version on load, so a beer whose migration never ran appears for a moment and
-then disappears, and the app never shows it at all. It has happened, for days,
-with every other check green.
+then never applied to Supabase. It has happened, for days, with every other
+check green.
 
 A pass that has already deleted an applied migration file can delete the thing
 that notices. This is the one check whose absence restores exactly the silence
 it was built to end.
 
-`CLAUDE.md`, "Step 6: Verifying the database actually got it", has the detail.
+`CLAUDE.md`, "Step 6", has the detail.
 
-The repo's two tests — `tools/verify-live-test.mjs` and
-`tools/app-logic-test.mjs`, the second covering the rules inside
-`public/stats/app.js` — are plain Node, need nothing installed and run in
+### 4. The snapshot merge — how a beer is visible at all
+
+Four things, and all four are load-bearing:
+
+- **`mergeRows()` in `public/stats/supabase-rows.mjs`** — the rule.
+- **the `mergeRows(` call in `public/stats/live-data.js`** — the stats page.
+- **`withSnapshot()` in `src/lib/snapshot.ts`**, and **its use in
+  `src/lib/beer-data.ts`** — the app. `src/data/snapshot.json` is generated
+  (`npm run snapshot`); do not hand-edit it, and do not delete it.
+
+A beer is added by editing `public/stats/data.js`. Carrying that into Supabase
+is a migration, and applying a migration is **not** something this repo can
+do — it did not happen for days at a time, across three merges, while every
+check stayed green.
+
+So both surfaces merge the database *into* the committed snapshot instead of
+replacing the snapshot with it: on a row both have the file wins, a row only
+the database has is added, and **a row only the file has is kept**. That last
+one is the entire point. Before it, the stats page painted a newly added beer
+and then replaced it with the database's answer — it appeared for one frame
+and vanished — and the app, which reads Supabase and nothing else, never had
+it at all.
+
+Reverting any part of this to "just use what the database returns" looks like
+a simplification and is the bug coming back. `tools/merge-rows-test.mjs` pins
+it, including that the key map — written once in `.mjs` and once in TypeScript,
+because `src/` cannot import out of `public/` — still says the same thing in
+both places.
+
+The repo's three tests — `tools/verify-live-test.mjs`,
+`tools/merge-rows-test.mjs` and `tools/app-logic-test.mjs`, the last covering
+the rules inside `public/stats/app.js` — are plain Node, need nothing installed and run in
 milliseconds. Each is named in the `check` script **and** has a step in
 `.github/workflows/checks.yml`, and `check-invariants.mjs` fails when a tool
 appears in one and not the other. That is not hypothetical tidiness: the

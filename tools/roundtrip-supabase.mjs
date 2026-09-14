@@ -18,6 +18,7 @@ import { join } from 'node:path';
 import { loadData } from './load-data.mjs';
 import { toRows, fromRows } from '../public/stats/supabase-rows.mjs';
 import { renderDataJs } from './render-data-js.mjs';
+import { snapshotText, committedSnapshot } from './make-snapshot.mjs';
 
 const before = loadData();
 const rows = toRows(before);
@@ -92,5 +93,20 @@ if (problems.length) {
   process.exit(1);
 }
 
+// The app reads src/data/snapshot.json, not data.js — it is a Vite bundle and
+// cannot import a file out of public/. That copy is generated from the same
+// projection this file just proved, so the only way it can be wrong is by
+// being stale: someone edited data.js and did not run `npm run snapshot`.
+//
+// Stale is the failure that matters. The app would go on showing the beer log
+// as it stood before the edit, and every other check here would still pass —
+// which is the exact silence this repo has already been bitten by once.
+if (committedSnapshot() !== snapshotText()) {
+  console.error('\nsrc/data/snapshot.json is out of step with data.js.\n');
+  console.error('  The app reads that file, so the beer log it shows is the stale one.');
+  console.error('  Run `npm run snapshot` (or `npm run publish`) and commit it.\n');
+  process.exit(1);
+}
+
 const counts = Object.entries(rows).map(([t, r]) => `${r.length} ${t}`).join(' · ');
-console.log(`\nRound trip clean — ${counts}.\n`);
+console.log(`\nRound trip clean — ${counts}, snapshot.json in step.\n`);

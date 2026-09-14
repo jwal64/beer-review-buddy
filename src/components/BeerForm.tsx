@@ -12,6 +12,7 @@
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { isSnapshotOnly } from "@/lib/snapshot";
 import {
   type Beer,
   METHODS,
@@ -205,12 +206,23 @@ export function BeerForm({
         drank_on: form.drank_on,
       };
 
-      const { error } = editing
-        ? await supabase.from("beers").update(payload).eq("id", beer.id)
-        : await supabase.from("beers").insert(payload);
+      // A beer the app is showing from the committed snapshot has no row in
+      // the database yet — the migration carrying it has not been applied — so
+      // there is nothing to update. `update ... where id = 'snapshot:…'`
+      // matches nothing and reports success, which would be the same silence
+      // that made an unapplied migration so expensive to notice in the first
+      // place. Saving it inserts it instead, which is also the one way to get
+      // it into the database from here.
+      const materialising = editing && isSnapshotOnly(beer);
+      const { error } =
+        editing && !materialising
+          ? await supabase.from("beers").update(payload).eq("id", beer.id)
+          : await supabase.from("beers").insert(payload);
       if (error) throw error;
 
-      toast.success(editing ? "Beer updated" : "Beer added");
+      toast.success(
+        materialising ? "Beer saved to the database" : editing ? "Beer updated" : "Beer added",
+      );
       await Promise.all([
         queryClient.invalidateQueries({ queryKey: ["beers"] }),
         queryClient.invalidateQueries({ queryKey: ["breweries"] }),
@@ -227,6 +239,13 @@ export function BeerForm({
 
   async function handleDelete() {
     if (!beer) return;
+    // Nothing to delete: this beer is being shown from the committed snapshot
+    // and has no database row. Removing it means editing data.js, which is
+    // where it is actually written down.
+    if (isSnapshotOnly(beer)) {
+      toast.error("This beer comes from the committed log — remove it in data.js instead.");
+      return;
+    }
     setBusy(true);
     const { error } = await supabase.from("beers").delete().eq("id", beer.id);
     setBusy(false);

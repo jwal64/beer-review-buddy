@@ -19,7 +19,13 @@ And two stores that are kept in step:
   its current state into SQL that carries it into Supabase; `npm run sync`
   pulls Supabase back into it.
 
-On a matched row the file wins — that is what makes it the authoring surface.
+On a matched row the file wins — that is what makes it the authoring surface,
+and both surfaces now apply that at display time: they **merge** the database
+into the committed snapshot rather than replacing the snapshot with it. So a
+beer that is in `data.js` and not yet in the database still shows, which is
+what makes adding one a matter of editing this file and merging. See "Step 6"
+below for why that had to change.
+
 A row only the database knows (a beer logged through the app's own form) is
 never touched by a migration; run `npm run sync` to pull those into the file.
 Never log the same pour both ways: the file writes it as the first of its
@@ -37,7 +43,7 @@ follows the same loop, and the loop is what makes it land on Lovable:
 3. **Validate before pushing** — Lovable deploys `main`, so `main` stays green:
 
    ```sh
-   npm run check          # data rules + round-trip + bun.lock + the tests (always)
+   npm run check          # data rules + round-trip + snapshot + bun.lock + tests (always)
    npm run test           # just the tests, when that is all you changed
    npx tsc --noEmit       # if src/ changed
    npx eslint <files>     # if src/ or tools/ changed; prettier --write first
@@ -73,10 +79,16 @@ Lovable in `AGENTS.md`:
 2. **One location format everywhere** — `placeLabel` in `src/lib/place.ts` and
    in `public/stats/app.js` ("Location Rule: City, Region, Country" below).
 3. **The live-data check** — `.github/workflows/verify-live.yml` and
-   `tools/verify-live.mjs` ("Step 6: Verifying the database actually got it"
-   above). A pass that has already deleted an applied migration file can
-   delete the thing that notices, and this is the one check whose absence
-   restores the exact silence it was built to end.
+   `tools/verify-live.mjs` ("Step 6" above). A pass that has already deleted an
+   applied migration file can delete the thing that notices, and this is the
+   one check whose absence restores the exact silence it was built to end.
+4. **The snapshot merge** — `mergeRows()` in `public/stats/supabase-rows.mjs`,
+   the `mergeRows(` call in `public/stats/live-data.js`, `withSnapshot()` in
+   `src/lib/snapshot.ts` and its use in `src/lib/beer-data.ts`. These are what
+   let the site show a beer the database has not got yet. Reverting any of
+   them — going back to "replace the snapshot with what the database says" —
+   restores the bug where a newly added beer paints for one frame and vanishes
+   (the stats page) or never appears at all (the app).
 
 `node tools/check-invariants.mjs` fails when any of them goes missing, and
 `npm run check` runs it, so CI turns red on the push that drops them rather
@@ -99,12 +111,13 @@ not mean to remove `placeLabel`, don't.
 
 ### The tests
 
-Two, both plain Node, both run by `npm run check` and by a step of their own in
-CI. `npm run test` runs the pair on their own.
+Three, all plain Node, each run by `npm run check` and by a step of its own in
+CI. `npm run test` runs the three on their own.
 
 | File | Pins |
 |------|------|
 | `tools/verify-live-test.mjs` | the live-sync comparison, against a database made wrong in each way that has actually happened |
+| `tools/merge-rows-test.mjs` | the snapshot/database merge — what the site shows when the database is behind the file |
 | `tools/app-logic-test.mjs` | the rules inside `public/stats/app.js` |
 
 `check-invariants.mjs` asks whether a feature is still *there*; the app-logic
@@ -190,8 +203,37 @@ only.
 ## Standard Operating Procedure: Adding a Beer
 
 This is the normal flow — the owner describes a beer they drank, and a Claude
-session makes these edits. Everything happens in `public/stats/data.js`, then
-one command turns it into a migration.
+session makes these edits. Everything happens in `public/stats/data.js`, and
+one command generates everything downstream of it.
+
+### The short version
+
+```sh
+# 1. edit public/stats/data.js — the review, the brewery, the domain, the city
+npm run fetch-logos        # 2. the logo (needs internet); then look at it:
+npm run logo-sheet
+npm run publish            # 3. checks, then writes the snapshot + the migration
+# 4. commit all of it, merge to main. That is the publish button.
+```
+
+**It is live when that merge deploys.** Not when a migration is applied —
+nothing here can make that happen, and for a long stretch it did not. Both
+surfaces read `data.js` (the app through `src/data/snapshot.json`) and treat
+the database as something that *adds* to it, so the beer shows whether or not
+Supabase ever hears about it. Step 6 is the long version of why.
+
+Two things no check can do for you, both worth thirty seconds: **look at the
+logo sheet** — nothing automated tells a brand's mark from a photograph of a
+bottle — and record a `nativeName` where one exists.
+
+If `npm run fetch-logos` can reach nothing (a sandbox with no egress answers
+`403` at `CONNECT` for every logo source, which looks identical to the brand
+having no logo), draw one into `public/stats/logos/` by hand and add it to
+`BRAND_LOGOS` — `public/stats/logos/README.md` is the guide, and a file you
+place by hand has to be listed under `kept` in `logo-fetch-report.json` or the
+next fetch overwrites it.
+
+### The long version
 
 ### Step 1: Add the review to `beers[]`
 
@@ -334,66 +376,91 @@ that belongs to one pour rather than to the brand.
 
 Without it the maps drop the review, and `npm run check` fails.
 
-### Step 5: Check, generate the migration, commit
+### Step 5: Check, and publish
 
 ```sh
-npm run check       # every rule above, enforced; plus the projection round-trip
-npm run migration   # writes supabase/migrations/<stamp>_sync_beer_log.sql
+npm run check       # every rule above, plus the projection round trip
+npm run publish     # writes src/data/snapshot.json + the migration
 ```
 
-`npm run migration` runs the check itself and refuses to generate from a file
-that fails it. Commit **both** the edited `data.js` and the new migration in
-one commit, and merge to `main`.
+`npm run publish` is the whole of it. It runs the check itself and refuses to
+generate from a file that fails, then writes the two generated artefacts:
 
-**The merge is not the end — and not even the mechanism any more.** Lovable
-sessions apply the change straight to the database themselves, with the
-built-in database data tools, as part of the same session that edits
-`data.js`, and then read the database back to confirm the new rows are there
-before closing the task. The generated migration is still committed as the
-record of the change (and as the repair file Step 6 pastes when something
-else drifts), but it is no longer the delivery mechanism, because in practice
-it has not been applying — see Step 6, which remains the standing check, and
-"What the first run found" for what the database actually did with the last
-three. A beer is not added until a `SELECT` says the database has it.
+| Artefact | Who reads it |
+|----------|--------------|
+| `src/data/snapshot.json` | the app — this is what puts the beer in the app |
+| `supabase/migrations/<stamp>_sync_beer_log.sql` | Supabase, whenever it is applied |
 
-The generated SQL is the whole file written as add-and-update statements: on a
-match the file wins, a row only the database knows is left alone, nothing
-deletes, and replaying it is a no-op. `npm run check` in CI runs on every push.
+Commit `data.js`, the snapshot and the migration together, and merge to `main`.
+**That is the publish button, and it is now the whole of it** — see Step 6 for
+why the database is no longer in the way.
 
-Two things no check can verify on its own: that the logo which came back is
-actually the brand's logo and not a photograph of a bottle (`npm run logo-sheet`
-and look at it — see "Logos" below), and that a `nativeName` was recorded where
-one exists.
+`npm run snapshot` writes just the snapshot, for the case where that is all
+that changed. `npm run check` fails when the snapshot is out of step with
+data.js, so a forgotten `publish` is caught here rather than by the app
+quietly showing yesterday's log.
 
-### Step 6: Verifying the database actually got it
+### Step 6: It is live at the merge — the database is no longer in the way
 
-**The merge is not the end.** Step 5 finishes with "merge to `main` — Lovable
-applies the migration", and that last step is the one part of adding a beer
-that does not happen in this repo. Nothing here can force it. It has silently
-not happened, for days at a time, while every check in CI stayed green.
+**This used to be the step that did not work, and it was expensive.** Adding a
+beer ended with "merge to `main` — Lovable applies the migration", and that
+last part is the one piece of adding a beer that does not happen in this
+repo. Nothing here can force it. It silently did not happen for days at a
+time, across at least three merges, while every check in CI stayed green.
 
-The silence is what makes it expensive. `public/stats/live-data.js` paints the
-committed snapshot and then, if the database disagrees, **replaces the whole
-dataset with the database's version** and repaints. So a migration that never
-applied does not leave the new beer sitting on the page — the beer appears for
-a moment and then vanishes, which reads exactly like the edit was never made.
-The app is blunter still: `src/` reads Supabase and nothing else, so the beer
-is simply not there.
+The silence was the cost. Both surfaces read the database and let it win, so
+an unapplied migration did not leave the new beer sitting there looking
+unsaved — the stats page painted it and then *replaced it with the database's
+answer*, and the app never had it at all. A beer that had been added, checked,
+committed and merged simply was not there, and nothing anywhere said so.
+
+**Both surfaces now merge rather than replace.** The file is the authoring
+surface — "on a matched row the file wins" was always the stated rule, and it
+is now the rule at display time too, not just at migration time:
+
+| | in both | file only | database only |
+|---|---|---|---|
+| what shows | the file's values | **kept** | kept |
+
+- `mergeRows()` in `public/stats/supabase-rows.mjs` is the rule, written once.
+- `public/stats/live-data.js` merges the database into the snapshot — the
+  stats page.
+- `src/lib/snapshot.ts` + `src/data/snapshot.json` do the same for the app,
+  which has no `data.js` to read: it is a Vite bundle and cannot import out of
+  `public/`.
+- `tools/merge-rows-test.mjs` pins all of it, including that the key map
+  written twice — once in `.mjs`, once in TS — still says the same thing.
+
+So **the beer is live when the merge deploys**, on both surfaces, whether or
+not the migration was ever applied. A row only the database has (a beer logged
+through the app's own form) still appears, which is what the hydrate was for
+in the first place.
+
+#### What the database being behind still costs
+
+Display is no longer waiting on it, but two things still are, so it is worth
+getting right eventually rather than never:
+
+- **The app's edit button.** A beer the app is showing from the snapshot has
+  no row to update. `BeerForm` notices (`isSnapshotOnly`) and **inserts**
+  instead of updating, so saving it from the app is one way to put it in the
+  database — the app writes as a signed-in user, which is the one credential
+  that can write. Deleting such a beer is refused, with a note to edit
+  `data.js` instead.
+- **`npm run verify-live`** still reports the divergence, and
+  `.github/workflows/verify-live.yml` still opens a `live-sync` issue for it.
+  That is now a maintenance signal rather than an outage.
 
 ```sh
 npm run verify-live                 # is the database in step with data.js?
 npm run verify-live -- --wait 900   # give Lovable up to 15 minutes first
 ```
 
-`tools/verify-live.mjs` reads every table with the publishable key — no secret
-is involved, and it never writes — and compares them against `data.js` through
-the same projection the seed and the sync share. It sorts what it finds:
-
 | Verdict | Means | Do |
-|---------|-------|----|
+|---------|-------|-----|
 | **missing** | `data.js` has the row, the database does not | the migration never applied — paste it (below) |
 | **differs** | both have it and disagree | same: the update half never ran |
-| **orphan** | a row a *migration* wrote (`seq` is set; the app's form never sets it) that `data.js` no longer knows | a rename stranded it — add an explicit `delete` to the next migration |
+| **orphan** | a row a *migration* wrote (`seq` is set) that `data.js` no longer knows | a rename stranded it — add an explicit `delete` to the next migration |
 | **db-only** | a row only the database has, that the app plausibly wrote | normal. `npm run sync` brings it into `data.js` |
 
 Its exit code is the point: `0` in step, `1` diverged, `2` the database could
@@ -401,40 +468,32 @@ not be reached — which is neither a pass nor a failure, because nothing was
 checked. A sandbox with no route to Supabase (this one included) looks exactly
 like an outage.
 
-**When it says rows are missing**, the fix takes a minute and does not need
-Lovable at all: open the newest `supabase/migrations/*_sync_beer_log.sql`,
-paste the whole file into the Supabase SQL editor, run it. That file is the
-entire contents of `data.js` as add-and-update statements, so it repairs every
-divergence at once, and running it is safe even if Lovable later applies it too.
-
-You do not have to remember to run this. `.github/workflows/verify-live.yml`
-runs it on every push to `main` — waiting up to twenty minutes for Lovable
-first — and again daily. On a divergence it opens an issue labelled
-`live-sync` naming the migration to paste, and closes the issue itself once
-the answer comes back clean.
+**To actually clear it**, when you have Supabase: open the newest
+`supabase/migrations/*_sync_beer_log.sql`, paste the whole file into the SQL
+editor, run it. That file is the entire contents of `data.js` as
+add-and-update statements, so it repairs every divergence at once, and running
+it is safe even if Lovable later applies it too.
 
 `tools/verify-live-test.mjs` pins the comparison's judgement against a database
 made wrong in each way that has actually happened, and against the one thing it
 must never call wrong: PostgREST returning a `numeric` column as the string
-`"2.50"`. A verifier that quietly says "fine" is worse than no verifier, so
-`npm run check` runs that test on every push. It needs no network and takes
-milliseconds.
+`"2.50"`.
 
-### What the first run found — read this before trusting a merge
+### The history, kept because it explains the design
 
-The check was built after the Amstel Light entry appeared to vanish. Its first
-run said the database held **79 reviews to `data.js`'s 80**, and that what was
-missing was the entire entry: the review, the brewery, the Tarrytown location
-and the brand domain. The migration had been merged to `main` five hours
-earlier.
+The merge behaviour above is not defensive programming for its own sake. It
+was written after the Amstel Light entry appeared to vanish. The first
+`verify-live` run said the database held **79 reviews to `data.js`'s 80**, and
+that what was missing was the entire entry. The migration had been merged to
+`main` five hours earlier.
 
-It was not one missed migration. Reading the database's actual values back
-against each migration file pins exactly which ones ran:
+Reading the database's values back against each migration file pins which ones
+ran:
 
 | Migration | Written by | Applied? | How we know |
 |-----------|-----------|----------|-------------|
 | `20260902141613_sync_beer_log` | us | — | its values match the cutover's, so it can't be told apart |
-| `20260902152346_sync_beer_log` | us | **no** | it reverses Sol's domains to `['cervezasol.com','solbeer.com']`; the database still has the old order |
+| `20260902152346_sync_beer_log` | us | **no** | it reverses Sol's domains; the database still has the old order |
 | `20260903024958_…uuid…` | Lovable | — | |
 | `20260904190220_…uuid…` | Lovable | **yes** | it sets Pacífico's logo to `pacifico-clara.svg`; the database has exactly that |
 | `20260905052233_sync_beer_log` | us | **no** | it moves Pacífico to `.webp`; the database never got it |
@@ -442,23 +501,21 @@ against each migration file pins exactly which ones ran:
 
 The migrations Lovable writes in its own sessions (the uuid-named ones) apply.
 The `_sync_beer_log.sql` files this repo's tooling generates — the ones that
-carry every beer you add — have not applied since 2 September, across three
-separate merges, while `npm run check` was green every time.
+carry every beer you add — have not applied since 2 September.
 
-**So do not treat the merge as the moment the beer goes live.** Until that
-changes, adding a beer has a sixth step and it is a manual one: after merging,
-run `npm run verify-live` (or wait for the workflow's issue), and when it
-reports missing rows, paste the newest `*_sync_beer_log.sql` into the Supabase
-SQL editor and run it. One paste repairs everything, because that file is the
-whole of `data.js`.
+That is the fact the design now assumes rather than fights: **the file is the
+source of truth for what is shown, and the database is an overlay that adds to
+it.** The generated migration is still committed, because it is still the
+repair file, and because the database should eventually hold the same thing.
+It is simply no longer what stands between adding a beer and seeing it.
 
-Two things worth knowing if this is ever chased further. The deleted migration
-`20260903121905_drop_redundant_logo_constraint.sql` is **not** the cause — it
-went missing before `20260904190220`, which applied fine afterwards. And the
-file is still absent from the tree; restoring it is not obviously safe, because
-re-adding a migration older than ones already applied is what makes a Supabase
-push complain about out-of-order history, so it is left alone deliberately
-rather than by oversight.
+The deleted migration `20260903121905_drop_redundant_logo_constraint.sql` is
+**not** the cause — it went missing before `20260904190220`, which applied fine
+afterwards. It is still absent from the tree; restoring it is not obviously
+safe, because re-adding a migration older than ones already applied is what
+makes a Supabase push complain about out-of-order history, so it is left alone
+deliberately rather than by oversight.
+
 
 ### The rename hazard
 
