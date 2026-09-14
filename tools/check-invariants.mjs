@@ -38,37 +38,24 @@ const checkScriptTools = () => [
 // reading the failure needs to know to put it back.
 const RULES = [
   {
-    file: "public/stats/supabase-rows.mjs",
-    needs: [[/export function mergeRows/, "`export function mergeRows`"]],
-    why:
-      "The rule that lets the site show a beer the database has not got yet. " +
-      "Applying a migration is Lovable's step, not this repo's, and generated " +
-      "migrations have sat unapplied for days — without this the hydrate " +
-      "replaces the snapshot wholesale and a newly added beer paints for one " +
-      'frame and then vanishes. See CLAUDE.md, "Adding a Beer".',
-  },
-  {
-    file: "public/stats/live-data.js",
-    needs: [[/mergeRows\(/, "a call to `mergeRows(`"]],
-    why:
-      "The hydrate has to merge the database into the snapshot, not replace " +
-      "it with it. Going back to fromRows(rowsByTable) alone is the exact " +
-      "revert that makes a newly added beer vanish on load.",
-  },
-  {
     file: "src/lib/snapshot.ts",
-    needs: [[/export function withSnapshot/, "`export function withSnapshot`"]],
+    needs: [
+      [/export const BEERS/, "`export const BEERS`"],
+      [/from "@\/data\/snapshot.json"/, "the import of `@/data/snapshot.json`"],
+    ],
     why:
-      "The app's half of the same rule. src/ reads Supabase, so without this " +
-      "a beer that is in data.js and not yet in the database is simply not in " +
-      "the app — which is how one went missing for days with every check green.",
+      "The app's entire data layer. src/data/snapshot.json is data.js " +
+      "projected into rows, and this is what reads it. There is no database " +
+      "behind the app any more, so replacing this with a fetch is not a " +
+      'restoration — see CLAUDE.md, "Adding a Beer".',
   },
   {
     file: "src/lib/beer-data.ts",
-    needs: [[/withSnapshot\("beers"/, '`withSnapshot("beers"` in the beers query']],
+    needs: [[/from "@\/lib\/snapshot"/, "the import from `@/lib/snapshot`"]],
     why:
-      "useBeers() must merge the committed snapshot under the database's " +
-      "rows. Dropping the call is what makes the app quietly a beer behind.",
+      "Every hook here serves the committed log. Pointing one back at a " +
+      "network call reintroduces the gap between what is committed and what " +
+      "is shown, which is the thing this repo spent longest not noticing.",
   },
   {
     file: "src/lib/place.ts",
@@ -113,43 +100,25 @@ const RULES = [
       "beers table, the city cards and the highlights each invent their own.",
   },
   {
-    file: ".github/workflows/verify-live.yml",
-    needs: [
-      [/node tools\/verify-live\.mjs/, "a `node tools/verify-live.mjs` run"],
-      [/branches:\s*\[main\]/, "`branches: [main]` — it has to run on the merge"],
-    ],
-    why:
-      "The only thing that notices when a migration is merged to main and then " +
-      "never applied to Supabase. Without it that failure is silent: live-data.js " +
-      "replaces the committed snapshot with the database's version, so the new " +
-      "beer appears for a moment and then vanishes. See CLAUDE.md, " +
-      '"Verifying the database actually got it".',
-  },
-  {
-    file: "tools/verify-live.mjs",
-    needs: [[/export function compareAll/, "`export function compareAll`"]],
-    why:
-      "The comparison the workflow runs, and the export its test drives. " +
-      "Deleting either leaves the workflow green over nothing.",
-  },
-  {
     file: "package.json",
     needs: [
-      [/tools\/verify-live-test\.mjs/, "`tools/verify-live-test.mjs` in the check script"],
+      [/tools\/roundtrip-snapshot\.mjs/, "`tools/roundtrip-snapshot.mjs` in the check script"],
       [/tools\/app-logic-test\.mjs/, "`tools/app-logic-test.mjs` in the check script"],
     ],
     why:
-      'A verifier that quietly says "fine" is worse than no verifier, so its ' +
-      "judgement is pinned by a test that npm run check runs on every push. The " +
-      "same goes for the rules inside app.js: the location format, the crossing-off " +
-      "rule, MIN_N, the canonical location and the shortlist's prediction.",
+      "The app reads src/data/snapshot.json rather than data.js, so the " +
+      "projection between them has to be proved lossless and proved in step on " +
+      "every push — a stale snapshot shows the log as it was before the last " +
+      "edit, with nothing else failing. The same goes for the rules inside " +
+      "app.js: the location format, the crossing-off rule, MIN_N, the canonical " +
+      "location and the shortlist's prediction.",
   },
   {
     // The workflow names its steps one at a time rather than running the whole
     // script, which reads better when one goes red — and drifts in silence when
-    // a tool is added to the script and not to the workflow. It already had:
-    // verify-live-test.mjs was named in the check script, described in CLAUDE.md
-    // as running on every push, and run by nothing. Green ticks over a test that
+    // a tool is added to the script and not to the workflow. That gap was real
+    // once: a test was named in the check script, described in CLAUDE.md as
+    // running on every push, and run by nothing. Green ticks over a test that
     // had never run is the same silence every other check here exists to end.
     file: ".github/workflows/checks.yml",
     needs: checkScriptTools().map((tool) => [
@@ -160,13 +129,11 @@ const RULES = [
       "Every tool in the check script needs a step here, or `npm run check` " +
       "passes locally while CI quietly checks less than it claims to.",
   },
-  ...["src/routes/beers.tsx", "src/routes/index.tsx", "src/components/BeerForm.tsx"].map(
-    (file) => ({
-      file,
-      needs: [[/placeLabel\(/, "a `placeLabel(` call"]],
-      why: "This surface writes a place, so it writes it through the shared helper.",
-    }),
-  ),
+  ...["src/routes/beers.tsx", "src/routes/index.tsx"].map((file) => ({
+    file,
+    needs: [[/placeLabel\(/, "a `placeLabel(` call"]],
+    why: "This surface writes a place, so it writes it through the shared helper.",
+  })),
 ];
 
 const problems = [];

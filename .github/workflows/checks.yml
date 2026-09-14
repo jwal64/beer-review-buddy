@@ -44,7 +44,7 @@ jobs:
       # data.js goes out through the database columns and back; a value that
       # does not survive is what a migration would quietly write wrong.
       - name: Check the Supabase projection round-trips
-        run: node tools/roundtrip-supabase.mjs
+        run: node tools/roundtrip-snapshot.mjs
 
       # npm never reads bun.lock, so a forgotten `bun install` used to pass
       # everything here and fail Lovable's build after the merge instead.
@@ -57,18 +57,6 @@ jobs:
       - name: Check the standing features are still in place
         run: node tools/check-invariants.mjs
 
-      # The verifier that notices an unapplied migration, held against a
-      # database made wrong in each way that has actually happened. It was
-      # named in the check script and run by nothing here until now.
-      - name: Test the live-sync comparison
-        run: node tools/verify-live-test.mjs
-
-      # The rule that decides what the site actually shows when the database
-      # is behind the file — which is the normal case, not the strange one,
-      # because applying a migration is Lovable's step and not this repo's.
-      - name: Test the snapshot/database merge
-        run: node tools/merge-rows-test.mjs
-
       # The rules inside app.js — the location format, when two spellings are
       # the same beer, MIN_N, the canonical location, the shortlist's guess.
       # Nothing else asks whether the code that renders the data still behaves.
@@ -76,4 +64,4 @@ jobs:
         run: node tools/app-logic-test.mjs
 
       - name: Syntax-check the site scripts
-        run: node --check public/stats/data.js && node --check public/stats/app.js && node --check public/stats/live-data.js
+        run: node --check public/stats/data.js && node --check public/stats/app.js

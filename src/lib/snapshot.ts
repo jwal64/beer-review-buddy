@@ -1,132 +1,142 @@
-// The committed beer log, merged underneath whatever the database returns.
+// The beer log. This is the whole data layer.
 //
-// WHY THIS EXISTS
+// `public/stats/data.js` is the source of truth — a beer is added by editing
+// it — and `src/data/snapshot.json` is that file projected into flat rows by
+// `npm run snapshot`. The app reads the projection because it cannot read
+// data.js itself: this is a Vite bundle, and `public/` is served as static
+// assets rather than offered as source.
 //
-// `public/stats/data.js` is the authoring surface — a beer is added by editing
-// it — and `supabase/migrations/` carries that into the database. Applying a
-// migration is Lovable's step, not this repo's, and generated migrations have
-// sat unapplied for days while every check stayed green. The app read Supabase
-// and nothing else, so for all that time a beer that had been added, checked,
-// committed and merged simply was not in the app. Nothing looked broken; the
-// beer was just missing.
+// There is no database behind any of this. There was, and it is worth knowing
+// why there isn't: carrying data.js into Supabase meant a migration, applying
+// a migration was the host's step rather than this repo's, and it stopped
+// happening — silently, for days at a time, while every check stayed green. A
+// beer that had been added, checked, committed and merged simply was not on
+// the site. The log lives in one file now, and what is committed is what is
+// shown.
 //
-// So the app now reads the same way the stats page does: paint what the file
-// says, and let the database *add* to it rather than replace it.
-//
-//   in both       → the file's values win (it is the authoring surface), but
-//                   the database's `id` and `created_at` are kept, so the row
-//                   stays editable
-//   file only     → kept. This is the case that used to disappear
-//   database only → kept. A beer logged through this app's own form is exactly
-//                   this, and is why the app reads the database at all
-//
-// The merge rule, and the natural key each table is matched on, are the same
-// ones in public/stats/supabase-rows.mjs — tools/merge-rows-test.mjs fails if
-// the two definitions of a key ever drift apart. src/ cannot import that file
-// (it lives under public/, which Vite serves as a static asset rather than
-// source), which is why the key map is written twice and pinned by a test.
+// tools/roundtrip-supabase.mjs proves the projection loses nothing, and
+// `npm run check` fails when snapshot.json is out of step with data.js — the
+// one way this file can now be wrong is by being stale.
 import snapshot from "@/data/snapshot.json";
 
-export const SNAPSHOT_TABLES = [
-  "countries",
-  "locations",
-  "breweries",
-  "beers",
-  "brand_domains",
-  "want_to_try",
-  "untappd_averages",
-  "app_meta",
-] as const;
-
-export type SnapshotTable = (typeof SNAPSHOT_TABLES)[number];
-
-// What makes two rows the same row. `beers` is name + drank_on because that is
-// what the generated migration matches on: merging on a different key than the
-// SQL updates on would fold together rows the migration treats as distinct.
-const KEYS: Record<SnapshotTable, readonly string[]> = {
-  countries: ["cc"],
-  locations: ["city", "cc"],
-  breweries: ["name"],
-  beers: ["name", "drank_on"],
-  brand_domains: ["beer_name"],
-  want_to_try: ["beer"],
-  untappd_averages: ["beer_name"],
-  app_meta: ["key"],
-};
-
-type Row = Record<string, unknown>;
-
-const keyOf = (table: SnapshotTable, row: Row) =>
-  KEYS[table].map((k) => String(row[k])).join(" ␟ ");
-
-/**
- * The marker on a row that exists in the file but not in the database.
- *
- * It is a real, stable id so React keys and `<Select>` values work, and it is
- * recognisable so a write can refuse to address a row the database does not
- * have — an `update ... where id = 'snapshot:…'` matches nothing and would
- * report success having changed nothing at all.
- */
-export const SNAPSHOT_ID_PREFIX = "snapshot:";
-
-export const isSnapshotOnly = (row: { id?: string | null } | null | undefined) =>
-  typeof row?.id === "string" && row.id.startsWith(SNAPSHOT_ID_PREFIX);
-
-// Columns every table has and the projection has no value for, because they
-// belong to the database rather than to the log: a synthetic id, and a
-// timestamp. For a review the timestamp is the day it was drunk, which is the
-// only honest answer and keeps it sorting where it belongs.
-function hydrate(table: SnapshotTable, row: Row): Row {
-  const drankOn = typeof row["drank_on"] === "string" ? row["drank_on"] : null;
-  return {
-    created_at: drankOn ? `${drankOn}T00:00:00.000Z` : "1970-01-01T00:00:00.000Z",
-    updated_at: "1970-01-01T00:00:00.000Z",
-    ...row,
-    id: `${SNAPSHOT_ID_PREFIX}${table}:${keyOf(table, row)}`,
-  };
+/** A review — one pour, on one day, in one place. */
+export interface Beer {
+  id: string;
+  seq: number | null;
+  name: string;
+  brewery: string | null;
+  style: string;
+  origin_cc: string;
+  abv: number;
+  method: string;
+  city: string;
+  region: string;
+  country: string;
+  cc: string;
+  rating: number;
+  is_new: boolean;
+  /** data.js records a month, not a day, so this is the first of that month. */
+  drank_on: string;
+  /** A logo for this pour only, overriding the brand's. Rarely set. */
+  logo: string | null;
 }
 
-const FILE_ROWS = snapshot as unknown as Record<SnapshotTable, Row[]>;
-
-// Newest first, which is how the app lists reviews. Within one month every
-// row shares a date — data.js records a month, not a day — so `seq` carries
-// the order they were logged in, and a row the app added (no seq) is newest.
-function compareBeers(a: Row, b: Row) {
-  const date = String(b["drank_on"]).localeCompare(String(a["drank_on"]));
-  if (date) return date;
-  const seq = (Number(b["seq"]) || 0) - (Number(a["seq"]) || 0);
-  if (seq) return seq;
-  return String(b["created_at"] ?? "").localeCompare(String(a["created_at"] ?? ""));
+export interface BreweryRow {
+  name: string;
+  location: string;
+  country: string;
+  cc: string;
+  lang: string;
+  native_name: string | null;
+  lat: number;
+  lng: number;
 }
 
-const SORTS: Partial<Record<SnapshotTable, (a: Row, b: Row) => number>> = {
-  beers: compareBeers,
-  breweries: (a, b) => String(a["name"]).localeCompare(String(b["name"])),
-  locations: (a, b) => String(a["city"]).localeCompare(String(b["city"])),
-  countries: (a, b) => String(a["name"] ?? "").localeCompare(String(b["name"] ?? "")),
-  want_to_try: (a, b) => (Number(a["seq"]) || 0) - (Number(b["seq"]) || 0),
-};
-
-/**
- * Merge the committed snapshot of `table` underneath the rows the database
- * returned, in the order the app wants to show them.
- *
- * Returns a new array every call, so callers hold it behind React Query's
- * cache — which is what keeps the map's pins (and its pop-out) from being
- * rebuilt on every render. See the note on the module-scope selects in
- * beer-data.ts.
- */
-export function withSnapshot<T>(table: SnapshotTable, dbRows: readonly T[]): T[] {
-  const byKey = new Map((dbRows as readonly Row[]).map((r) => [keyOf(table, r), r]));
-  const merged: Row[] = (FILE_ROWS[table] ?? []).map((fileRow) => {
-    const k = keyOf(table, fileRow);
-    const hit = byKey.get(k);
-    byKey.delete(k);
-    // The file wins on every column it has a value for; the database keeps the
-    // ones only it can know — `id` above all, which is what the form edits on.
-    return hit ? { ...hit, ...fileRow } : hydrate(table, fileRow);
-  });
-  for (const only of byKey.values()) merged.push(only);
-  const sort = SORTS[table];
-  return (sort ? merged.sort(sort) : merged) as T[];
+export interface LocationRow {
+  id: string;
+  city: string;
+  region: string | null;
+  country: string;
+  cc: string;
+  lat: number;
+  lng: number;
 }
+
+export interface CountryRow {
+  cc: string;
+  flag: string | null;
+  name: string | null;
+}
+
+/** Where a beer's logo comes from: the committed file, then the domains. */
+export interface BrandDomainRow {
+  beer_name: string;
+  domains: string[];
+  logo: string | null;
+}
+
+export interface WantToTryRow {
+  seq: number | null;
+  beer: string;
+  style: string;
+  origin: string;
+  abv: number;
+  region: string;
+  untappd: number;
+  method: string;
+  /** Names this beer is logged under, when the shelf name isn't the logged one. */
+  aka: string[] | null;
+}
+
+export interface UntappdAverageRow {
+  beer_name: string;
+  avg: number;
+}
+
+interface RawSnapshot {
+  countries: CountryRow[];
+  locations: Omit<LocationRow, "id">[];
+  breweries: BreweryRow[];
+  beers: Omit<Beer, "id">[];
+  brand_domains: BrandDomainRow[];
+  want_to_try: WantToTryRow[];
+  untappd_averages: UntappdAverageRow[];
+}
+
+const raw = snapshot as unknown as RawSnapshot;
+
+// Rows are identified by what makes them unique in the log, so a React key is
+// stable across reloads and a row can be pointed at without a database id.
+const slug = (...parts: (string | number)[]) => parts.map((p) => String(p)).join("::");
+
+// Built once, at module load. Every hook hands back these same arrays, so the
+// memoised selects in beer-data.ts keep their identity and the map's pins —
+// and the pop-out a click just opened — are not rebuilt on every render.
+// See "Map Rule: The Pop-out Stays Open" in CLAUDE.md.
+export const BEERS: Beer[] = raw.beers
+  .map((b) => ({ ...b, id: slug("beer", b.name, b.drank_on) }))
+  .sort(
+    (a, b) =>
+      String(b.drank_on).localeCompare(String(a.drank_on)) ||
+      (Number(b.seq) || 0) - (Number(a.seq) || 0),
+  );
+
+export const BREWERIES: BreweryRow[] = [...raw.breweries].sort((a, b) =>
+  a.name.localeCompare(b.name),
+);
+
+export const LOCATIONS: LocationRow[] = raw.locations
+  .map((l) => ({ ...l, id: slug("loc", l.city, l.cc) }))
+  .sort((a, b) => a.city.localeCompare(b.city));
+
+export const COUNTRIES: CountryRow[] = [...raw.countries].sort((a, b) =>
+  String(a.name ?? "").localeCompare(String(b.name ?? "")),
+);
+
+export const BRAND_DOMAINS: BrandDomainRow[] = raw.brand_domains;
+
+export const WANT_TO_TRY: WantToTryRow[] = [...raw.want_to_try].sort(
+  (a, b) => (Number(a.seq) || 0) - (Number(b.seq) || 0),
+);
+
+export const UNTAPPD_AVERAGES: UntappdAverageRow[] = raw.untappd_averages;
