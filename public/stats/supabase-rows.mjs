@@ -198,3 +198,55 @@ export function sortBeers(rows) {
     String(a.created_at ?? '').localeCompare(String(b.created_at ?? '')) ||
     String(a.name).localeCompare(String(b.name)));
 }
+
+// ── merging the file with the database ────────────────────────
+//
+// The natural key of each table — what makes two rows the same row. `beers`
+// uses name + drank_on because that is what the generated migration matches
+// on, so the merge, the migration and tools/verify-live.mjs all agree about
+// which rows are "the same row" by construction rather than by coincidence.
+export const KEYS = {
+  countries: ['cc'],
+  locations: ['city', 'cc'],
+  breweries: ['name'],
+  beers: ['name', 'drank_on'],
+  brand_domains: ['beer_name'],
+  want_to_try: ['beer'],
+  untappd_averages: ['beer_name'],
+  app_meta: ['key'],
+};
+
+export const keyOf = (table, row) =>
+  KEYS[table].map(k => String(row[k])).join(' ␟ ');
+
+// data.js is the authoring surface: "on a matched row the file wins" is the
+// rule the whole repo is written around, and this is where that rule is
+// applied at display time rather than only at migration time.
+//
+// It matters because the database is not guaranteed to be in step. Applying a
+// migration is Lovable's step, not this repo's, and generated migrations have
+// sat unapplied for days. Until this function existed the hydrate *replaced*
+// the snapshot wholesale, so a beer the file had and the database did not
+// painted for one frame and then vanished — which reads exactly like the edit
+// was never made.
+//
+//   in both      → the file's values, over the database's row, so a column
+//                  only the database has (`id`, `created_at`) survives and the
+//                  app can still edit that beer
+//   file only    → kept. This is the fix: these used to be dropped
+//   database only→ kept, appended. A beer logged through the app's own form
+//                  is exactly this, and is why the hydrate exists at all
+export function mergeRows(fileRows, dbRows) {
+  const out = {};
+  for (const t of TABLES) {
+    const file = fileRows?.[t] ?? [];
+    const byKey = new Map((dbRows?.[t] ?? []).map(r => [keyOf(t, r), r]));
+    out[t] = file.map(r => {
+      const k = keyOf(t, r);
+      const hit = byKey.get(k);
+      byKey.delete(k);
+      return hit ? { ...hit, ...r } : r;
+    }).concat([...byKey.values()]);
+  }
+  return out;
+}

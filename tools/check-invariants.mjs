@@ -38,6 +38,39 @@ const checkScriptTools = () => [
 // reading the failure needs to know to put it back.
 const RULES = [
   {
+    file: "public/stats/supabase-rows.mjs",
+    needs: [[/export function mergeRows/, "`export function mergeRows`"]],
+    why:
+      "The rule that lets the site show a beer the database has not got yet. " +
+      "Applying a migration is Lovable's step, not this repo's, and generated " +
+      "migrations have sat unapplied for days — without this the hydrate " +
+      "replaces the snapshot wholesale and a newly added beer paints for one " +
+      'frame and then vanishes. See CLAUDE.md, "Adding a Beer".',
+  },
+  {
+    file: "public/stats/live-data.js",
+    needs: [[/mergeRows\(/, "a call to `mergeRows(`"]],
+    why:
+      "The hydrate has to merge the database into the snapshot, not replace " +
+      "it with it. Going back to fromRows(rowsByTable) alone is the exact " +
+      "revert that makes a newly added beer vanish on load.",
+  },
+  {
+    file: "src/lib/snapshot.ts",
+    needs: [[/export function withSnapshot/, "`export function withSnapshot`"]],
+    why:
+      "The app's half of the same rule. src/ reads Supabase, so without this " +
+      "a beer that is in data.js and not yet in the database is simply not in " +
+      "the app — which is how one went missing for days with every check green.",
+  },
+  {
+    file: "src/lib/beer-data.ts",
+    needs: [[/withSnapshot\("beers"/, '`withSnapshot("beers"` in the beers query']],
+    why:
+      "useBeers() must merge the committed snapshot under the database's " +
+      "rows. Dropping the call is what makes the app quietly a beer behind.",
+  },
+  {
     file: "src/lib/place.ts",
     needs: [[/export function placeLabel/, "`export function placeLabel`"]],
     why:

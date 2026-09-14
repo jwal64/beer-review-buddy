@@ -1,5 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { withSnapshot } from "@/lib/snapshot";
 
 // These mirror the tables, which are the source of truth for the static site
 // at jwal64/JWAL-BEER-REVIEW as well as for this app. A column that is not null
@@ -43,6 +44,13 @@ const FRESH_FOR = 5 * 60 * 1000;
 
 export const METHODS = ["Draft", "Bottle", "Can", "Nitro"] as const;
 
+// Every hook below returns the database's rows merged over the committed
+// snapshot in src/data/snapshot.json — see src/lib/snapshot.ts for the rule
+// and for why it is not simply "whatever the database says". In short: adding
+// a beer means editing data.js, and the migration that carries that into the
+// database is applied by Lovable rather than by anything here, so "the
+// database is a beer or two behind the file" is the ordinary state and not an
+// error. The file is what the app shows; the database adds to it.
 export function useBeers() {
   return useQuery({
     queryKey: ["beers"],
@@ -53,7 +61,7 @@ export function useBeers() {
         .order("drank_on", { ascending: false })
         .order("created_at", { ascending: false });
       if (error) throw error;
-      return (data ?? []) as Beer[];
+      return withSnapshot("beers", (data ?? []) as Beer[]);
     },
     staleTime: FRESH_FOR,
   });
@@ -65,7 +73,7 @@ export function useBreweries() {
     queryFn: async () => {
       const { data, error } = await supabase.from("breweries").select("*").order("name");
       if (error) throw error;
-      return (data ?? []) as BreweryRow[];
+      return withSnapshot("breweries", (data ?? []) as BreweryRow[]);
     },
     staleTime: FRESH_FOR,
   });
@@ -77,7 +85,7 @@ export function useLocations() {
     queryFn: async () => {
       const { data, error } = await supabase.from("locations").select("*").order("city");
       if (error) throw error;
-      return (data ?? []) as LocationRow[];
+      return withSnapshot("locations", (data ?? []) as LocationRow[]);
     },
     staleTime: FRESH_FOR,
   });
@@ -92,7 +100,7 @@ export function useCountries() {
     queryFn: async () => {
       const { data, error } = await supabase.from("countries").select("*").order("name");
       if (error) throw error;
-      return (data ?? []) as CountryRow[];
+      return withSnapshot("countries", (data ?? []) as CountryRow[]);
     },
     staleTime: FRESH_FOR,
   });
@@ -108,7 +116,7 @@ function brandDomainsQuery() {
     queryFn: async () => {
       const { data, error } = await supabase.from("brand_domains").select("*");
       if (error) throw error;
-      return (data ?? []) as BrandDomainRow[];
+      return withSnapshot("brand_domains", (data ?? []) as BrandDomainRow[]);
     },
     staleTime: FRESH_FOR,
   };
@@ -163,7 +171,7 @@ export function useWantToTry() {
         .order("seq", { ascending: true, nullsFirst: false })
         .order("beer");
       if (error) throw error;
-      return (data ?? []) as WantToTryRow[];
+      return withSnapshot("want_to_try", (data ?? []) as WantToTryRow[]);
     },
     staleTime: FRESH_FOR,
   });
@@ -179,7 +187,7 @@ export function useUntappdAverages() {
       const { data, error } = await supabase.from("untappd_averages").select("*");
       if (error) throw error;
       const map = new Map<string, number>();
-      for (const row of (data ?? []) as UntappdAverageRow[])
+      for (const row of withSnapshot("untappd_averages", (data ?? []) as UntappdAverageRow[]))
         map.set(row.beer_name, Number(row.avg));
       return map;
     },
