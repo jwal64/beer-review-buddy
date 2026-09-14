@@ -192,6 +192,27 @@ This is the normal flow — the owner describes a beer they drank, and a Claude
 session makes these edits. Everything happens in `public/stats/data.js`, and
 one command generates everything downstream of it.
 
+### How a beer arrives
+
+Two ways in, and they meet in the same place — an edit to `data.js`.
+
+1. **From a phone.** The app's Beers tab has a **+**, which opens `/add`: pick
+   where you drank it, then tap through to a pre-filled GitHub issue and attach
+   the Untappd screenshot. That files it under the `beer` label, which is the
+   queue. Nothing is written to the repo by that — it cannot be, and should not
+   be: a brewery's coordinates, its language, a native name and a fetched logo
+   are research, not form fields, which is exactly what the screenshot is handed
+   over for.
+2. **Straight to a Claude session** — the screenshot and where it was drunk,
+   the way it has always worked.
+
+Either way the work below is the same. **When starting from an issue, close it
+with the commit** (`Closes #N`) so the queue drains.
+
+The city matters more than the rest of it: it has to match a row in
+`drunkLocs` exactly or `npm run check` fails, which is why `/add` offers the
+places already in the log rather than a free-text box.
+
 ### The short version
 
 ```sh

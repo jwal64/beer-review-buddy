@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AddRouteImport } from './routes/add'
 import { Route as BeersRouteImport } from './routes/beers'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as MapRouteImport } from './routes/map'
@@ -18,6 +19,11 @@ import { Route as StatsRouteImport } from './routes/stats'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AddRoute = AddRouteImport.update({
+  id: '/add',
+  path: '/add',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BeersRoute = BeersRouteImport.update({
@@ -43,6 +49,7 @@ const StatsRoute = StatsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/add': typeof AddRoute
   '/beers': typeof BeersRoute
   '/insights': typeof InsightsRoute
   '/map': typeof MapRoute
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/add': typeof AddRoute
   '/beers': typeof BeersRoute
   '/insights': typeof InsightsRoute
   '/map': typeof MapRoute
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/add': typeof AddRoute
   '/beers': typeof BeersRoute
   '/insights': typeof InsightsRoute
   '/map': typeof MapRoute
@@ -65,14 +74,15 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/beers' | '/insights' | '/map' | '/stats'
+  fullPaths: '/' | '/add' | '/beers' | '/insights' | '/map' | '/stats'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/beers' | '/insights' | '/map' | '/stats'
-  id: '__root__' | '/' | '/beers' | '/insights' | '/map' | '/stats'
+  to: '/' | '/add' | '/beers' | '/insights' | '/map' | '/stats'
+  id: '__root__' | '/' | '/add' | '/beers' | '/insights' | '/map' | '/stats'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AddRoute: typeof AddRoute
   BeersRoute: typeof BeersRoute
   InsightsRoute: typeof InsightsRoute
   MapRoute: typeof MapRoute
@@ -86,6 +96,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/add': {
+      id: '/add'
+      path: '/add'
+      fullPath: '/add'
+      preLoaderRoute: typeof AddRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/beers': {
@@ -121,6 +138,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AddRoute: AddRoute,
   BeersRoute: BeersRoute,
   InsightsRoute: InsightsRoute,
   MapRoute: MapRoute,
