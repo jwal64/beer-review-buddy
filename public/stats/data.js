@@ -428,7 +428,7 @@ const BRAND_LOGOS = {
 "Red Stripe":"logos/red-stripe.webp",
 "Ringnes":"logos/ringnes.webp",
 "Rolling Rock Extra Pale":"logos/rolling-rock-extra-pale.webp",
-"Rothaus Pils / Tannen Zäpfle":"logos/rothaus-pils-tannen-zapfle.svg",
+"Rothaus Pils / Tannen Zäpfle":"logos/rothaus-pils-tannen-zapfle.webp",
 "Sam Adams Boston Lager":"logos/sam-adams-boston-lager.svg",
 "Samuel Adams Summer Ale":"logos/samuel-adams-summer-ale.svg",
 "Sapporo Premium":"logos/sapporo-premium.webp",

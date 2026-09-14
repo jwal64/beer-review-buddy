@@ -416,7 +416,7 @@ insert into public.brand_domains (beer_name,domains,logo) values
   ('Red Stripe',array['redstripebeer.com'],'logos/red-stripe.webp'),
   ('Ringnes',array['ringnes.no'],'logos/ringnes.webp'),
   ('Rolling Rock Extra Pale',array['rollingrock.com'],'logos/rolling-rock-extra-pale.webp'),
-  ('Rothaus Pils / Tannen Zäpfle',array['rothaus.de'],'logos/rothaus-pils-tannen-zapfle.svg'),
+  ('Rothaus Pils / Tannen Zäpfle',array['rothaus.de'],'logos/rothaus-pils-tannen-zapfle.webp'),
   ('Sam Adams Boston Lager',array['samueladams.com'],'logos/sam-adams-boston-lager.svg'),
   ('Sapporo Premium',array['sapporobeer.com'],'logos/sapporo-premium.webp'),
   ('Belhaven Scottish Stout',array['belhaven.co.uk'],'logos/belhaven-scottish-stout.svg'),
