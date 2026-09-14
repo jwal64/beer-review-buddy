@@ -1,12 +1,23 @@
-// The projection between data.js and the Supabase tables behind
-// beer-review-buddy — written once, here, and used in both directions.
+// The projection between data.js and the flat rows the app reads.
 //
-// tools/export-supabase-seed.mjs turns data.js into rows (the one-time
-// cutover, and a way to regenerate the seed). tools/sync-from-supabase.mjs
-// turns rows back into data.js (every sync from now on). Both call into this
-// file, so the two directions can never disagree about what a column means.
+// data.js is the log, written as a diary: a brewery lists the beers it makes,
+// a review names its month. src/data/snapshot.json is the same data as flat
+// rows, which is the shape the app wants. This file is the translation, in
+// both directions, written once.
 //
-// Two fields deliberately have no column of their own:
+//   toRows(D)      data.js values  -> rows   (tools/make-snapshot.mjs)
+//   fromRows(rows) rows -> data.js values    (tools/render-data-js.mjs)
+//
+// tools/roundtrip-snapshot.mjs sends the data through both and fails if
+// anything comes back different, which is what makes it safe for the app to
+// read the projection rather than the file.
+//
+// It used to live in public/stats/ and carry the name supabase-rows.mjs,
+// because the stats page imported it in the browser to reconcile the snapshot
+// against a Supabase database. There is no database now — the log is one
+// committed file — so it is a build-time tool like the rest of tools/.
+//
+// Two fields deliberately have no row of their own:
 //
 //   breweries[].beers    the `·`-joined list of that brewery's beers
 //   breweries[].ratings  the rating of each, in the same order
@@ -197,56 +208,4 @@ export function sortBeers(rows) {
     (a.seq ?? 1e9) - (b.seq ?? 1e9) ||
     String(a.created_at ?? '').localeCompare(String(b.created_at ?? '')) ||
     String(a.name).localeCompare(String(b.name)));
-}
-
-// ── merging the file with the database ────────────────────────
-//
-// The natural key of each table — what makes two rows the same row. `beers`
-// uses name + drank_on because that is what the generated migration matches
-// on, so the merge, the migration and tools/verify-live.mjs all agree about
-// which rows are "the same row" by construction rather than by coincidence.
-export const KEYS = {
-  countries: ['cc'],
-  locations: ['city', 'cc'],
-  breweries: ['name'],
-  beers: ['name', 'drank_on'],
-  brand_domains: ['beer_name'],
-  want_to_try: ['beer'],
-  untappd_averages: ['beer_name'],
-  app_meta: ['key'],
-};
-
-export const keyOf = (table, row) =>
-  KEYS[table].map(k => String(row[k])).join(' ␟ ');
-
-// data.js is the authoring surface: "on a matched row the file wins" is the
-// rule the whole repo is written around, and this is where that rule is
-// applied at display time rather than only at migration time.
-//
-// It matters because the database is not guaranteed to be in step. Applying a
-// migration is Lovable's step, not this repo's, and generated migrations have
-// sat unapplied for days. Until this function existed the hydrate *replaced*
-// the snapshot wholesale, so a beer the file had and the database did not
-// painted for one frame and then vanished — which reads exactly like the edit
-// was never made.
-//
-//   in both      → the file's values, over the database's row, so a column
-//                  only the database has (`id`, `created_at`) survives and the
-//                  app can still edit that beer
-//   file only    → kept. This is the fix: these used to be dropped
-//   database only→ kept, appended. A beer logged through the app's own form
-//                  is exactly this, and is why the hydrate exists at all
-export function mergeRows(fileRows, dbRows) {
-  const out = {};
-  for (const t of TABLES) {
-    const file = fileRows?.[t] ?? [];
-    const byKey = new Map((dbRows?.[t] ?? []).map(r => [keyOf(t, r), r]));
-    out[t] = file.map(r => {
-      const k = keyOf(t, r);
-      const hit = byKey.get(k);
-      byKey.delete(k);
-      return hit ? { ...hit, ...r } : r;
-    }).concat([...byKey.values()]);
-  }
-  return out;
 }

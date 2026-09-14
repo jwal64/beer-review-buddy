@@ -10,7 +10,6 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BeersRouteImport } from './routes/beers'
 import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as MapRouteImport } from './routes/map'
@@ -19,11 +18,6 @@ import { Route as StatsRouteImport } from './routes/stats'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AuthRoute = AuthRouteImport.update({
-  id: '/auth',
-  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const BeersRoute = BeersRouteImport.update({
@@ -49,7 +43,6 @@ const StatsRoute = StatsRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/beers': typeof BeersRoute
   '/insights': typeof InsightsRoute
   '/map': typeof MapRoute
@@ -57,7 +50,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/beers': typeof BeersRoute
   '/insights': typeof InsightsRoute
   '/map': typeof MapRoute
@@ -66,7 +58,6 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
   '/beers': typeof BeersRoute
   '/insights': typeof InsightsRoute
   '/map': typeof MapRoute
@@ -74,15 +65,14 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/beers' | '/insights' | '/map' | '/stats'
+  fullPaths: '/' | '/beers' | '/insights' | '/map' | '/stats'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/beers' | '/insights' | '/map' | '/stats'
-  id: '__root__' | '/' | '/auth' | '/beers' | '/insights' | '/map' | '/stats'
+  to: '/' | '/beers' | '/insights' | '/map' | '/stats'
+  id: '__root__' | '/' | '/beers' | '/insights' | '/map' | '/stats'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRoute
   BeersRoute: typeof BeersRoute
   InsightsRoute: typeof InsightsRoute
   MapRoute: typeof MapRoute
@@ -96,13 +86,6 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/auth': {
-      id: '/auth'
-      path: '/auth'
-      fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/beers': {
@@ -138,7 +121,6 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthRoute: AuthRoute,
   BeersRoute: BeersRoute,
   InsightsRoute: InsightsRoute,
   MapRoute: MapRoute,

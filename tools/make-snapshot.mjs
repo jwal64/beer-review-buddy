@@ -21,7 +21,7 @@ import { writeFileSync, mkdirSync, readFileSync, existsSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { loadData } from "./load-data.mjs";
-import { toRows, TABLES } from "../public/stats/supabase-rows.mjs";
+import { toRows, TABLES } from "./snapshot-rows.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 export const SNAPSHOT_PATH = join(ROOT, "src", "data", "snapshot.json");

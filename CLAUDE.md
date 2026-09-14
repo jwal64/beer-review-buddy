@@ -4,36 +4,32 @@ Everything lives here now. One repo, hosted by Lovable, holding three parts:
 
 | Part | Where | What it is |
 |------|-------|------------|
-| The app | `src/` | React/TanStack, mobile-first: Home, Beers, Map, and the add-a-beer form. Reads and writes Supabase directly. |
+| The app | `src/` | React/TanStack, mobile-first: Home, Beers, Map, Insights. Reads the committed log; no network, no writes. |
 | The stats site | `public/stats/` | The full analytics site — charts, maps, the passport, the want-to-try scorecard. Static files, no build step, served whole at `/stats`. Moved intact from `jwal64/JWAL-BEER-REVIEW`. |
-| The tools | `tools/` | Node scripts: validate, migration, sync, round-trip, SRI, smoke, logo audit. Zero-dependency, except the three that drive a browser (smoke, logo audit, logo fetch). |
+| The tools | `tools/` | Node scripts: validate, snapshot, round-trip, invariants, SRI, smoke, logo audit. Zero-dependency, except the three that drive a browser (smoke, logo audit, logo fetch). |
 
-And two stores that are kept in step:
+There is **one store**, and it is a file:
 
-- **Supabase** is the runtime store. The app reads and writes it; the stats
-  page hydrates from it on load (`public/stats/live-data.js`), so a beer added
-  minutes ago appears with no deploy.
-- **`public/stats/data.js`** is the authoring surface and the committed
-  snapshot. Beers are added by editing it (the SOP below); it also paints the
-  stats page instantly and keeps it working offline. `npm run migration` turns
-  its current state into SQL that carries it into Supabase; `npm run sync`
-  pulls Supabase back into it.
+**`public/stats/data.js`** is the log. Every review, brewery, location, brand
+domain, Untappd average and want-to-try entry is written there, by hand, and
+what is committed is exactly what the site shows. `npm run snapshot` projects
+it into `src/data/snapshot.json`, which is the same data as flat rows — the
+shape the app wants, since the app is a Vite bundle and cannot read a file out
+of `public/`. Both are committed; `npm run check` fails if they disagree.
 
-On a matched row the file wins — that is what makes it the authoring surface,
-and both surfaces now apply that at display time: they **merge** the database
-into the committed snapshot rather than replacing the snapshot with it. So a
-beer that is in `data.js` and not yet in the database still shows, which is
-what makes adding one a matter of editing this file and merging. See "Step 6"
-below for why that had to change.
-
-A row only the database knows (a beer logged through the app's own form) is
-never touched by a migration; run `npm run sync` to pull those into the file.
-Never log the same pour both ways: the file writes it as the first of its
-month, the form with a real date, and the two would land as two rows.
+There used to be a Supabase database as well, and it is worth knowing why
+there isn't. Carrying `data.js` into it meant a generated migration, applying
+a migration was the host's step rather than this repo's, and it stopped
+happening — silently, for days at a time, across three merges, while every
+check stayed green. Both surfaces read the database and let it win, so a beer
+that had been added, checked, committed and merged was simply not on the site
+and nothing said so. The database has been removed rather than worked around:
+there is no second copy of the log to drift, no migration to apply, and no
+step between merging and being live.
 
 ## Making Changes with Claude
 
-Any edit — a feature in the app, a tweak to the stats site, a schema change —
+Any edit — a feature in the app, a tweak to the stats site, a new beer —
 follows the same loop, and the loop is what makes it land on Lovable:
 
 1. **Start from the latest `main`.** Lovable commits its own edits straight to
@@ -51,9 +47,9 @@ follows the same loop, and the loop is what makes it land on Lovable:
    npm run smoke          # if public/stats/ changed (needs a browser)
    ```
 
-4. **Merge to `main`.** That is the publish button: Lovable syncs the commit,
-   applies any new file in `supabase/migrations/`, and redeploys. A branch that
-   is only pushed exists on GitHub and nowhere else.
+4. **Merge to `main`.** That is the publish button, and the whole of it:
+   Lovable syncs the commit and redeploys, and what deploys is what shows.
+   A branch that is only pushed exists on GitHub and nowhere else.
 
 A remote Claude session gets its dependencies automatically — the
 `SessionStart` hook in `.claude/hooks/session-start.sh` runs `npm install` when
@@ -78,17 +74,11 @@ Lovable in `AGENTS.md`:
    `src/lib/beer-data.ts` ("Map Rule: The Pop-out Stays Open" below).
 2. **One location format everywhere** — `placeLabel` in `src/lib/place.ts` and
    in `public/stats/app.js` ("Location Rule: City, Region, Country" below).
-3. **The live-data check** — `.github/workflows/verify-live.yml` and
-   `tools/verify-live.mjs` ("Step 6" above). A pass that has already deleted an
-   applied migration file can delete the thing that notices, and this is the
-   one check whose absence restores the exact silence it was built to end.
-4. **The snapshot merge** — `mergeRows()` in `public/stats/supabase-rows.mjs`,
-   the `mergeRows(` call in `public/stats/live-data.js`, `withSnapshot()` in
-   `src/lib/snapshot.ts` and its use in `src/lib/beer-data.ts`. These are what
-   let the site show a beer the database has not got yet. Reverting any of
-   them — going back to "replace the snapshot with what the database says" —
-   restores the bug where a newly added beer paints for one frame and vanishes
-   (the stats page) or never appears at all (the app).
+3. **The app's data layer** — `src/lib/snapshot.ts` (which must export `BEERS`
+   and import `@/data/snapshot.json`) and `src/lib/beer-data.ts` importing from
+   it. This is the whole of how the app gets the log. Pointing any of it back
+   at a network call reintroduces the gap between what is committed and what is
+   shown — the gap that hid a beer for a week while every check stayed green.
 
 `node tools/check-invariants.mjs` fails when any of them goes missing, and
 `npm run check` runs it, so CI turns red on the push that drops them rather
@@ -111,20 +101,13 @@ not mean to remove `placeLabel`, don't.
 
 ### The tests
 
-Three, all plain Node, each run by `npm run check` and by a step of its own in
-CI. `npm run test` runs the three on their own.
+`tools/app-logic-test.mjs` — plain Node, no network, milliseconds. `npm run
+check` runs it and CI gives it a step of its own; `npm run test` runs it alone.
 
-| File | Pins |
-|------|------|
-| `tools/verify-live-test.mjs` | the live-sync comparison, against a database made wrong in each way that has actually happened |
-| `tools/merge-rows-test.mjs` | the snapshot/database merge — what the site shows when the database is behind the file |
-| `tools/app-logic-test.mjs` | the rules inside `public/stats/app.js` |
-
-`check-invariants.mjs` asks whether a feature is still *there*; the app-logic
-test asks whether it still *behaves*. It covers `esc()`, both halves of the
+It pins the rules inside `public/stats/app.js`: `esc()`, both halves of the
 location format, `wtNorm()`, the `MIN_N` helpers, the rating ramp,
-`computeCanonLoc()`, `predictRating()` and `isDisplayNew()` — and three of
-those are worth knowing about:
+`computeCanonLoc()`, `predictRating()` and `isDisplayNew()`. Three are worth
+knowing about:
 
 - **The two `placeLabel`s are compared to each other**, over every location in
   `drunkLocs`. Nothing else does: the format is written twice, once in
@@ -133,27 +116,31 @@ those are worth knowing about:
 - **`computeCanonLoc()` is dormant** — every beer is currently reviewed in
   exactly one city, so none of it runs against the committed data. It starts
   running by itself the first time a beer is logged in a second city, which is
-  the worst moment to discover an untested rule. The test is where the home-city
-  and tie-break rules are actually exercised.
+  the worst moment to discover an untested rule.
 - **`predictRating()`'s `MIN_N` fallback is invisible.** A wrong one still
   returns a plausible number, so nothing on the page would look broken.
 
 The declarations are lifted out of `app.js` and evaluated by `loadAppScope()`
-in `tools/load-data.mjs` — the same trick `validate-data.mjs` already used for
-`sC` and `wtNorm`, generalised. So the tests run the site's own definitions
-rather than a copy, and app.js keeps its no-imports, no-exports shape. A test
-that fails with "app.js has no top-level declaration of …" means the
-declaration was renamed or indented, not that the rule broke.
+in `tools/load-data.mjs`, so the tests run the site's own definitions rather
+than a copy, and app.js keeps its no-imports, no-exports shape. A test that
+fails with "app.js has no top-level declaration of …" means the declaration was
+renamed or indented, not that the rule broke.
 
-Adding a tool to the `check` script now also requires a step for it in
-`.github/workflows/checks.yml`; `check-invariants.mjs` compares the two and
-fails when they drift. That gap was real: `verify-live-test.mjs` was named in
-the check script, described here as running on every push, and run by nothing
-in CI.
+`tools/roundtrip-snapshot.mjs` is the other half of the safety net, and matters
+more than it used to: the app reads `src/data/snapshot.json` rather than
+`data.js`, so it sends the data through the projection and back and fails if
+anything comes back different — and fails if the committed snapshot is out of
+step with `data.js`. A stale snapshot is the one way the app can now show the
+wrong thing, and it is silent, so `npm run check` refuses it.
+
+`check-invariants.mjs` asks whether a feature is still *there*; the tests ask
+whether it still *behaves*. Adding a tool to the `check` script also requires a
+step for it in `.github/workflows/checks.yml`; `check-invariants.mjs` compares
+the two and fails when they drift.
 
 `npx tsc --noEmit` type-checks `src/`, and `npm run smoke` drives the built
-page in a browser. Neither is replaced by this; nothing yet covers the React
-components or the drawing half of `app.js`.
+page in a browser. Nothing yet covers the React components or the drawing half
+of `app.js`.
 
 ### Git rules (Lovable)
 
@@ -180,25 +167,24 @@ only.
   outside their sandbox. Editing only the `scripts` block needs no
   `bun install` — the lockfile records dependencies, and the check only reads
   those.
-- **Schema changes are new migration files, never edits to applied ones.** A
-  file in `supabase/migrations/` that has run is history; changing it does
-  nothing to the database and desynchronises the migration record. Add a new
-  `<YYYYMMDDHHMMSS>_name.sql`, written to be safe on replay and against a
-  database already in use — backfill before a `NOT NULL`, add-and-update
-  rather than delete, `if not exists` on DDL. The existing migrations are the
-  worked example.
-- **`src/integrations/supabase/types.ts` follows every schema change, by
-  hand.** There is no CLI regeneration here; the file mirrors the tables, and
-  the app's type-safety is only as truthful as it is.
+- **There is no database, and no migrations.** A change to what a column
+  means is a change to `data.js`, to `tools/snapshot-rows.mjs` (the projection)
+  and to the row types in `src/lib/snapshot.ts` — and `npm run check` proves
+  the three agree. Anything under `supabase/` is the remains of the old store
+  and is not wired to anything; do not add to it, and do not reintroduce a
+  client for it.
+- **`src/lib/snapshot.ts` owns the app's row types.** They are hand-written
+  and describe exactly what `npm run snapshot` emits. Add a field to a row and
+  it is added in both places, or `npx tsc --noEmit` says so.
 - **The stats site stays dependency-free.** `public/stats/` is plain browser
   JavaScript served as-is — no imports in `data.js`/`app.js`, no build step,
   CDN scripts pinned with SRI hashes (`npm run sri` re-derives them; never
-  hand-write one). `live-data.js` and `supabase-rows.mjs` are the only module
-  code, and `supabase-rows.mjs` is shared with the node tools — a change to
-  what a column means happens there and nowhere else.
-- **Secrets stay out.** The only key in the tree is Supabase's publishable
-  key, which is public by design. The service-role key never appears in code,
-  migrations, or workflows.
+  hand-write one). `data.js` and `app.js` are the whole of it — there is no
+  module code there at all now, and nothing on the page fetches anything but
+  the two pinned CDN libraries.
+- **Secrets stay out.** There is nothing to authenticate to any more, so
+  there is no key in the tree at all. Keep it that way: a feature that needs a
+  secret needs a conversation first.
 
 ## Standard Operating Procedure: Adding a Beer
 
@@ -212,15 +198,15 @@ one command generates everything downstream of it.
 # 1. edit public/stats/data.js — the review, the brewery, the domain, the city
 npm run fetch-logos        # 2. the logo (needs internet); then look at it:
 npm run logo-sheet
-npm run publish            # 3. checks, then writes the snapshot + the migration
+npm run check && npm run snapshot   # 3. check, then write what the app reads
 # 4. commit all of it, merge to main. That is the publish button.
 ```
 
-**It is live when that merge deploys.** Not when a migration is applied —
-nothing here can make that happen, and for a long stretch it did not. Both
-surfaces read `data.js` (the app through `src/data/snapshot.json`) and treat
-the database as something that *adds* to it, so the beer shows whether or not
-Supabase ever hears about it. Step 6 is the long version of why.
+**It is live when that merge deploys.** Both surfaces read the committed log
+and nothing else — the stats page loads `data.js` directly, the app the
+snapshot projected from it — so there is no database to be behind, no
+migration to apply, and no step between merging and being live. Step 6 is the
+long version of why that is worth saying out loud.
 
 Two things no check can do for you, both worth thirty seconds: **look at the
 logo sheet** — nothing automated tells a brand's mark from a photograph of a
@@ -253,9 +239,8 @@ next fetch overwrites it.
 ```
 
 Append it at the end of `beers[]` (the list reads as a diary, oldest first),
-under its month's comment header. The file is written by `npm run sync` with
-padded columns; a hand-added line does not need to match the padding — the
-next sync normalises it.
+under its month's comment header. The existing lines are written with padded
+columns; a hand-added line does not need to match the padding.
 
 ### UK Exception: Split GB by Constituent Country
 
@@ -292,9 +277,9 @@ the beer's name to its `beers` string (` · `-separated) and its rating to
  nativeName:"NativeBeerName"},
 ```
 
-In the database, `beers` and `ratings` have no columns — they are derived from
-the reviews, because a beer row names its own brewery. In the file they are
-written out, and `npm run check` fails if they disagree with the reviews.
+In the projected rows, `beers` and `ratings` have no column — they are derived
+from the reviews, because a beer row names its own brewery. In the file they
+are written out, and `npm run check` fails if they disagree with the reviews.
 
 ### Step 2.5: Add the brand domain to `BRAND_DOMAINS` (REQUIRED)
 
@@ -376,166 +361,60 @@ that belongs to one pour rather than to the brand.
 
 Without it the maps drop the review, and `npm run check` fails.
 
-### Step 5: Check, and publish
+### Step 5: Check, publish the snapshot, commit
 
 ```sh
 npm run check       # every rule above, plus the projection round trip
-npm run publish     # writes src/data/snapshot.json + the migration
+npm run snapshot    # writes src/data/snapshot.json — what the app reads
 ```
 
-`npm run publish` is the whole of it. It runs the check itself and refuses to
-generate from a file that fails, then writes the two generated artefacts:
+`npm run check` fails when the snapshot is out of step with `data.js`, so a
+forgotten `npm run snapshot` is caught here rather than by the app quietly
+showing the log as it stood before your edit.
 
-| Artefact | Who reads it |
-|----------|--------------|
-| `src/data/snapshot.json` | the app — this is what puts the beer in the app |
-| `supabase/migrations/<stamp>_sync_beer_log.sql` | Supabase, whenever it is applied |
+Commit `data.js` and `src/data/snapshot.json` together, and merge to `main`.
 
-Commit `data.js`, the snapshot and the migration together, and merge to `main`.
-**That is the publish button, and it is now the whole of it** — see Step 6 for
-why the database is no longer in the way.
+### Step 6: There is no step 6
 
-`npm run snapshot` writes just the snapshot, for the case where that is all
-that changed. `npm run check` fails when the snapshot is out of step with
-data.js, so a forgotten `publish` is caught here rather than by the app
-quietly showing yesterday's log.
+**It is live when the merge deploys.** Both surfaces read the committed log
+and nothing else:
 
-### Step 6: It is live at the merge — the database is no longer in the way
+| Surface | Reads |
+|---------|-------|
+| the stats site, `/stats` | `public/stats/data.js`, as a `<script>` |
+| the app | `src/data/snapshot.json`, bundled |
 
-**This used to be the step that did not work, and it was expensive.** Adding a
-beer ended with "merge to `main` — Lovable applies the migration", and that
-last part is the one piece of adding a beer that does not happen in this
-repo. Nothing here can force it. It silently did not happen for days at a
-time, across at least three merges, while every check in CI stayed green.
+No database, no migration to apply, nothing between merging and being live,
+and nothing that can be a beer behind. The app makes no data request at all,
+which is also why it works offline and paints instantly.
 
-The silence was the cost. Both surfaces read the database and let it win, so
-an unapplied migration did not leave the new beer sitting there looking
-unsaved — the stats page painted it and then *replaced it with the database's
-answer*, and the app never had it at all. A beer that had been added, checked,
-committed and merged simply was not there, and nothing anywhere said so.
+This is worth spelling out because for a long stretch it was the opposite, and
+that cost more than anything else in this project. Adding a beer used to end
+with "merge to `main` — Lovable applies the migration", and that last step is
+the one part that did not happen in this repo and that nothing here could
+force. It silently stopped happening on 2 September and stayed stopped across
+three merges. Both surfaces let the database win — the stats page painted the
+new beer and then *replaced it with the database's answer*, and the app read
+Supabase and nothing else — so a beer that had been added, checked, committed
+and merged appeared for one frame and then vanished, or never appeared at all.
+Every check was green throughout, because every check was asking whether the
+file was right, and the file was right.
 
-**Both surfaces now merge rather than replace.** The file is the authoring
-surface — "on a matched row the file wins" was always the stated rule, and it
-is now the rule at display time too, not just at migration time:
+The fix was to stop having two copies of the log. The database is gone, along
+with the 22 migrations, the migration generator, the live-sync verifier and
+its workflow, the nightly sync and the Supabase client. What is committed is
+what is shown.
 
-| | in both | file only | database only |
-|---|---|---|---|
-| what shows | the file's values | **kept** | kept |
+### Renaming a beer
 
-- `mergeRows()` in `public/stats/supabase-rows.mjs` is the rule, written once.
-- `public/stats/live-data.js` merges the database into the snapshot — the
-  stats page.
-- `src/lib/snapshot.ts` + `src/data/snapshot.json` do the same for the app,
-  which has no `data.js` to read: it is a Vite bundle and cannot import out of
-  `public/`.
-- `tools/merge-rows-test.mjs` pins all of it, including that the key map
-  written twice — once in `.mjs`, once in TS — still says the same thing.
+Rename it in `data.js`, run `npm run snapshot`, commit both. That is all — the
+rename is the whole change, because there is only one copy of the log.
 
-So **the beer is live when the merge deploys**, on both surfaces, whether or
-not the migration was ever applied. A row only the database has (a beer logged
-through the app's own form) still appears, which is what the hydrate was for
-in the first place.
-
-#### What the database being behind still costs
-
-Display is no longer waiting on it, but two things still are, so it is worth
-getting right eventually rather than never:
-
-- **The app's edit button.** A beer the app is showing from the snapshot has
-  no row to update. `BeerForm` notices (`isSnapshotOnly`) and **inserts**
-  instead of updating, so saving it from the app is one way to put it in the
-  database — the app writes as a signed-in user, which is the one credential
-  that can write. Deleting such a beer is refused, with a note to edit
-  `data.js` instead.
-- **`npm run verify-live`** still reports the divergence, and
-  `.github/workflows/verify-live.yml` still opens a `live-sync` issue for it.
-  That is now a maintenance signal rather than an outage.
-
-```sh
-npm run verify-live                 # is the database in step with data.js?
-npm run verify-live -- --wait 900   # give Lovable up to 15 minutes first
-```
-
-| Verdict | Means | Do |
-|---------|-------|-----|
-| **missing** | `data.js` has the row, the database does not | the migration never applied — paste it (below) |
-| **differs** | both have it and disagree | same: the update half never ran |
-| **orphan** | a row a *migration* wrote (`seq` is set) that `data.js` no longer knows | a rename stranded it — add an explicit `delete` to the next migration |
-| **db-only** | a row only the database has, that the app plausibly wrote | normal. `npm run sync` brings it into `data.js` |
-
-Its exit code is the point: `0` in step, `1` diverged, `2` the database could
-not be reached — which is neither a pass nor a failure, because nothing was
-checked. A sandbox with no route to Supabase (this one included) looks exactly
-like an outage.
-
-**To actually clear it**, when you have Supabase: open the newest
-`supabase/migrations/*_sync_beer_log.sql`, paste the whole file into the SQL
-editor, run it. That file is the entire contents of `data.js` as
-add-and-update statements, so it repairs every divergence at once, and running
-it is safe even if Lovable later applies it too.
-
-`tools/verify-live-test.mjs` pins the comparison's judgement against a database
-made wrong in each way that has actually happened, and against the one thing it
-must never call wrong: PostgREST returning a `numeric` column as the string
-`"2.50"`.
-
-### The history, kept because it explains the design
-
-The merge behaviour above is not defensive programming for its own sake. It
-was written after the Amstel Light entry appeared to vanish. The first
-`verify-live` run said the database held **79 reviews to `data.js`'s 80**, and
-that what was missing was the entire entry. The migration had been merged to
-`main` five hours earlier.
-
-Reading the database's values back against each migration file pins which ones
-ran:
-
-| Migration | Written by | Applied? | How we know |
-|-----------|-----------|----------|-------------|
-| `20260902141613_sync_beer_log` | us | — | its values match the cutover's, so it can't be told apart |
-| `20260902152346_sync_beer_log` | us | **no** | it reverses Sol's domains; the database still has the old order |
-| `20260903024958_…uuid…` | Lovable | — | |
-| `20260904190220_…uuid…` | Lovable | **yes** | it sets Pacífico's logo to `pacifico-clara.svg`; the database has exactly that |
-| `20260905052233_sync_beer_log` | us | **no** | it moves Pacífico to `.webp`; the database never got it |
-| `20260905170720_sync_beer_log` | us | **no** | the whole Amstel Light entry is missing |
-
-The migrations Lovable writes in its own sessions (the uuid-named ones) apply.
-The `_sync_beer_log.sql` files this repo's tooling generates — the ones that
-carry every beer you add — have not applied since 2 September.
-
-That is the fact the design now assumes rather than fights: **the file is the
-source of truth for what is shown, and the database is an overlay that adds to
-it.** The generated migration is still committed, because it is still the
-repair file, and because the database should eventually hold the same thing.
-It is simply no longer what stands between adding a beer and seeing it.
-
-The deleted migration `20260903121905_drop_redundant_logo_constraint.sql` is
-**not** the cause — it went missing before `20260904190220`, which applied fine
-afterwards. It is still absent from the tree; restoring it is not obviously
-safe, because re-adding a migration older than ones already applied is what
-makes a Supabase push complain about out-of-order history, so it is left alone
-deliberately rather than by oversight.
-
-
-### The rename hazard
-
-Reviews are matched on **`name` + `drank_on`** — by the generated SQL, and so
-by the verifier — and the generated SQL **never deletes**. So renaming a beer
-that a migration has already applied inserts the new name and *strands the old
-row*, which then shows up on the site forever as a review that `data.js` has no
-record of.
-
-When you rename or remove anything already in the database, write the delete
-yourself, at the top of the next migration.
-`supabase/migrations/20260905170720_sync_beer_log.sql` is the worked example —
-it opens with two lines cleaning up after "Amstel" became "Amstel Light":
-
-```sql
-delete from public.beers where name = 'Amstel' and drank_on = '2026-09-01';
-delete from public.brand_domains where beer_name = 'Amstel';
-```
-
-`npm run verify-live` reports anything you forget as an **orphan**.
+This used to be a hazard worth a section of its own: reviews were matched on
+`name` + `drank_on`, the generated SQL never deleted, so renaming a beer that
+a migration had already applied inserted the new name and stranded the old row,
+which then showed on the site forever as a review `data.js` had no record of.
+Nothing can strand now.
 
 ## Standard Operating Procedure: The Want-To-Try Shortlist
 
@@ -561,7 +440,7 @@ prediction, which is the only thing that makes the scorecard worth having.
 ### Adding an entry
 
 An entry is authored in `WANT_TO_TRY` in `public/stats/data.js`, like everything
-else, and `npm run migration` carries it into the `want_to_try` table:
+else, and `npm run snapshot` carries it into the rows the app reads:
 
 ```js
 {beer:'Tsingtao', style:'Lager', origin:'CN', abv:4.7, region:'Qingdao, Shandong', untappd:3.29, method:'Bottle'},
@@ -581,7 +460,7 @@ word. That is deliberately strict — a looser rule would let *Peroni Original*
 cross off *Peroni Nastro Azzurro*.
 
 When a beer really is logged under a different name, say so — `as` in data.js,
-which the migration carries into the table as `aka`:
+which the projection carries into the rows as `aka`:
 
 ```js
 {beer:'Paulaner Hefe', ..., as:['Paulaner Hefe-Weißbier']},
@@ -865,7 +744,6 @@ recognising if they come back:
 | What | When | Catches |
 |------|------|---------|
 | `npm run check` | on every push, in CI | a beer with no `BRAND_DOMAINS` entry, **and a beer with no committed logo file** — both are errors |
-| the `brand_domains` check constraints | when the row is written | a domain that isn't a bare domain; a `logo` that is a URL rather than a path into `logos/` |
 | `[DOMAIN CHECK]` console warning | automatically on load | a missing domain, in the browser |
 | `npm run logos` | run it yourself, and monthly in CI | what each beer *actually* resolves to in a browser |
 | `npm run logo-sheet` | after any fetch | whether the thing that resolved is the brand's logo at all |

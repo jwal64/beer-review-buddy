@@ -16,7 +16,7 @@ import { writeFileSync, mkdtempSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { loadData } from './load-data.mjs';
-import { toRows, fromRows } from '../public/stats/supabase-rows.mjs';
+import { toRows, fromRows } from './snapshot-rows.mjs';
 import { renderDataJs } from './render-data-js.mjs';
 import { snapshotText, committedSnapshot } from './make-snapshot.mjs';
 

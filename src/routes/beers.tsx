@@ -24,8 +24,6 @@ import {
 } from "@/lib/beer-data";
 import { Search, Plus, Pencil } from "lucide-react";
 import { placeLabel } from "@/lib/place";
-import { useSession } from "@/lib/use-session";
-import { BeerForm } from "@/components/BeerForm";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/beers")({
@@ -58,13 +56,10 @@ type SortKey = keyof typeof SORTS;
 function BeersPage() {
   const { data: beers, isLoading, isError, refetch } = useBeers();
   const { data: countries } = useCountries();
-  const { isSignedIn } = useSession();
   const [query, setQuery] = useState("");
   const [style, setStyle] = useState("All");
   const [sort, setSort] = useState<SortKey>("Recent");
   const [selected, setSelected] = useState<Beer | null>(null);
-  const [formOpen, setFormOpen] = useState(false);
-  const [editingBeer, setEditingBeer] = useState<Beer | null>(null);
 
   const styles = useMemo(
     () => ["All", ...Array.from(new Set((beers ?? []).map((b) => b.style))).sort()],
@@ -216,20 +211,6 @@ function BeersPage() {
               </SheetHeader>
               <div className="mt-4 space-y-3 pb-6">
                 <Rating value={Number(selected.rating)} size={20} />
-                {isSignedIn && (
-                  <Button
-                    variant="secondary"
-                    className="h-10 w-full rounded-xl"
-                    onClick={() => {
-                      setEditingBeer(selected);
-                      setSelected(null);
-                      setFormOpen(true);
-                    }}
-                  >
-                    <Pencil size={14} />
-                    Edit this beer
-                  </Button>
-                )}
                 <dl className="grid grid-cols-2 gap-3 text-sm">
                   {[
                     ["Style", selected.style],
@@ -257,37 +238,6 @@ function BeersPage() {
           )}
         </SheetContent>
       </Sheet>
-
-      {isSignedIn && (
-        <Button
-          type="button"
-          onClick={() => {
-            setEditingBeer(null);
-            setFormOpen(true);
-          }}
-          aria-label="Add a beer"
-          size="icon"
-          className="fixed bottom-24 right-5 z-50 h-14 w-14 rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95"
-        >
-          <Plus size={26} />
-        </Button>
-      )}
-
-      {/* Only for someone who can actually use it. The form subscribes to
-          breweries, locations, countries and brand domains the moment it
-          mounts, so rendering it for a signed-out reader fetched three tables
-          nothing on this page can show — and rebuilt a <SelectItem> for all 66
-          breweries and every location on each render, which for this component
-          means on every keystroke typed into the search box above. */}
-      {isSignedIn && (
-        <BeerForm
-          key={editingBeer?.id ?? "new"}
-          open={formOpen}
-          onOpenChange={setFormOpen}
-          beer={editingBeer}
-          onDeleted={() => setEditingBeer(null)}
-        />
-      )}
     </Shell>
   );
 }
