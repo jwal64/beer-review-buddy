@@ -112,8 +112,9 @@ let beers=[
   {beer:"Radeberger Pilsner",                   style:"Pilsner",        origin:"DE",    abv:4.8,method:"Bottle",city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
   {beer:"Presidente",                           style:"Pilsner",        origin:"DO",    abv:5.0,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
   {beer:"Heineken Silver",                      style:"Lager",          origin:"NL",    abv:4.0,method:"Draft", city:"Queens",         region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
-  // SEP 2026 (1 review)
+  // SEP 2026 (2 reviews)
   {beer:"Amstel Light",                         style:"Lager",          origin:"NL",    abv:3.5,method:"Bottle",city:"Tarrytown",      region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
+  {beer:"Rothaus Pils / Tannen Zäpfle",         style:"Pilsner",        origin:"DE",    abv:5.1,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.75,isNew:true, month:"Sep",monthN:9,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -216,6 +217,7 @@ let breweries=[
   {name:"Radeberger Exportbierbrauerei",     location:"Radeberg, Saxony",                        country:"Germany",           cc:"DE",    lang:"de",beers:"Radeberger Pilsner",                                                                       lat:51.1136,lng:13.9169,  ratings:[3.00]},
   {name:"Cervecería Nacional Dominicana",    location:"Santo Domingo, Distrito Nacional",        country:"Dominican Republic",cc:"DO",    lang:"es",beers:"Presidente",                                                                               lat:18.4861,lng:-69.9312, ratings:[3.00]},
   {name:"Amstel Brouwerij (Heineken)",       location:"Amsterdam, Noord-Holland",                country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Amstel Light",                                                                             lat:52.3578,lng:4.8918,   ratings:[2.50]},
+  {name:"Badische Staatsbrauerei Rothaus",   location:"Grafenhausen, Baden-Württemberg",         country:"Germany",           cc:"DE",    lang:"de",beers:"Rothaus Pils / Tannen Zäpfle",                                                            lat:47.8333,lng:8.2167,   ratings:[2.75]},
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -310,6 +312,7 @@ const BRAND_DOMAINS = {
 "Red Stripe":"redstripebeer.com",
 "Ringnes":"ringnes.no",
 "Rolling Rock Extra Pale":"rollingrock.com",
+"Rothaus Pils / Tannen Zäpfle":"rothaus.de",
 "Sam Adams Boston Lager":"samueladams.com",
 "Sapporo Premium":"sapporobeer.com",
 "Belhaven Scottish Stout":"belhaven.co.uk",
@@ -425,6 +428,7 @@ const BRAND_LOGOS = {
 "Red Stripe":"logos/red-stripe.webp",
 "Ringnes":"logos/ringnes.webp",
 "Rolling Rock Extra Pale":"logos/rolling-rock-extra-pale.webp",
+"Rothaus Pils / Tannen Zäpfle":"logos/rothaus-pils-tannen-zapfle.svg",
 "Sam Adams Boston Lager":"logos/sam-adams-boston-lager.svg",
 "Samuel Adams Summer Ale":"logos/samuel-adams-summer-ale.svg",
 "Sapporo Premium":"logos/sapporo-premium.webp",

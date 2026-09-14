@@ -39,14 +39,14 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Twelve files are here that way, and every one of them is a **drawn
+Thirteen files are here that way, and every one of them is a **drawn
 approximation in the house idiom** — a brand-coloured field, the wordmark, one
 characteristic device — not the brand's own artwork:
 
 `augustiner-helles` · `estrella-jalisco` · `guinness-draught` ·
 `hop-commander` · `daura` · `newcastle-brown-ale` · `pacifico-clara` ·
 `pub-ale` · `singha` · `smithwicks` · `sol` ·
-`stiegl-goldbrau`
+`stiegl-goldbrau` · `rothaus-pils-tannen-zapfle`
 
 Five of them — `daura`, `newcastle-brown-ale`, `pacifico-clara`, `singha` and
 `smithwicks` — exist because the fetcher walked every tier for those brands and
@@ -56,6 +56,18 @@ which the fetcher now refuses. `logo-fetch-report.json` records each ladder in
 full under `missing`. If one of those brands ever publishes a reachable logo,
 these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
 then re-fetch, since the fetcher will not overwrite a file it did not write.
+
+`rothaus-pils-tannen-zapfle` is the newest of the thirteen, and its ladder
+never ran for lack of a logo — it ran into the same egress wall as the six
+below: every tier (`rothaus.de`, Wikidata `P154`, the favicon services,
+DuckDuckGo) answered `403` at `CONNECT` from this environment's policy, not
+`404` from the brand. `logo-fetch-report.json` records the attempt under
+`missing` until it was moved to `kept` by hand alongside this file. The
+drawing is a fir cone (the beer's namesake — *Tannenzäpfle* is German for
+"little fir cone") on Rothaus's own navy field; the moment a session can
+reach `rothaus.de` or Wikidata, `npm run fetch-logos -- --force --only
+"Rothaus Pils / Tannen Zäpfle"` is the right tool to replace it with the
+brand's own mark.
 
 ## Five drawings that became the real thing
 

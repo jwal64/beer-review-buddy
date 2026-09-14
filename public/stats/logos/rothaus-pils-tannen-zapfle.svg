@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Rothaus Pils / Tannen Zäpfle">
+  <rect width="512" height="512" rx="60" fill="#1c3d5e"/>
+  <!-- a fir cone, for Tannenzäpfle ("little fir cone") -->
+  <g fill="#e3b355">
+    <path d="M256 88 L286 150 L226 150 Z"/>
+    <ellipse cx="256" cy="214" rx="46" ry="70"/>
+  </g>
+  <g fill="#1c3d5e">
+    <path d="M222 178 q34 14 68 0" stroke="#1c3d5e" stroke-width="7" fill="none"/>
+    <path d="M216 202 q40 16 80 0" stroke="#1c3d5e" stroke-width="7" fill="none"/>
+    <path d="M214 226 q42 17 84 0" stroke="#1c3d5e" stroke-width="7" fill="none"/>
+    <path d="M218 250 q38 16 76 0" stroke="#1c3d5e" stroke-width="7" fill="none"/>
+    <path d="M228 270 q28 12 56 0" stroke="#1c3d5e" stroke-width="7" fill="none"/>
+  </g>
+  <rect x="146" y="322" width="220" height="5" fill="#e3b355"/>
+  <g text-anchor="middle" fill="#f4e9cf" font-family="Georgia, 'Times New Roman', serif" font-weight="700">
+    <text x="256" y="380" font-size="62" letter-spacing="3">ROTHAUS</text>
+  </g>
+  <g text-anchor="middle" fill="#e3b355" font-family="Arial, Helvetica, sans-serif" font-weight="700">
+    <text x="256" y="424" font-size="27" letter-spacing="3">TANNENZÄPFLE</text>
+  </g>
+</svg>
