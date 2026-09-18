@@ -2895,3 +2895,143 @@ try {
     if (validTab(h) && el && !el.classList.contains('active')) showTab(h);
   });
 } catch(e) { console.error('Event delegation setup error:', e); }
+
+// ══════════════════════════════════════════════════════════════
+// BACKGROUND
+// ══════════════════════════════════════════════════════════════
+// Purely decorative: a few soft, slowly drifting glows on the #webglBg canvas
+// (see index.html), painted with WebGL instead of a CSS animation so they
+// stay smooth while the rest of the page is busy drawing charts. Reads no
+// beer data and touches nothing else on the page — if it can't start for any
+// reason the canvas is simply left blank and the page looks as it always has.
+(function(){
+  try {
+    const canvas = document.getElementById('webglBg');
+    if (!canvas) return;
+    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (!gl) return;
+
+    const vsSrc = 'attribute vec2 a_position;\n' +
+      'void main() { gl_Position = vec4(a_position, 0.0, 1.0); }';
+    const fsSrc = 'precision mediump float;\n' +
+      'uniform vec2 u_resolution;\n' +
+      'uniform float u_time;\n' +
+      'uniform vec3 u_colorA;\n' +
+      'uniform vec3 u_colorB;\n' +
+      'uniform vec3 u_colorC;\n' +
+      'void main() {\n' +
+      '  vec2 uv = gl_FragCoord.xy / u_resolution;\n' +
+      '  vec2 p = uv * 2.0 - 1.0;\n' +
+      '  p.x *= u_resolution.x / u_resolution.y;\n' +
+      '  float t = u_time * 0.05;\n' +
+      '  vec2 c1 = vec2(sin(t * 0.7) * 0.65, cos(t * 0.5) * 0.5 - 0.15);\n' +
+      '  vec2 c2 = vec2(cos(t * 0.4) * 0.6, sin(t * 0.9) * 0.55 + 0.25);\n' +
+      '  vec2 c3 = vec2(sin(t * 0.33 + 2.0) * 0.5 + 0.15, cos(t * 0.6 + 1.0) * 0.45 - 0.3);\n' +
+      '  float g1 = exp(-dot(p - c1, p - c1) * 2.6);\n' +
+      '  float g2 = exp(-dot(p - c2, p - c2) * 2.6);\n' +
+      '  float g3 = exp(-dot(p - c3, p - c3) * 2.6);\n' +
+      '  vec3 col = u_colorA * g1 + u_colorB * g2 + u_colorC * g3;\n' +
+      '  float alpha = clamp((g1 + g2 + g3) * 0.4, 0.0, 0.28);\n' +
+      '  gl_FragColor = vec4(col, alpha);\n' +
+      '}';
+
+    function compile(type, src) {
+      const s = gl.createShader(type);
+      gl.shaderSource(s, src);
+      gl.compileShader(s);
+      if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { gl.deleteShader(s); return null; }
+      return s;
+    }
+    const vs = compile(gl.VERTEX_SHADER, vsSrc);
+    const fs = compile(gl.FRAGMENT_SHADER, fsSrc);
+    const program = gl.createProgram();
+    if (!vs || !fs || !program) return;
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+    gl.useProgram(program);
+
+    const quad = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+    const positionLoc = gl.getAttribLocation(program, 'a_position');
+    gl.enableVertexAttribArray(positionLoc);
+    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+    gl.enable(gl.BLEND);
+    gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+
+    const resolutionLoc = gl.getUniformLocation(program, 'u_resolution');
+    const timeLoc = gl.getUniformLocation(program, 'u_time');
+    const colorALoc = gl.getUniformLocation(program, 'u_colorA');
+    const colorBLoc = gl.getUniformLocation(program, 'u_colorB');
+    const colorCLoc = gl.getUniformLocation(program, 'u_colorC');
+
+    // style.css colors are plain hex/rgba, unlike the app's oklch palette, so
+    // they can be parsed directly rather than resolved through the DOM.
+    function hexToRgb01(hex, fallback) {
+      const m = /^#([0-9a-f]{6})$/i.exec(String(hex || '').trim());
+      if (!m) return fallback;
+      const n = parseInt(m[1], 16);
+      return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+    }
+    function mixRgb(a, b, t) {
+      return [a[0]+(b[0]-a[0])*t, a[1]+(b[1]-a[1])*t, a[2]+(b[2]-a[2])*t];
+    }
+    const rootStyle = getComputedStyle(document.documentElement);
+    const bg = hexToRgb01(rootStyle.getPropertyValue('--bg'), [0.059, 0.059, 0.067]);
+    const accent = hexToRgb01(rootStyle.getPropertyValue('--accent'), [0.914, 0.635, 0.231]);
+    const colorA = accent;
+    const colorB = mixRgb(accent, [1,1,1], 0.3);
+    const colorC = mixRgb(accent, bg, 0.45);
+    gl.uniform3f(colorALoc, colorA[0], colorA[1], colorA[2]);
+    gl.uniform3f(colorBLoc, colorB[0], colorB[1], colorB[2]);
+    gl.uniform3f(colorCLoc, colorC[0], colorC[1], colorC[2]);
+
+    // Rendered under CSS pixels rather than device pixels — the glows are
+    // soft by design, so the upscale reads as depth, not blur, and it keeps
+    // this cheap on a phone with a high-DPI screen.
+    const RENDER_SCALE = 0.6;
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const width = Math.max(1, Math.floor(window.innerWidth * dpr * RENDER_SCALE));
+      const height = Math.max(1, Math.floor(window.innerHeight * dpr * RENDER_SCALE));
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
+        gl.viewport(0, 0, width, height);
+      }
+      gl.uniform2f(resolutionLoc, width, height);
+    }
+    function draw(time) {
+      gl.uniform1f(timeLoc, time);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    }
+    function handleResize() {
+      resize();
+      if (reduceMotion) draw(0);
+    }
+
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    resize();
+    window.addEventListener('resize', handleResize);
+
+    let rafId = 0;
+    const start = performance.now();
+    function frame(now) {
+      draw((now - start) / 1000);
+      rafId = requestAnimationFrame(frame);
+    }
+    function stopLoop() { if (rafId) cancelAnimationFrame(rafId); rafId = 0; }
+    function startLoop() { if (reduceMotion || rafId) return; rafId = requestAnimationFrame(frame); }
+
+    if (reduceMotion) draw(0);
+    else startLoop();
+
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) stopLoop(); else startLoop();
+    });
+    canvas.addEventListener('webglcontextlost', stopLoop);
+  } catch(e) { console.error('WebGL background setup error:', e); }
+})();

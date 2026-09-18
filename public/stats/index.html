@@ -38,6 +38,11 @@
 </head>
 <body>
 
+<!-- Purely decorative: a few soft, slowly drifting WebGL glows behind
+     everything else. Driven from app.js; if WebGL isn't available the
+     canvas just stays blank and the page looks as it always has. -->
+<canvas id="webglBg" aria-hidden="true"></canvas>
+
 <!-- BEER DETAIL MODAL -->
 <div id="beerModal" role="dialog" aria-modal="true" aria-labelledby="beerModalTitle" aria-hidden="true">
   <div id="beerModalBox" tabindex="-1">

@@ -152,6 +152,15 @@ touch-action: manipulation;
 }
 button, input, select, textarea { font-family: inherit; }
 
+#webglBg {
+position: fixed;
+inset: 0;
+z-index: -1;
+width: 100%;
+height: 100%;
+pointer-events: none;
+}
+
 /* Visible focus ring for keyboard navigation (mouse clicks stay clean) */
 .nav-item:focus-visible, .subtab:focus-visible, button:focus-visible,
 .bb-select:focus-visible, input:focus-visible, .cmd-item:focus-visible,
