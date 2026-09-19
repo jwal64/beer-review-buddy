@@ -115,6 +115,7 @@ let beers=[
   // SEP 2026 (2 reviews)
   {beer:"Amstel Light",                         style:"Lager",          origin:"NL",    abv:3.5,method:"Bottle",city:"Tarrytown",      region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Rothaus Pils / Tannen Zäpfle",         style:"Pilsner",        origin:"DE",    abv:5.1,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.75,isNew:true, month:"Sep",monthN:9,year:2026},
+  {beer:"Pabst Blue Ribbon",                    style:"Lager",          origin:"US",    abv:4.7,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.25,isNew:true, month:"Sep",monthN:9,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -218,6 +219,7 @@ let breweries=[
   {name:"Cervecería Nacional Dominicana",    location:"Santo Domingo, Distrito Nacional",        country:"Dominican Republic",cc:"DO",    lang:"es",beers:"Presidente",                                                                               lat:18.4861,lng:-69.9312, ratings:[3.00]},
   {name:"Amstel Brouwerij (Heineken)",       location:"Amsterdam, Noord-Holland",                country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Amstel Light",                                                                             lat:52.3578,lng:4.8918,   ratings:[2.50]},
   {name:"Badische Staatsbrauerei Rothaus",   location:"Grafenhausen, Baden-Württemberg",         country:"Germany",           cc:"DE",    lang:"de",beers:"Rothaus Pils / Tannen Zäpfle",                                                            lat:47.8333,lng:8.2167,   ratings:[2.75]},
+  {name:"Pabst Brewing Company",             location:"Milwaukee, Wisconsin",                    country:"USA",               cc:"US",    lang:"en",beers:"Pabst Blue Ribbon",                                                                        lat:43.0389,lng:-87.9065,ratings:[3.25]},
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -301,6 +303,7 @@ const BRAND_DOMAINS = {
 "Norrlands Guld":"norrlandsguld.se",
 "Ocean SJU":"oceanlabbrewing.com",
 "Orion":"orionbeer.co.jp",
+"Pabst Blue Ribbon":"pabstblueribbon.com",
 "Pacífico Clara":"drinkpacifico.com",
 "Paulaner Hefe":"paulaner.com",
 "Paulaner Hefe-Weißbier":"paulaner.com",
@@ -415,6 +418,7 @@ const BRAND_LOGOS = {
 "Norrlands Guld":"logos/norrlands-guld.svg",
 "Ocean SJU":"logos/ocean-sju.webp",
 "Orion":"logos/orion.webp",
+"Pabst Blue Ribbon":"logos/pabst-blue-ribbon.svg",
 "Pacífico Clara":"logos/pacifico-clara.webp",
 "Paulaner Hefe":"logos/paulaner-hefe.webp",
 "Paulaner Hefe-Weißbier":"logos/paulaner-hefe-weissbier.webp",

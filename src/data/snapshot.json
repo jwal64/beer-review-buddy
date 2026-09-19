@@ -134,7 +134,8 @@
     {"name":"Radeberger Exportbierbrauerei","location":"Radeberg, Saxony","country":"Germany","cc":"DE","lang":"de","native_name":null,"lat":51.1136,"lng":13.9169},
     {"name":"Cervecería Nacional Dominicana","location":"Santo Domingo, Distrito Nacional","country":"Dominican Republic","cc":"DO","lang":"es","native_name":null,"lat":18.4861,"lng":-69.9312},
     {"name":"Amstel Brouwerij (Heineken)","location":"Amsterdam, Noord-Holland","country":"Netherlands","cc":"NL","lang":"nl","native_name":null,"lat":52.3578,"lng":4.8918},
-    {"name":"Badische Staatsbrauerei Rothaus","location":"Grafenhausen, Baden-Württemberg","country":"Germany","cc":"DE","lang":"de","native_name":null,"lat":47.8333,"lng":8.2167}
+    {"name":"Badische Staatsbrauerei Rothaus","location":"Grafenhausen, Baden-Württemberg","country":"Germany","cc":"DE","lang":"de","native_name":null,"lat":47.8333,"lng":8.2167},
+    {"name":"Pabst Brewing Company","location":"Milwaukee, Wisconsin","country":"USA","cc":"US","lang":"en","native_name":null,"lat":43.0389,"lng":-87.9065}
   ],
   "beers": [
     {"seq":1,"name":"Grolsch","brewery":"Grolsch","style":"Pilsner","origin_cc":"NL","abv":5,"method":"Bottle","city":"Hengelo","region":"Overijssel","country":"Netherlands","cc":"NL","rating":3.5,"is_new":false,"drank_on":"2026-01-01","logo":null},
@@ -217,7 +218,8 @@
     {"seq":78,"name":"Presidente","brewery":"Cervecería Nacional Dominicana","style":"Pilsner","origin_cc":"DO","abv":5,"method":"Bottle","city":"New Rochelle","region":"New York","country":"USA","cc":"US","rating":3,"is_new":true,"drank_on":"2026-08-01","logo":null},
     {"seq":79,"name":"Heineken Silver","brewery":"Heineken","style":"Lager","origin_cc":"NL","abv":4,"method":"Draft","city":"Queens","region":"New York","country":"USA","cc":"US","rating":3,"is_new":true,"drank_on":"2026-08-01","logo":null},
     {"seq":80,"name":"Amstel Light","brewery":"Amstel Brouwerij (Heineken)","style":"Lager","origin_cc":"NL","abv":3.5,"method":"Bottle","city":"Tarrytown","region":"New York","country":"USA","cc":"US","rating":2.5,"is_new":true,"drank_on":"2026-09-01","logo":null},
-    {"seq":81,"name":"Rothaus Pils / Tannen Zäpfle","brewery":"Badische Staatsbrauerei Rothaus","style":"Pilsner","origin_cc":"DE","abv":5.1,"method":"Draft","city":"New York","region":"New York","country":"USA","cc":"US","rating":2.75,"is_new":true,"drank_on":"2026-09-01","logo":null}
+    {"seq":81,"name":"Rothaus Pils / Tannen Zäpfle","brewery":"Badische Staatsbrauerei Rothaus","style":"Pilsner","origin_cc":"DE","abv":5.1,"method":"Draft","city":"New York","region":"New York","country":"USA","cc":"US","rating":2.75,"is_new":true,"drank_on":"2026-09-01","logo":null},
+    {"seq":82,"name":"Pabst Blue Ribbon","brewery":"Pabst Brewing Company","style":"Lager","origin_cc":"US","abv":4.7,"method":"Can","city":"New Rochelle","region":"New York","country":"USA","cc":"US","rating":3.25,"is_new":true,"drank_on":"2026-09-01","logo":null}
   ],
   "brand_domains": [
     {"beer_name":"Affligem Tripel","domains":["affligembeer.com","affligembeer.be"],"logo":"logos/affligem-tripel.svg"},
@@ -289,6 +291,7 @@
     {"beer_name":"Norrlands Guld","domains":["norrlandsguld.se"],"logo":"logos/norrlands-guld.svg"},
     {"beer_name":"Ocean SJU","domains":["oceanlabbrewing.com"],"logo":"logos/ocean-sju.webp"},
     {"beer_name":"Orion","domains":["orionbeer.co.jp"],"logo":"logos/orion.webp"},
+    {"beer_name":"Pabst Blue Ribbon","domains":["pabstblueribbon.com"],"logo":"logos/pabst-blue-ribbon.svg"},
     {"beer_name":"Pacífico Clara","domains":["drinkpacifico.com"],"logo":"logos/pacifico-clara.webp"},
     {"beer_name":"Paulaner Hefe","domains":["paulaner.com"],"logo":"logos/paulaner-hefe.webp"},
     {"beer_name":"Paulaner Hefe-Weißbier","domains":["paulaner.com"],"logo":"logos/paulaner-hefe-weissbier.webp"},
