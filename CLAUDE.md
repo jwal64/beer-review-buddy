@@ -292,11 +292,20 @@ the beer's name to its `beers` string (` · `-separated) and its rating to
  country:"CountryName", cc:"XX",
  lang:"xx",                     // ISO 639-1 of the brewery's home language (de, ja, pl, cs, …)
  beers:"Beer1 · Beer2",         // Every beer of theirs reviewed so far
- lat:49.6853, lng:19.1925,      // The brewery city's coordinates
+ lat:49.6853, lng:19.1925,      // This brewery's own site — not the city centre
  ratings:[3.50],                // One rating per listed beer, same order
  // only when the native name differs from the marketed one:
  nativeName:"NativeBeerName"},
 ```
+
+**Point the coordinates at the brewery, not at its city.** Two breweries in one
+city that both carry the city-centre point land on the same pixel at every
+zoom, and the one written later paints over the earlier one and takes its
+clicks with it — so that brewery's beers have no reachable pin, on the app's
+map or the stats site's, and nothing about the page looks wrong. It has
+happened twice, to Amstel under Heineken and to Miller Lite under Pabst, both
+times by copying the coordinates of the brewery already there. `npm run check`
+now fails on two breweries sharing a point.
 
 In the projected rows, `beers` and `ratings` have no column — they are derived
 from the reviews, because a beer row names its own brewery. In the file they
