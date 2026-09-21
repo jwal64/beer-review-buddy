@@ -39,23 +39,29 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Twelve files are here that way, and every one of them is a **drawn
+Four files are here that way, and every one of them is a **drawn
 approximation in the house idiom** — a brand-coloured field, the wordmark, one
 characteristic device — not the brand's own artwork:
 
-`augustiner-helles` · `estrella-jalisco` · `guinness-draught` ·
-`hop-commander` · `daura` · `newcastle-brown-ale` · `pacifico-clara` ·
-`pub-ale` · `singha` · `smithwicks` · `sol` ·
-`stiegl-goldbrau`
+`augustiner-helles` · `daura` · `hop-commander` · `stiegl-goldbrau`
 
-Five of them — `daura`, `newcastle-brown-ale`, `pacifico-clara`, `singha` and
-`smithwicks` — exist because the fetcher walked every tier for those brands and
-came back with nothing: dead or unreachable brand sites, no `P154` logo on
-Wikidata, and Icon Horse answering four of them with a generated grey capital,
-which the fetcher now refuses. `logo-fetch-report.json` records each ladder in
-full under `missing`. If one of those brands ever publishes a reachable logo,
-these are the files to replace — delete the file *and* its `BRAND_LOGOS` line,
-then re-fetch, since the fetcher will not overwrite a file it did not write.
+There were twelve. Eight of them are the brands' own artwork now — see "Eight
+drawings replaced by the real marks" below — and these four are what no
+reachable source has: two Bavarian and Austrian brewery marks (Augustiner,
+Stiegl), one American craft label (Captain Lawrence's Hop Commander), and
+Daura, whose own mark exists nowhere but Damm's site. `logo-fetch-report.json`
+records each ladder in full under `missing`. If one of those brands ever
+publishes a reachable logo, these are the files to replace — delete the file
+*and* its `BRAND_LOGOS` line, then re-fetch, since the fetcher will not
+overwrite a file it did not write.
+
+Daura is the one to think twice about. Estrella Damm's own label *is* reachable
+and is already in the tree as `estrella-damm.svg`, so copying it onto Daura the
+way `grolsch-puur-weizen` copies `grolsch` was available and was **not** taken:
+the drawing at least says "Daura", and a mark that names a different beer is
+not an improvement on one that names the right one. That is the opposite call
+to the two Modelos below, and deliberately — there the drawing named the right
+beer *badly*, here it names it plainly.
 
 ## Five drawings that became the real thing
 
@@ -123,6 +129,71 @@ egress wall as before, and wider: every brand site, both Wikimedia hosts, and
 all three favicon services answered `403` at `CONNECT`. `npm run fetch-logos`
 is the right tool the moment a session can reach them again.
 
+## Eight drawings replaced by the real marks
+
+The egress wall never lifted. Every brand domain, Google, Icon Horse,
+DuckDuckGo and both Wikimedia hosts still answer `403` at `CONNECT`, so
+`npm run fetch-logos` still resolves nothing here — but that is a statement
+about *those hosts*, not about the session. Anonymous git reads of public
+GitHub repositories are served, and `detain/svg-logos` is 120,484 brand SVGs
+traced from vector originals. Eight of the twelve drawings had a real mark
+sitting in it:
+
+| Beer | file | what it is now |
+|------|------|----------------|
+| Guinness Draught | `guinness-draught.svg` | the gold harp over `GUINNESS` / `DRAUGHT` — the beer's own lockup, not the company's |
+| Newcastle Brown Ale | `newcastle-brown-ale.webp` | the blue-star label, "The One and Only" band and all |
+| Singha | `singha.svg` | the lion in its roundel over the `PREMIUM BEER` ribbon |
+| Smithwick's | `smithwicks.svg` | the green plate, castle and red bar |
+| Pacífico Clara | `pacifico-clara.svg` | `CERVEZA PACIFICO CLARA` in the gold wordmark |
+| Estrella Jalisco | `estrella-jalisco.svg` | the red star badge and `La Cerveza Tapatía` |
+| Sol | `sol.svg` | the ornate red-and-gold `Sol` script |
+| Pub Ale | `pub-ale.svg` | Boddingtons' barrel-in-an-arch |
+
+Three more files were not drawings but were wrong anyway, and are the brands'
+artwork now for the same reason:
+
+| Beer | was | is |
+|------|-----|----|
+| Michelob Ultra | a bare red ribbon — the brand's favicon, and nothing of the mark | the eagle crest over the `Michelob ULTRA` lockup |
+| Żywiec | a 407-byte red `Ż` | the full crest: the two dancers, the 1856 shield, the `ŻYWIEC` ribbon |
+| Negra Modelo | a byte copy of `modelo-especial.webp`, so it wore the *Especial* script | the gold `NEGRA MODELO` banner and `LA CREMA DE LA CERVEZA` |
+
+Negra Modelo is worth noting twice: it is the first of the three Modelos to get
+a mark of its own, so the warning above it — that the crest names a different
+product — now applies only to `modelo-oro.webp`.
+
+**Two things were done to every file taken from that collection**, and both are
+presentation rather than redrawing:
+
+- **The plate comes off.** Every file in it sits on one 192.756 square canvas
+  whose first path is an opaque full-bleed rectangle — white for eleven of
+  them, black for Guinness. Left in, each logo would have arrived here as a
+  solid square on a site whose other ninety are transparent. The plate is the
+  file's packaging, not the mark, and it is the *first* path in the document,
+  so it lifts out cleanly: `d="M0 0h192.756v192.756H0V0z"`.
+- **The heavy three are rasters.** `.bc-logo` never draws a logo taller than
+  64px, so Newcastle's 168 KB vector, Michelob's 143 KB and Żywiec's 75 KB are
+  stored as WebP at the fetcher's own 256px cap instead — 22, 15 and 25 KB, at
+  four times the resolution the page can use. The other eight stayed vector;
+  they were small enough that the question never arose.
+
+**Where the caveats are.** Two of the eight carry a real mark that names a
+sibling product, the same trade the Modelos record below:
+
+- **Pub Ale** wears the Boddingtons arch, which reads `BITTER`. The arch and
+  the barrel are the brand's mark across the range; `BITTER` is the variant
+  inside it. The drawing it replaced said `PUB ALE` correctly and was a drawing.
+- **Guinness Draught** is exactly right, and is the one to *not* re-fetch
+  casually: `guinness.com` answered Wikidata `P154` with a photograph of the
+  St James's Gate facade once already.
+
+A third caveat is about the ground rather than the mark: Guinness's wordmark is
+white and Estrella Jalisco's `La Cerveza Tapatía` is black, so each disappears
+on one half of `npm run logo-sheet`'s tile. Both surfaces here are dark, so
+both read where it counts — but the sheet will keep looking half-wrong, and
+that is the sheet being honest rather than the file being broken.
+
 Four more beers were wrong for the **opposite** reason — the fetcher answered
 for these, and answered *wrong*:
 
@@ -184,16 +255,16 @@ owner rather than drawn or fetched:
 - `budweiser.webp` — the bowtie, replacing the drawn stand-in that replaced
   Budvar's mark. Same border-only flood as Harp, which is what keeps the white
   script inside the bowtie; red on charcoal needs no tile behind it.
-- `negra-modelo.webp` and `modelo-oro.webp` — **byte-identical copies of
-  `modelo-especial.webp`**, at the owner's instruction, because no source has a
-  separate mark for either beer. Know what this costs: the crest carries the
-  *Especial* script, so both beers display a mark naming a different product.
-  That was a deliberate trade against the drawings they replaced. If a distinct
-  Negra Modelo or Modelo Oro mark ever turns up, these are the two files to
-  replace.
+- `modelo-oro.webp` — a **byte-identical copy of `modelo-especial.webp`**, at
+  the owner's instruction, because no source has a separate mark for it. Know
+  what this costs: the crest carries the *Especial* script, so Modelo Oro
+  displays a mark naming a different product. That was a deliberate trade
+  against the drawing it replaced. If a distinct Modelo Oro mark ever turns up,
+  this is the file to replace. `negra-modelo` was the same copy until this pass
+  and is now the brand's own banner — one down, one to go.
 
-  They are separate files rather than three `BRAND_LOGOS` entries pointing at
-  one path, and that is load-bearing: `fetch-logos` finds a beer's file by
+  It is a separate file rather than two `BRAND_LOGOS` entries pointing at one
+  path, and that is load-bearing: `fetch-logos` finds a beer's file by
   `slug(name)`, so a beer with no `<slug>.<ext>` of its own reads as having no
   file at all — it would be queued for fetching, and `--data-only` would
   rewrite `BRAND_LOGOS` from what is on disk and drop the shared entry. The two
@@ -264,19 +335,18 @@ fix. Worth trying first on any SVG here that renders as a broken image —
 `augustiner-helles` and `pilsner-urquell` were checked the same way and were
 genuinely empty, which is what sent them to the drawing pile.
 
-## Four that look odd and are staying
+## Two that look odd and are staying
 
-`zywiec` (a red `Ż`), `michelob-ultra` (a bare red ribbon), `ocean-sju` (a black
-porthole ring) and `big-wave-golden-ale` (a 48px teal hibiscus) all read as
-thin answers, and all four are **the brand's own site favicon**, fetched from
-the brand's own domain. `zywiec.svg` in particular is a hand-authored path in
-Żywiec's brand red `#E4002B` — not one of the generated grey capitals the
-fetcher now refuses.
+`ocean-sju` (a black porthole ring) and `big-wave-golden-ale` (a 48px teal
+hibiscus) both read as thin answers, and both are **the brand's own site
+favicon**, fetched from the brand's own domain.
 
 They are the brands' digital marks rather than their label art, which is a real
 limitation but not a wrong answer. Replacing a brand's own icon with someone's
 drawing of what the label looks like would be the confidently-wrong trade this
-file keeps warning about, so they stay.
+file keeps warning about, so they stay — and note what *did* replace two of
+their neighbours: `zywiec` and `michelob-ultra` were on this list, and they
+left it for the brands' real artwork, not for a drawing.
 
 **A file the fetcher did not write is never replaced**, `--force` included: it
 knows which files are its own from `logo-fetch-report.json`, and leaves the

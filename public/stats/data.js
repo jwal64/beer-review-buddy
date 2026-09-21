@@ -413,13 +413,13 @@ const BRAND_LOGOS = {
 "Modelo Oro":"logos/modelo-oro.webp",
 "Mythos":"logos/mythos.webp",
 "Narragansett Lager":"logos/narragansett-lager.webp",
-"Negra Modelo":"logos/negra-modelo.webp",
-"Newcastle Brown Ale":"logos/newcastle-brown-ale.svg",
+"Negra Modelo":"logos/negra-modelo.svg",
+"Newcastle Brown Ale":"logos/newcastle-brown-ale.webp",
 "Norrlands Guld":"logos/norrlands-guld.svg",
 "Ocean SJU":"logos/ocean-sju.webp",
 "Orion":"logos/orion.webp",
 "Pabst Blue Ribbon":"logos/pabst-blue-ribbon.webp",
-"Pacífico Clara":"logos/pacifico-clara.webp",
+"Pacífico Clara":"logos/pacifico-clara.svg",
 "Paulaner Hefe":"logos/paulaner-hefe.webp",
 "Paulaner Hefe-Weißbier":"logos/paulaner-hefe-weissbier.webp",
 "Peroni Nastro Azzurro":"logos/peroni-nastro-azzurro.webp",
@@ -453,7 +453,7 @@ const BRAND_LOGOS = {
 "Victoria Bitter":"logos/victoria-bitter.svg",
 "Weihenstephaner Hefeweissbier":"logos/weihenstephaner-hefeweissbier.webp",
 "Wrench":"logos/wrench.webp",
-"Żywiec":"logos/zywiec.svg",
+"Żywiec":"logos/zywiec.webp",
 };
 
 // ══════════════════════════════════════════════════════════════

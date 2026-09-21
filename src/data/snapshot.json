@@ -278,7 +278,7 @@
     {"beer_name":"Michelob Ultra","domains":["michelobultra.com"],"logo":"logos/michelob-ultra.webp"},
     {"beer_name":"Miller Lite","domains":["millerlite.com"],"logo":"logos/miller-lite.webp"},
     {"beer_name":"Modelo Especial","domains":["modelousa.com"],"logo":"logos/modelo-especial.webp"},
-    {"beer_name":"Negra Modelo","domains":["modelousa.com"],"logo":"logos/negra-modelo.webp"},
+    {"beer_name":"Negra Modelo","domains":["modelousa.com"],"logo":"logos/negra-modelo.svg"},
     {"beer_name":"Modelo Oro","domains":["modelousa.com"],"logo":"logos/modelo-oro.webp"},
     {"beer_name":"Mythos","domains":["mythosbeer.gr"],"logo":"logos/mythos.webp"},
     {"beer_name":"Hofbräu Dunkel","domains":["hofbraeu-muenchen.de"],"logo":"logos/hofbrau-dunkel.svg"},
@@ -287,12 +287,12 @@
     {"beer_name":"Narragansett Lager","domains":["narragansettbeer.com"],"logo":"logos/narragansett-lager.webp"},
     {"beer_name":"Peroni Nastro Azzurro","domains":["peroni.it"],"logo":"logos/peroni-nastro-azzurro.webp"},
     {"beer_name":"Peroni Original","domains":["peroni.it"],"logo":"logos/peroni-original.webp"},
-    {"beer_name":"Newcastle Brown Ale","domains":["newcastlebrown.com","newcastlebrownale.com"],"logo":"logos/newcastle-brown-ale.svg"},
+    {"beer_name":"Newcastle Brown Ale","domains":["newcastlebrown.com","newcastlebrownale.com"],"logo":"logos/newcastle-brown-ale.webp"},
     {"beer_name":"Norrlands Guld","domains":["norrlandsguld.se"],"logo":"logos/norrlands-guld.svg"},
     {"beer_name":"Ocean SJU","domains":["oceanlabbrewing.com"],"logo":"logos/ocean-sju.webp"},
     {"beer_name":"Orion","domains":["orionbeer.co.jp"],"logo":"logos/orion.webp"},
     {"beer_name":"Pabst Blue Ribbon","domains":["pabstblueribbon.com"],"logo":"logos/pabst-blue-ribbon.webp"},
-    {"beer_name":"Pacífico Clara","domains":["drinkpacifico.com"],"logo":"logos/pacifico-clara.webp"},
+    {"beer_name":"Pacífico Clara","domains":["drinkpacifico.com"],"logo":"logos/pacifico-clara.svg"},
     {"beer_name":"Paulaner Hefe","domains":["paulaner.com"],"logo":"logos/paulaner-hefe.webp"},
     {"beer_name":"Paulaner Hefe-Weißbier","domains":["paulaner.com"],"logo":"logos/paulaner-hefe-weissbier.webp"},
     {"beer_name":"Pilsner Urquell","domains":["pilsnerurquell.com","prazdroj.cz"],"logo":"logos/pilsner-urquell.webp"},
@@ -325,7 +325,7 @@
     {"beer_name":"Victoria Bitter","domains":["vb.com.au","victoriabitter.com.au"],"logo":"logos/victoria-bitter.svg"},
     {"beer_name":"Weihenstephaner Hefeweissbier","domains":["weihenstephaner.de"],"logo":"logos/weihenstephaner-hefeweissbier.webp"},
     {"beer_name":"Wrench","domains":["industrialartsbrewing.com"],"logo":"logos/wrench.webp"},
-    {"beer_name":"Żywiec","domains":["zywiec.com.pl"],"logo":"logos/zywiec.svg"}
+    {"beer_name":"Żywiec","domains":["zywiec.com.pl"],"logo":"logos/zywiec.webp"}
   ],
   "want_to_try": [
     {"seq":1,"beer":"Paulaner Hefe","style":"Wheat Beer","origin":"DE","abv":5.5,"region":"Munich, Bavaria","untappd":3.87,"method":"Bottle","aka":["Paulaner Hefe-Weißbier"]},

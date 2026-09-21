@@ -1,6 +1,6 @@
 {
   "at": "2026-09-14T00:53:26.845Z",
-  "total": 103,
+  "total": 104,
   "fetched": [
     {
       "beer": "Affligem Tripel",
@@ -443,16 +443,6 @@
       "bytes": 7400
     },
     {
-      "beer": "Michelob Ultra",
-      "file": "logos/michelob-ultra.webp",
-      "source": "google faviconV2",
-      "domain": "michelobultra.com",
-      "from": "180×180 png",
-      "stored": "180px",
-      "url": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://michelobultra.com&size=256",
-      "bytes": 1224
-    },
-    {
       "beer": "Miller Lite",
       "file": "logos/miller-lite.webp",
       "source": "site header logo",
@@ -741,16 +731,6 @@
       "stored": "108px",
       "url": "https://www.weihenstephaner.de/_next/image?url=%2Flogo.png&w=96&q=75",
       "bytes": 8676
-    },
-    {
-      "beer": "Żywiec",
-      "file": "logos/zywiec.svg",
-      "source": "icon.horse",
-      "domain": "zywiec.com.pl",
-      "from": "22×44 svg",
-      "stored": "vector",
-      "url": "https://icon.horse/icon/zywiec.com.pl",
-      "bytes": 407
     }
   ],
   "kept": [
@@ -807,6 +787,10 @@
       "file": "logos/leffe-blonde.webp"
     },
     {
+      "beer": "Michelob Ultra",
+      "file": "logos/michelob-ultra.webp"
+    },
+    {
       "beer": "Modelo Especial",
       "file": "logos/modelo-especial.webp"
     },
@@ -816,11 +800,11 @@
     },
     {
       "beer": "Negra Modelo",
-      "file": "logos/negra-modelo.webp"
+      "file": "logos/negra-modelo.svg"
     },
     {
       "beer": "Newcastle Brown Ale",
-      "file": "logos/newcastle-brown-ale.svg"
+      "file": "logos/newcastle-brown-ale.webp"
     },
     {
       "beer": "Pabst Blue Ribbon",
@@ -828,7 +812,7 @@
     },
     {
       "beer": "Pacífico Clara",
-      "file": "logos/pacifico-clara.webp"
+      "file": "logos/pacifico-clara.svg"
     },
     {
       "beer": "Pilsner Urquell",
@@ -869,6 +853,10 @@
     {
       "beer": "Wrench",
       "file": "logos/wrench.webp"
+    },
+    {
+      "beer": "Żywiec",
+      "file": "logos/zywiec.webp"
     }
   ],
   "missing": []
