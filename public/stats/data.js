@@ -116,7 +116,7 @@ let beers=[
   {beer:"Amstel Light",                         style:"Lager",          origin:"NL",    abv:3.5,method:"Bottle",city:"Tarrytown",      region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Rothaus Pils / Tannen Zäpfle",         style:"Pilsner",        origin:"DE",    abv:5.1,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.75,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Pabst Blue Ribbon",                    style:"Lager",          origin:"US",    abv:4.7,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.25,isNew:true, month:"Sep",monthN:9,year:2026},
-  {beer:"Killsner",                             style:"Pilsner",        origin:"US",    abv:5.0,method:"Can",   city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.75,isNew:true, month:"Sep",monthN:9,year:2026},
+  {beer:"Killsner",                             style:"Pilsner",        origin:"US",    abv:5.0,method:"Can",   city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -221,7 +221,7 @@ let breweries=[
   {name:"Amstel Brouwerij (Heineken)",       location:"Amsterdam, Noord-Holland",                country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Amstel Light",                                                                             lat:52.3601,lng:4.9114,   ratings:[2.50]},
   {name:"Badische Staatsbrauerei Rothaus",   location:"Grafenhausen, Baden-Württemberg",         country:"Germany",           cc:"DE",    lang:"de",beers:"Rothaus Pils / Tannen Zäpfle",                                                            lat:47.8333,lng:8.2167,   ratings:[2.75]},
   {name:"Pabst Brewing Company",             location:"Milwaukee, Wisconsin",                    country:"USA",               cc:"US",    lang:"en",beers:"Pabst Blue Ribbon",                                                                        lat:43.0389,lng:-87.9065,ratings:[3.25]},
-  {name:"Kills Boro Brewing Co.",            location:"Staten Island, New York",                 country:"USA",               cc:"US",    lang:"en",beers:"Killsner",                                                                                 lat:40.6444,lng:-74.0989, ratings:[2.75]},
+  {name:"Kills Boro Brewing Co.",            location:"Staten Island, New York",                 country:"USA",               cc:"US",    lang:"en",beers:"Killsner",                                                                                 lat:40.6444,lng:-74.0989, ratings:[2.50]},
 ];
 
 // ══════════════════════════════════════════════════════════════
