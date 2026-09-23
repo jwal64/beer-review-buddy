@@ -39,21 +39,24 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Four files are here that way, and every one of them is a **drawn
+Five files are here that way, and every one of them is a **drawn
 approximation in the house idiom** — a brand-coloured field, the wordmark, one
 characteristic device — not the brand's own artwork:
 
-`augustiner-helles` · `daura` · `hop-commander` · `stiegl-goldbrau`
+`augustiner-helles` · `daura` · `hop-commander` · `killsner` · `stiegl-goldbrau`
 
-There were twelve. Eight of them are the brands' own artwork now — see "Eight
-drawings replaced by the real marks" below — and these four are what no
-reachable source has: two Bavarian and Austrian brewery marks (Augustiner,
-Stiegl), one American craft label (Captain Lawrence's Hop Commander), and
-Daura, whose own mark exists nowhere but Damm's site. `logo-fetch-report.json`
-records each ladder in full under `missing`. If one of those brands ever
-publishes a reachable logo, these are the files to replace — delete the file
-*and* its `BRAND_LOGOS` line, then re-fetch, since the fetcher will not
-overwrite a file it did not write.
+There were twelve, then four; `killsner` is the fifth. `npm run fetch-logos
+-- --only "Killsner"` walked its full ladder against `killsboro.com` — site
+icons, header logo, brand page image, the favicon services, DuckDuckGo — and
+every tier answered `403` at `CONNECT`, this environment's egress wall again.
+`logo-fetch-report.json` records that ladder under `kept` now rather than
+`missing`, since the file is hand-placed. The other four are what no reachable
+source has: two Bavarian and Austrian brewery marks (Augustiner, Stiegl), one
+American craft label (Captain Lawrence's Hop Commander), and Daura, whose own
+mark exists nowhere but Damm's site. If one of these five brands ever
+publishes a reachable logo, that is the file to replace — delete it *and* its
+`BRAND_LOGOS` line, then re-fetch, since the fetcher will not overwrite a file
+it did not write.
 
 Daura is the one to think twice about. Estrella Damm's own label *is* reachable
 and is already in the tree as `estrella-damm.svg`, so copying it onto Daura the
