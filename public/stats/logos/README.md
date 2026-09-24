@@ -61,12 +61,14 @@ not an improvement on one that names the right one. That is the opposite call
 to the two Modelos below, and deliberately — there the drawing named the right
 beer *badly*, here it names it plainly.
 
-## Three labels from Untappd's own bucket
+## Marks from Untappd's own bucket
 
-`stiegl-goldbrau` · `hop-commander` · `killsner`
+`hop-commander` · `killsner` · `big-wave-golden-ale`
 
-All three were drawings — a staircase on red, a cartoon hop on navy, two
-wavy lines on green, each with its name typed underneath.
+The first two were drawings — a cartoon hop on navy, two wavy lines on
+green, each with its name typed underneath — and Big Wave was Kona's 48px
+teal hibiscus favicon. Stiegl came through here too, and left again; see
+below.
 
 Every brand site, every favicon service and Wikimedia still answer `403` at
 `CONNECT` here. But the files Untappd serves from `assets.untappd.com` sit in
@@ -81,9 +83,9 @@ never draws a logo taller than 64px, so that is enough.
 
 | Beer | key | what it is |
 |------|-----|------------|
-| Stiegl Goldbräu | `beer_logos/beer-5539_7ca11_sm.jpeg` | the Goldbräu label itself: the red `Stiegl` script over `GOLDBRÄU` on the gold-edged shield |
 | Hop Commander | `beer_logos/beer-871255_7b1a9_sm.jpeg` | the green `HOP COMMANDER` wordmark from the can |
 | Killsner | `brewery_logos/brewery-277977_93f5e.jpeg` | Kills Boro's own mark, the hand-lettered `KILLS BORO` in its black splash |
+| Big Wave Golden Ale | `brewery_logos/brewery-konabrewingcompany_1988.jpeg` | Kona's roundel: `KONA` over the orange gecko, `BREWING CO.`, `Liquid Aloha · Hawaii` |
 
 **Killsner is the one with a caveat.** Several searches named a label key for
 it, `beer-4183963_1e922`, and the bucket answers `403` to every extension and
@@ -91,23 +93,31 @@ size of it — no label is stored under that key, and none was found under any
 other. What the Untappd pages that do list Killsner carry is the brewery's
 mark, so that is the file: the brewery's own artwork instead of a drawing of
 a can, the same trade `bloodline-blood-orange-ipa` makes with Flying Dog's
-wings. If a Killsner label ever turns up, this is the file to replace.
+wings. If a Killsner label ever turns up, this is the file to replace. Big
+Wave is the same trade: no label key for `beer-9657` turned up, so it wears
+Kona's own roundel.
 
-Stiegl had its real mark once already. `jwal64/JWAL-BEER-REVIEW` holds a 300px
-`Salzburger Stiegl` badge fetched from `stiegl.at` on 2 September, and the
+**Stiegl is the brand's own badge, not Untappd's label.** The Goldbräu label
+from this bucket (`beer_logos/beer-5539_7ca11_sm.jpeg`) was here briefly and
+was not good enough: a 100px JPEG of a tilted shield, soft at every size the
+page draws. The real mark had been in the tree once already. On 2 September
+the fetcher took a 300×300 `Salzburger Stiegl` badge from `stiegl.at` (the
+red script and staircase on a white shield, transparent around it), and the
 next re-fetch replaced it with the fully transparent WebP recorded below.
-The Goldbräu label is used rather than that badge because it names this beer
-rather than the brewery. The badge is still in that repo's history (`26d8ca4`)
-if a sharper brewery mark is ever preferred.
+That file is still in the history (`public/stats/logos/stiegl-goldbrau.webp`
+at `6a32035`, blob `26d8ca4`), and `stiegl-goldbrau.webp` is it again, scaled
+to the fetcher's 256px cap. Untappd's brewery logo for Stiegl
+(`brewery_logos/brewery-1202_5af88.jpeg`) is the same badge at 100px.
 
 What was done to each, all presentation rather than redrawing:
 
-- **Stiegl and Hop Commander** had Untappd's white ground flooded out from the
-  border, the same way `harp-lager` was, so the label sits on the page's own
-  ground. Both read on charcoal as they are.
-- **Killsner sits on a white rounded tile**, like `modelo-especial.webp`: the
-  mark is a black splash, which is invisible on `--bg`, and its white ground
-  is what the lettering reads against.
+- **Hop Commander** had Untappd's white ground flooded out from the border,
+  the same way `harp-lager` was, so the wordmark sits on the page's own
+  ground. It reads on charcoal as it is.
+- **Killsner and Big Wave sit on white rounded tiles**, like
+  `modelo-especial.webp`. Kills Boro's mark is a black splash and Kona's is
+  dark brown, and both vanish on `--bg`; the white ground is what they were
+  drawn against.
 
 ## Five drawings that became the real thing
 
@@ -391,18 +401,19 @@ fix. Worth trying first on any SVG here that renders as a broken image —
 `augustiner-helles` and `pilsner-urquell` were checked the same way and were
 genuinely empty, which is what sent them to the drawing pile.
 
-## Two that look odd and are staying
+## One that looks odd and is staying
 
-`ocean-sju` (a black porthole ring) and `big-wave-golden-ale` (a 48px teal
-hibiscus) both read as thin answers, and both are **the brand's own site
-favicon**, fetched from the brand's own domain.
+`ocean-sju` (a black porthole ring) reads as a thin answer, and it is **the
+brand's own site favicon**, fetched from the brand's own domain.
+`big-wave-golden-ale` was the other one here, Kona's 48px hibiscus; it has
+left for Kona's full roundel (above).
 
-They are the brands' digital marks rather than their label art, which is a real
+It is the brand's digital mark rather than its label art, which is a real
 limitation but not a wrong answer. Replacing a brand's own icon with someone's
 drawing of what the label looks like would be the confidently-wrong trade this
-file keeps warning about, so they stay — and note what *did* replace two of
-their neighbours: `zywiec` and `michelob-ultra` were on this list, and they
-left it for the brands' real artwork, not for a drawing.
+file keeps warning about, so it stays — and note what *did* replace three of
+its neighbours: `zywiec`, `michelob-ultra` and `big-wave-golden-ale` were on
+this list, and they left it for the brands' real artwork, not for a drawing.
 
 **A file the fetcher did not write is never replaced**, `--force` included: it
 knows which files are its own from `logo-fetch-report.json`, and leaves the

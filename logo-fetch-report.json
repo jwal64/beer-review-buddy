@@ -53,16 +53,6 @@
       "bytes": 47631
     },
     {
-      "beer": "Big Wave Golden Ale",
-      "file": "logos/big-wave-golden-ale.webp",
-      "source": "duckduckgo",
-      "domain": "konabrewingco.com",
-      "from": "48×48 png",
-      "stored": "48px",
-      "url": "https://icons.duckduckgo.com/ip3/konabrewingco.com.ico",
-      "bytes": 2582
-    },
-    {
       "beer": "Birra Moretti",
       "file": "logos/birra-moretti.webp",
       "source": "wikidata P154",
@@ -861,6 +851,10 @@
     {
       "beer": "Killsner",
       "file": "logos/killsner.webp"
+    },
+    {
+      "beer": "Big Wave Golden Ale",
+      "file": "logos/big-wave-golden-ale.webp"
     }
   ],
   "missing": []
