@@ -12,13 +12,13 @@ import { ChevronRight } from "lucide-react";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "JWAL's Brew Reviews — Every beer, rated" },
+      { title: "JWAL BREW REVIEW — Every beer, rated" },
       {
         name: "description",
         content:
           "A running log of every beer JWAL has tasted: ratings, styles, breweries and the cities they were drunk in.",
       },
-      { property: "og:title", content: "JWAL's Brew Reviews" },
+      { property: "og:title", content: "JWAL BREW REVIEW" },
       {
         property: "og:description",
         content: "Ratings, styles and breweries from every beer in the log.",
@@ -91,7 +91,7 @@ function HomePage() {
   }, [beers]);
 
   return (
-    <Shell title="JWAL's Brew Reviews" subtitle="Every pint, pour and bottle — rated.">
+    <Shell title="JWAL BREW REVIEW" subtitle="Every pint, pour and bottle — rated.">
       {isLoading ? (
         <div className="space-y-3" aria-label="Loading home">
           {[...Array(6)].map((_, i) => (

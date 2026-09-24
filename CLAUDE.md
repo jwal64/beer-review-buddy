@@ -55,6 +55,9 @@ A remote Claude session gets its dependencies automatically — the
 `SessionStart` hook in `.claude/hooks/session-start.sh` runs `npm install` when
 the container starts, so all of the commands above work from the first turn.
 The data tools in `tools/` need nothing installed at all.
+It also sets `CHROMIUM_PATH` to the container's preinstalled Chromium, which
+is not the build this repo's playwright expects; without it every tool that
+drives a browser fails with "Executable doesn't exist".
 
 The hook finds the repository from its own path, not from `CLAUDE_PROJECT_DIR`.
 That variable is unset in a session with more than one repository attached, and

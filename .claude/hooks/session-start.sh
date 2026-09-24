@@ -29,3 +29,11 @@ cd "$(dirname "${BASH_SOURCE[0]}")/../.."
 export PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 
 npm install --no-audit --no-fund
+
+# The preinstalled Chromium is not the build this repo's playwright expects, so
+# every browser-driving tool (smoke, logos, logo-sheet, fetch-logos) died with
+# "Executable doesn't exist" until CHROMIUM_PATH was set by hand. They all read
+# that variable; hand it to the session through CLAUDE_ENV_FILE.
+if [ -n "${CLAUDE_ENV_FILE:-}" ] && [ -z "${CHROMIUM_PATH:-}" ] && [ -x /opt/pw-browsers/chromium ]; then
+  echo "export CHROMIUM_PATH=/opt/pw-browsers/chromium" >> "$CLAUDE_ENV_FILE"
+fi

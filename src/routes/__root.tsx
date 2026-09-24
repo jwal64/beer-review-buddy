@@ -79,14 +79,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "JWAL's Brew Reviews" },
+      { title: "JWAL BREW REVIEW" },
       {
         name: "description",
         content:
           "A running log of every beer JWAL has tasted: ratings, styles, breweries and the cities they were drunk in.",
       },
       { name: "author", content: "JWAL" },
-      { property: "og:title", content: "JWAL's Brew Reviews" },
+      { property: "og:title", content: "JWAL BREW REVIEW" },
       {
         property: "og:description",
         content:

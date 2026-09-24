@@ -916,7 +916,8 @@ const beerSort={key:'rating',dir:-1};
 const BEER_SORT_CMP={
   beer:(a,b)=>a.beer.localeCompare(b.beer),
   style:(a,b)=>a.style.localeCompare(b.style),
-  origin:(a,b)=>a.origin.localeCompare(b.origin),
+  // By country name, not code — "GB-SCT" files under Scotland, not beside "DE".
+  origin:(a,b)=>(CNAMES[a.origin]||a.origin).localeCompare(CNAMES[b.origin]||b.origin)||b.rating-a.rating,
   abv:(a,b)=>a.abv-b.abv,
   method:(a,b)=>a.method.localeCompare(b.method),
   city:(a,b)=>a.city.localeCompare(b.city),
