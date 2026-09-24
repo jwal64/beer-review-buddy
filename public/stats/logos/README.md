@@ -85,7 +85,7 @@ never draws a logo taller than 64px, so that is enough.
 |------|-----|------------|
 | Hop Commander | `beer_logos/beer-871255_7b1a9_sm.jpeg` | the green `HOP COMMANDER` wordmark from the can |
 | Killsner | `brewery_logos/brewery-277977_93f5e.jpeg` | Kills Boro's own mark, the hand-lettered `KILLS BORO` in its black splash |
-| Big Wave Golden Ale | `brewery_logos/brewery-konabrewingcompany_1988.jpeg` | Kona's roundel: `KONA` over the orange gecko, `BREWING CO.`, `Liquid Aloha · Hawaii` |
+| Big Wave Golden Ale | `beer_logos/beer-9657_f1704_sm.jpeg` | the current can: the hibiscus over `KONA BIG WAVE`, `Liquid Aloha` and the wave, on ocean blue |
 
 **Killsner is the one with a caveat.** Several searches named a label key for
 it, `beer-4183963_1e922`, and the bucket answers `403` to every extension and
@@ -93,9 +93,15 @@ size of it — no label is stored under that key, and none was found under any
 other. What the Untappd pages that do list Killsner carry is the brewery's
 mark, so that is the file: the brewery's own artwork instead of a drawing of
 a can, the same trade `bloodline-blood-orange-ipa` makes with Flying Dog's
-wings. If a Killsner label ever turns up, this is the file to replace. Big
-Wave is the same trade: no label key for `beer-9657` turned up, so it wears
-Kona's own roundel.
+wings. If a Killsner label ever turns up, this is the file to replace.
+
+**Big Wave is not the gecko.** Kona's brewery logo in the same bucket
+(`brewery_logos/brewery-konabrewingcompany_1988.jpeg`, the orange gecko in a
+brown `KONA BREWING CO.` roundel) was here for one commit and is the wrong
+answer: Kona relaunched in 2023 as *Kona Big Wave*, built around the
+hibiscus, and the gecko is the mark it retired. The 48px teal hibiscus that
+was here before was the right brand, just a sliver of it. The label is the
+whole thing.
 
 **Stiegl is the brand's own badge, not Untappd's label.** The Goldbräu label
 from this bucket (`beer_logos/beer-5539_7ca11_sm.jpeg`) was here briefly and
@@ -114,10 +120,12 @@ What was done to each, all presentation rather than redrawing:
 - **Hop Commander** had Untappd's white ground flooded out from the border,
   the same way `harp-lager` was, so the wordmark sits on the page's own
   ground. It reads on charcoal as it is.
-- **Killsner and Big Wave sit on white rounded tiles**, like
-  `modelo-especial.webp`. Kills Boro's mark is a black splash and Kona's is
-  dark brown, and both vanish on `--bg`; the white ground is what they were
-  drawn against.
+- **Killsner sits on a white rounded tile**, like `modelo-especial.webp`:
+  Kills Boro's mark is a black splash, which vanishes on `--bg`, and the white
+  ground is what it was drawn against.
+- **Big Wave keeps its own blue.** The label is a full-bleed ocean-blue
+  panel, so it is trimmed to that panel and given the tiles' ⅙-side corner
+  radius; nothing is added behind it.
 
 ## Five drawings that became the real thing
 
@@ -414,7 +422,7 @@ genuinely empty, which is what sent them to the drawing pile.
 `ocean-sju` (a black porthole ring) reads as a thin answer, and it is **the
 brand's own site favicon**, fetched from the brand's own domain.
 `big-wave-golden-ale` was the other one here, Kona's 48px hibiscus; it has
-left for Kona's full roundel (above).
+left for the full Kona Big Wave label (above).
 
 It is the brand's digital mark rather than its label art, which is a real
 limitation but not a wrong answer. Replacing a brand's own icon with someone's
