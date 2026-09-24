@@ -53,16 +53,6 @@
       "bytes": 47631
     },
     {
-      "beer": "Big Wave Golden Ale",
-      "file": "logos/big-wave-golden-ale.webp",
-      "source": "duckduckgo",
-      "domain": "konabrewingco.com",
-      "from": "48×48 png",
-      "stored": "48px",
-      "url": "https://icons.duckduckgo.com/ip3/konabrewingco.com.ico",
-      "bytes": 2582
-    },
-    {
       "beer": "Birra Moretti",
       "file": "logos/birra-moretti.webp",
       "source": "wikidata P154",
@@ -776,7 +766,7 @@
     },
     {
       "beer": "Hop Commander",
-      "file": "logos/hop-commander.svg"
+      "file": "logos/hop-commander.webp"
     },
     {
       "beer": "La Fin Du Monde",
@@ -800,7 +790,7 @@
     },
     {
       "beer": "Negra Modelo",
-      "file": "logos/negra-modelo.svg"
+      "file": "logos/negra-modelo.webp"
     },
     {
       "beer": "Newcastle Brown Ale",
@@ -844,7 +834,7 @@
     },
     {
       "beer": "Stiegl Goldbräu",
-      "file": "logos/stiegl-goldbrau.svg"
+      "file": "logos/stiegl-goldbrau.webp"
     },
     {
       "beer": "Tennent's",
@@ -860,7 +850,11 @@
     },
     {
       "beer": "Killsner",
-      "file": "logos/killsner.svg"
+      "file": "logos/killsner.webp"
+    },
+    {
+      "beer": "Big Wave Golden Ale",
+      "file": "logos/big-wave-golden-ale.webp"
     }
   ],
   "missing": []
