@@ -22,7 +22,7 @@ import {
   useCountries,
   type Beer,
 } from "@/lib/beer-data";
-import { Search, Plus } from "lucide-react";
+import { Search, Plus, ArrowUpDown } from "lucide-react";
 import { placeLabel } from "@/lib/place";
 import { Button } from "@/components/ui/button";
 
@@ -32,12 +32,14 @@ export const Route = createFileRoute("/beers")({
       { title: "All beers — JWAL BREW REVIEW" },
       {
         name: "description",
-        content: "Search and filter every beer in the log by name, style or brewery.",
+        content:
+          "Search, filter and sort every beer in the log by name, style, brewery, city or country.",
       },
       { property: "og:title", content: "All beers — JWAL BREW REVIEW" },
       {
         property: "og:description",
-        content: "Search and filter every beer in the log by name, style or brewery.",
+        content:
+          "Search, filter and sort every beer in the log by name, style, brewery, city or country.",
       },
     ],
   }),
@@ -61,12 +63,17 @@ const SORTS = {
 
 type SortKey = keyof typeof SORTS;
 
+const selectClass =
+  "h-9 rounded-lg border border-input bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring";
+
 function BeersPage() {
   const { data: beers, isLoading, isError, refetch } = useBeers();
   const { data: countries } = useCountries();
   const [query, setQuery] = useState("");
   const [style, setStyle] = useState("All");
+  const [origin, setOrigin] = useState("All");
   const [sort, setSort] = useState<SortKey>("Recent");
+  const [reversed, setReversed] = useState(false);
   const [selected, setSelected] = useState<Beer | null>(null);
 
   const styles = useMemo(
@@ -87,21 +94,33 @@ function BeersPage() {
     return (cc: string) => names.get(cc) ?? cc;
   }, [countries]);
 
+  // Every brewing country in the log, A–Z by name, with how many reviews each.
+  const origins = useMemo(() => {
+    const counts = new Map<string, number>();
+    for (const b of beers ?? []) counts.set(b.origin_cc, (counts.get(b.origin_cc) ?? 0) + 1);
+    return [...counts]
+      .map(([cc, n]) => ({ cc, n, name: countryName(cc) }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, [beers, countryName]);
+
+  const cmp = useMemo(() => SORTS[sort](countryName), [sort, countryName]);
+
   const filtered = useMemo(() => {
     const q = deferredQuery.trim().toLowerCase();
     return (beers ?? [])
       .filter((b) => {
         const matchesStyle = style === "All" || b.style === style;
+        const matchesOrigin = origin === "All" || b.origin_cc === origin;
         const matchesQuery =
           !q ||
           b.name.toLowerCase().includes(q) ||
           (b.brewery ?? "").toLowerCase().includes(q) ||
           (b.city ?? "").toLowerCase().includes(q) ||
           countryName(b.origin_cc).toLowerCase().includes(q);
-        return matchesStyle && matchesQuery;
+        return matchesStyle && matchesOrigin && matchesQuery;
       })
-      .sort(SORTS[sort](countryName));
-  }, [beers, deferredQuery, style, sort, countryName]);
+      .sort((a, b) => (reversed ? -1 : 1) * cmp(a, b));
+  }, [beers, deferredQuery, style, origin, cmp, reversed, countryName]);
 
   return (
     <Shell title="All beers" subtitle={`${filtered.length} of ${beers?.length ?? 0} reviews`}>
@@ -115,7 +134,7 @@ function BeersPage() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search beer, brewery, city or country"
+            placeholder="Search beer, brewery or place"
             aria-label="Search beers"
             className="h-11 rounded-xl pl-9"
           />
@@ -140,23 +159,50 @@ function BeersPage() {
           ))}
         </div>
 
-        <div className="flex items-center justify-between gap-3">
-          <p className="text-xs text-muted-foreground" aria-live="polite">
+        <div className="flex items-center gap-2">
+          <select
+            value={origin}
+            onChange={(e) => setOrigin(e.target.value)}
+            aria-label="Filter by country of origin"
+            className={`${selectClass} min-w-0 flex-1`}
+          >
+            <option value="All">All countries</option>
+            {origins.map((o) => (
+              <option key={o.cc} value={o.cc}>
+                {flagEmoji(o.cc, countries)} {o.name} ({o.n})
+              </option>
+            ))}
+          </select>
+          <select
+            value={sort}
+            onChange={(e) => {
+              setSort(e.target.value as SortKey);
+              setReversed(false);
+            }}
+            aria-label="Sort beers"
+            className={selectClass}
+          >
+            {Object.keys(SORTS).map((key) => (
+              <option key={key} value={key}>
+                Sort: {key}
+              </option>
+            ))}
+          </select>
+          <Button
+            type="button"
+            variant={reversed ? "default" : "secondary"}
+            size="icon"
+            aria-pressed={reversed}
+            aria-label="Reverse order"
+            title="Reverse order"
+            onClick={() => setReversed((r) => !r)}
+            className="h-9 w-9 shrink-0 rounded-lg"
+          >
+            <ArrowUpDown size={16} />
+          </Button>
+          <p className="sr-only" aria-live="polite">
             {filtered.length} {filtered.length === 1 ? "result" : "results"}
           </p>
-          <label className="flex items-center gap-2 text-xs text-muted-foreground">
-            <span>Sort</span>
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value as SortKey)}
-              aria-label="Sort beers"
-              className="h-9 rounded-lg border border-input bg-background px-2 text-xs text-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-            >
-              {Object.keys(SORTS).map((key) => (
-                <option key={key}>{key}</option>
-              ))}
-            </select>
-          </label>
         </div>
 
         {isLoading ? (
@@ -207,7 +253,9 @@ function BeersPage() {
         ) : (
           <div className="rounded-2xl border border-dashed border-border px-5 py-10 text-center">
             <p className="text-sm font-medium">No beers found</p>
-            <p className="mt-1 text-xs text-muted-foreground">Try a different search or style.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Try a different search, style or country.
+            </p>
           </div>
         )}
       </div>
