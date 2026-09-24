@@ -39,22 +39,17 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Five files are here that way, and every one of them is a **drawn
-approximation in the house idiom** — a brand-coloured field, the wordmark, one
-characteristic device — not the brand's own artwork:
+Two files are here that way, and both are **drawn approximations in the
+house idiom** — a brand-coloured field, the wordmark, one characteristic
+device — not the brand's own artwork:
 
-`augustiner-helles` · `daura` · `hop-commander` · `killsner` · `stiegl-goldbrau`
+`augustiner-helles` · `daura`
 
-There were twelve, then four; `killsner` is the fifth. `npm run fetch-logos
--- --only "Killsner"` walked its full ladder against `killsboro.com` — site
-icons, header logo, brand page image, the favicon services, DuckDuckGo — and
-every tier answered `403` at `CONNECT`, this environment's egress wall again.
-`logo-fetch-report.json` records that ladder under `kept` now rather than
-`missing`, since the file is hand-placed. The other four are what no reachable
-source has: two Bavarian and Austrian brewery marks (Augustiner, Stiegl), one
-American craft label (Captain Lawrence's Hop Commander), and Daura, whose own
-mark exists nowhere but Damm's site. If one of these five brands ever
-publishes a reachable logo, that is the file to replace — delete it *and* its
+There were twelve, then four, then five when `killsner` joined them; the
+section below this one is where three of those five went. The two left are what
+no reachable source has: Augustiner's Bavarian brewery mark, and Daura, whose
+own mark exists nowhere but Damm's site. If either brand ever publishes a
+reachable logo, that is the file to replace — delete it *and* its
 `BRAND_LOGOS` line, then re-fetch, since the fetcher will not overwrite a file
 it did not write.
 
@@ -65,6 +60,60 @@ the drawing at least says "Daura", and a mark that names a different beer is
 not an improvement on one that names the right one. That is the opposite call
 to the two Modelos below, and deliberately — there the drawing named the right
 beer *badly*, here it names it plainly.
+
+## Four labels from Untappd's own bucket
+
+`stiegl-goldbrau` · `hop-commander` · `killsner` · `negra-modelo`
+
+Three of these were drawings — a staircase on red, a cartoon hop on navy, two
+wavy lines on green, each with its name typed underneath — and the fourth
+was the right brand in the wrong decade: the classic `NEGRA MODELO` banner
+from `detain/svg-logos`, whose five black stars disappeared on this ground.
+
+Every brand site, every favicon service and Wikimedia still answer `403` at
+`CONNECT` here. But the files Untappd serves from `assets.untappd.com` sit in
+a public S3 bucket, and `untappd.s3.amazonaws.com` **is** reachable. Its
+listing is denied, so a file has to be asked for by its exact key —
+`site/beer_logos/beer-<bid>_<hash>_sm.jpeg` for a beer's label,
+`site/brewery_logos/brewery-<id>_<hash>.jpeg` for a brewery's — and the hash
+is not derivable: it comes from the beer's own Untappd page. A wrong key
+answers `403` and a right one `200`, so there is no guessing a file into the
+tree by accident. Only the `_sm` size (100×100) exists for these; the page
+never draws a logo taller than 64px, so that is enough.
+
+| Beer | key | what it is |
+|------|-----|------------|
+| Stiegl Goldbräu | `beer_logos/beer-5539_7ca11_sm.jpeg` | the Goldbräu label itself: the red `Stiegl` script over `GOLDBRÄU` on the gold-edged shield |
+| Hop Commander | `beer_logos/beer-871255_7b1a9_sm.jpeg` | the green `HOP COMMANDER` wordmark from the can |
+| Negra Modelo | `beer_logos/beer-5852_694d6_sm.jpeg` | the current label: the gold Modelo crest and lions over the `Negra` script, on its black panel |
+| Killsner | `brewery_logos/brewery-277977_93f5e.jpeg` | Kills Boro's own mark, the hand-lettered `KILLS BORO` in its black splash |
+
+**Killsner is the one with a caveat.** Several searches named a label key for
+it, `beer-4183963_1e922`, and the bucket answers `403` to every extension and
+size of it — no label is stored under that key, and none was found under any
+other. What the Untappd pages that do list Killsner carry is the brewery's
+mark, so that is the file: the brewery's own artwork instead of a drawing of
+a can, the same trade `bloodline-blood-orange-ipa` makes with Flying Dog's
+wings. If a Killsner label ever turns up, this is the file to replace.
+
+Stiegl had its real mark once already. `jwal64/JWAL-BEER-REVIEW` holds a 300px
+`Salzburger Stiegl` badge fetched from `stiegl.at` on 2 September, and the
+next re-fetch replaced it with the fully transparent WebP recorded below.
+The Goldbräu label is used rather than that badge because it names this beer
+rather than the brewery. The badge is still in that repo's history (`26d8ca4`)
+if a sharper brewery mark is ever preferred.
+
+What was done to each, all presentation rather than redrawing:
+
+- **Stiegl and Hop Commander** had Untappd's white ground flooded out from the
+  border, the same way `harp-lager` was, so the label sits on the page's own
+  ground. Both read on charcoal as they are.
+- **Negra Modelo keeps its black panel.** Flooding the black as well took the
+  thin white `Negra` script with it, and the panel is the label's own. It is
+  trimmed inside the JPEG's grey fringe and given rounded corners.
+- **Killsner sits on a white rounded tile**, like `modelo-especial.webp`: the
+  mark is a black splash, which is invisible on `--bg`, and its white ground
+  is what the lettering reads against.
 
 ## Five drawings that became the real thing
 
@@ -164,7 +213,8 @@ artwork now for the same reason:
 
 Negra Modelo is worth noting twice: it is the first of the three Modelos to get
 a mark of its own, so the warning above it — that the crest names a different
-product — now applies only to `modelo-oro.webp`.
+product — now applies only to `modelo-oro.webp`. (The banner has since given
+way to the current label from Untappd's bucket; see above.)
 
 **Two things were done to every file taken from that collection**, and both are
 presentation rather than redrawing:
@@ -263,8 +313,8 @@ owner rather than drawn or fetched:
   what this costs: the crest carries the *Especial* script, so Modelo Oro
   displays a mark naming a different product. That was a deliberate trade
   against the drawing it replaced. If a distinct Modelo Oro mark ever turns up,
-  this is the file to replace. `negra-modelo` was the same copy until this pass
-  and is now the brand's own banner — one down, one to go.
+  this is the file to replace. `negra-modelo` was the same copy once and now
+  carries its own label — one down, one to go.
 
   It is a separate file rather than two `BRAND_LOGOS` entries pointing at one
   path, and that is load-bearing: `fetch-logos` finds a beer's file by

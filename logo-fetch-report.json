@@ -776,7 +776,7 @@
     },
     {
       "beer": "Hop Commander",
-      "file": "logos/hop-commander.svg"
+      "file": "logos/hop-commander.webp"
     },
     {
       "beer": "La Fin Du Monde",
@@ -800,7 +800,7 @@
     },
     {
       "beer": "Negra Modelo",
-      "file": "logos/negra-modelo.svg"
+      "file": "logos/negra-modelo.webp"
     },
     {
       "beer": "Newcastle Brown Ale",
@@ -844,7 +844,7 @@
     },
     {
       "beer": "Stiegl Goldbräu",
-      "file": "logos/stiegl-goldbrau.svg"
+      "file": "logos/stiegl-goldbrau.webp"
     },
     {
       "beer": "Tennent's",
@@ -860,7 +860,7 @@
     },
     {
       "beer": "Killsner",
-      "file": "logos/killsner.svg"
+      "file": "logos/killsner.webp"
     }
   ],
   "missing": []
