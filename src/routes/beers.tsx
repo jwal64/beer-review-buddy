@@ -29,12 +29,12 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/beers")({
   head: () => ({
     meta: [
-      { title: "All beers — JWAL's Brew Reviews" },
+      { title: "All beers — JWAL BREW REVIEW" },
       {
         name: "description",
         content: "Search and filter every beer in the log by name, style or brewery.",
       },
-      { property: "og:title", content: "All beers — JWAL's Brew Reviews" },
+      { property: "og:title", content: "All beers — JWAL BREW REVIEW" },
       {
         property: "og:description",
         content: "Search and filter every beer in the log by name, style or brewery.",
@@ -44,12 +44,20 @@ export const Route = createFileRoute("/beers")({
   component: BeersPage,
 });
 
+type Cmp = (a: Beer, b: Beer) => number;
+
+const byRating: Cmp = (a, b) => Number(b.rating) - Number(a.rating);
+
+// `name` turns a brewery's country code into the name it sorts by, so "GB-SCT"
+// files under Scotland rather than beside Germany's "DE".
 const SORTS = {
-  Recent: (a: Beer, b: Beer) => b.drank_on.localeCompare(a.drank_on),
-  Rating: (a: Beer, b: Beer) => Number(b.rating) - Number(a.rating),
-  Name: (a: Beer, b: Beer) => a.name.localeCompare(b.name),
-  ABV: (a: Beer, b: Beer) => Number(b.abv ?? 0) - Number(a.abv ?? 0),
-} satisfies Record<string, (a: Beer, b: Beer) => number>;
+  Recent: () => (a, b) => b.drank_on.localeCompare(a.drank_on),
+  Rating: () => byRating,
+  Name: () => (a, b) => a.name.localeCompare(b.name),
+  ABV: () => (a, b) => Number(b.abv ?? 0) - Number(a.abv ?? 0),
+  // Country of origin A–Z, best-rated first within each country.
+  Country: (name) => (a, b) => name(a.origin_cc).localeCompare(name(b.origin_cc)) || byRating(a, b),
+} satisfies Record<string, (name: (cc: string) => string) => Cmp>;
 
 type SortKey = keyof typeof SORTS;
 
@@ -74,6 +82,11 @@ function BeersPage() {
   // keeps the field responsive without a timer to tune or cancel.
   const deferredQuery = useDeferredValue(query);
 
+  const countryName = useMemo(() => {
+    const names = new Map((countries ?? []).map((c) => [c.cc, c.name ?? c.cc]));
+    return (cc: string) => names.get(cc) ?? cc;
+  }, [countries]);
+
   const filtered = useMemo(() => {
     const q = deferredQuery.trim().toLowerCase();
     return (beers ?? [])
@@ -83,11 +96,12 @@ function BeersPage() {
           !q ||
           b.name.toLowerCase().includes(q) ||
           (b.brewery ?? "").toLowerCase().includes(q) ||
-          (b.city ?? "").toLowerCase().includes(q);
+          (b.city ?? "").toLowerCase().includes(q) ||
+          countryName(b.origin_cc).toLowerCase().includes(q);
         return matchesStyle && matchesQuery;
       })
-      .sort(SORTS[sort]);
-  }, [beers, deferredQuery, style, sort]);
+      .sort(SORTS[sort](countryName));
+  }, [beers, deferredQuery, style, sort, countryName]);
 
   return (
     <Shell title="All beers" subtitle={`${filtered.length} of ${beers?.length ?? 0} reviews`}>
@@ -101,7 +115,7 @@ function BeersPage() {
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search beer, brewery or city"
+            placeholder="Search beer, brewery, city or country"
             aria-label="Search beers"
             className="h-11 rounded-xl pl-9"
           />
@@ -155,8 +169,13 @@ function BeersPage() {
           <QueryError what="beers" onRetry={() => void refetch()} />
         ) : filtered.length ? (
           <ul className="space-y-2">
-            {filtered.map((b) => (
+            {filtered.map((b, i) => (
               <li key={b.id}>
+                {sort === "Country" && filtered[i - 1]?.origin_cc !== b.origin_cc && (
+                  <h2 className="px-1 pb-1 pt-3 text-xs font-semibold text-muted-foreground">
+                    {flagEmoji(b.origin_cc, countries)} {countryName(b.origin_cc)}
+                  </h2>
+                )}
                 <button
                   type="button"
                   onClick={() => setSelected(b)}

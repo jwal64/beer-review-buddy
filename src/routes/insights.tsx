@@ -40,13 +40,13 @@ import {
 export const Route = createFileRoute("/insights")({
   head: () => ({
     meta: [
-      { title: "Insights — JWAL's Brew Reviews" },
+      { title: "Insights — JWAL BREW REVIEW" },
       {
         name: "description",
         content:
           "The whole log read back: best styles and countries, how ratings trend, where my taste disagrees with the world, and what to try next.",
       },
-      { property: "og:title", content: "Insights — JWAL's Brew Reviews" },
+      { property: "og:title", content: "Insights — JWAL BREW REVIEW" },
       {
         property: "og:description",
         content:

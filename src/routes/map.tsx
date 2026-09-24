@@ -35,12 +35,12 @@ const esc = (s: string) =>
 export const Route = createFileRoute("/map")({
   head: () => ({
     meta: [
-      { title: "Beer map — JWAL's Brew Reviews" },
+      { title: "Beer map — JWAL BREW REVIEW" },
       {
         name: "description",
         content: "Every brewery and drinking spot from the beer log, on one map.",
       },
-      { property: "og:title", content: "Beer map — JWAL's Brew Reviews" },
+      { property: "og:title", content: "Beer map — JWAL BREW REVIEW" },
       {
         property: "og:description",
         content: "Every brewery and drinking spot from the beer log, on one map.",
