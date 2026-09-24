@@ -61,14 +61,12 @@ not an improvement on one that names the right one. That is the opposite call
 to the two Modelos below, and deliberately — there the drawing named the right
 beer *badly*, here it names it plainly.
 
-## Four labels from Untappd's own bucket
+## Three labels from Untappd's own bucket
 
-`stiegl-goldbrau` · `hop-commander` · `killsner` · `negra-modelo`
+`stiegl-goldbrau` · `hop-commander` · `killsner`
 
-Three of these were drawings — a staircase on red, a cartoon hop on navy, two
-wavy lines on green, each with its name typed underneath — and the fourth
-was the right brand in the wrong decade: the classic `NEGRA MODELO` banner
-from `detain/svg-logos`, whose five black stars disappeared on this ground.
+All three were drawings — a staircase on red, a cartoon hop on navy, two
+wavy lines on green, each with its name typed underneath.
 
 Every brand site, every favicon service and Wikimedia still answer `403` at
 `CONNECT` here. But the files Untappd serves from `assets.untappd.com` sit in
@@ -85,7 +83,6 @@ never draws a logo taller than 64px, so that is enough.
 |------|-----|------------|
 | Stiegl Goldbräu | `beer_logos/beer-5539_7ca11_sm.jpeg` | the Goldbräu label itself: the red `Stiegl` script over `GOLDBRÄU` on the gold-edged shield |
 | Hop Commander | `beer_logos/beer-871255_7b1a9_sm.jpeg` | the green `HOP COMMANDER` wordmark from the can |
-| Negra Modelo | `beer_logos/beer-5852_694d6_sm.jpeg` | the current label: the gold Modelo crest and lions over the `Negra` script, on its black panel |
 | Killsner | `brewery_logos/brewery-277977_93f5e.jpeg` | Kills Boro's own mark, the hand-lettered `KILLS BORO` in its black splash |
 
 **Killsner is the one with a caveat.** Several searches named a label key for
@@ -108,9 +105,6 @@ What was done to each, all presentation rather than redrawing:
 - **Stiegl and Hop Commander** had Untappd's white ground flooded out from the
   border, the same way `harp-lager` was, so the label sits on the page's own
   ground. Both read on charcoal as they are.
-- **Negra Modelo keeps its black panel.** Flooding the black as well took the
-  thin white `Negra` script with it, and the panel is the label's own. It is
-  trimmed inside the JPEG's grey fringe and given rounded corners.
 - **Killsner sits on a white rounded tile**, like `modelo-especial.webp`: the
   mark is a black splash, which is invisible on `--bg`, and its white ground
   is what the lettering reads against.
@@ -213,8 +207,17 @@ artwork now for the same reason:
 
 Negra Modelo is worth noting twice: it is the first of the three Modelos to get
 a mark of its own, so the warning above it — that the crest names a different
-product — now applies only to `modelo-oro.webp`. (The banner has since given
-way to the current label from Untappd's bucket; see above.)
+product — now applies only to `modelo-oro.webp`.
+
+**Do not replace it with Untappd's label.** Untappd's `Modelo Negra`
+(`beer-5852_694d6_sm.jpeg`) is the newer can-and-bottle layout Negra inherited
+from Especial: the Modelo crest and lions, `Modelo` large, `Negra` in small
+script underneath. It reads as Modelo, not as Negra Modelo, and it was put
+here once and taken straight back out for exactly that reason. The gold
+ribbon is Negra's own mark. Its five stars are black, so it now sits on a
+white rounded tile, rasterised from the same SVG at 256px, the way
+`modelo-especial.webp` does. That is presentation only; the artwork is
+unchanged.
 
 **Two things were done to every file taken from that collection**, and both are
 presentation rather than redrawing:

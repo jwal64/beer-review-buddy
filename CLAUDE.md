@@ -365,8 +365,8 @@ environment's egress policy blocks every logo source: `npm run fetch-logos`
 resolves nothing here, but anonymous git reads of public GitHub repositories
 are served, and a brand-logo collection cloned that way is where eight of the
 drawings found their real marks. Untappd's label bucket, `untappd.s3.amazonaws.com`,
-is reachable too, by exact key only; that is where Stiegl, Hop Commander,
-Killsner and Negra Modelo found theirs.
+is reachable too, by exact key only; that is where Stiegl, Hop Commander
+and Killsner found theirs.
 
 Three things that file also records, because no check can catch any of them: a
 logo can be the brand's real artwork and still render as nothing (an SVG whose
