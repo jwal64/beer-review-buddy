@@ -219,15 +219,23 @@ Negra Modelo is worth noting twice: it is the first of the three Modelos to get
 a mark of its own, so the warning above it — that the crest names a different
 product — now applies only to `modelo-oro.webp`.
 
-**Do not replace it with Untappd's label.** Untappd's `Modelo Negra`
-(`beer-5852_694d6_sm.jpeg`) is the newer can-and-bottle layout Negra inherited
-from Especial: the Modelo crest and lions, `Modelo` large, `Negra` in small
-script underneath. It reads as Modelo, not as Negra Modelo, and it was put
-here once and taken straight back out for exactly that reason. The gold
-ribbon is Negra's own mark. Its five stars are black, so it now sits on a
-white rounded tile, rasterised from the same SVG at 256px, the way
-`modelo-especial.webp` does. That is presentation only; the artwork is
-unchanged.
+**It is not the banner any more.** The owner supplied the mark they want: the
+current Negra label, `CERVEZA` / `Modelo` in the white serif between the two
+gold lions, the `1925` ribbon, and `Negra` in white script underneath, on
+black. It went through two wrong answers first, and both are worth knowing:
+
+- the gold `NEGRA MODELO` ribbon above, from `detain/svg-logos` — Negra's
+  older mark, not the one the owner drinks;
+- Untappd's own copy of the right label (`beer_logos/beer-5852_694d6_sm.jpeg`),
+  which is the right artwork at only 100px, soft enough that the `Negra`
+  script barely reads.
+
+`negra-modelo.webp` is the supplied 1200×630 image cropped to its artwork,
+centred on its own black ground with a 6% margin, scaled to the fetcher's
+256px cap and given the tiles' ⅙-side corner radius. The black is the
+label's own ground rather than a tile added behind it, and it is kept rather
+than flooded out: the faint brewery watermark behind `Modelo` would survive
+as a grey ghost, and the thin script with it.
 
 **Two things were done to every file taken from that collection**, and both are
 presentation rather than redrawing:
@@ -327,7 +335,7 @@ owner rather than drawn or fetched:
   displays a mark naming a different product. That was a deliberate trade
   against the drawing it replaced. If a distinct Modelo Oro mark ever turns up,
   this is the file to replace. `negra-modelo` was the same copy once and now
-  carries its own label — one down, one to go.
+  carries its own Negra label, supplied by the owner — one down, one to go.
 
   It is a separate file rather than two `BRAND_LOGOS` entries pointing at one
   path, and that is load-bearing: `fetch-logos` finds a beer's file by
