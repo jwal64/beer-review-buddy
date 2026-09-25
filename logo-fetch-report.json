@@ -855,6 +855,10 @@
     {
       "beer": "Big Wave Golden Ale",
       "file": "logos/big-wave-golden-ale.webp"
+    },
+    {
+      "beer": "Hofbräu Oktoberfestbier",
+      "file": "logos/hofbrau-oktoberfestbier.svg"
     }
   ],
   "missing": []

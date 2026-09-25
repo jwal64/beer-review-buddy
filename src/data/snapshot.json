@@ -221,7 +221,8 @@
     {"seq":80,"name":"Amstel Light","brewery":"Amstel Brouwerij (Heineken)","style":"Lager","origin_cc":"NL","abv":3.5,"method":"Bottle","city":"Tarrytown","region":"New York","country":"USA","cc":"US","rating":2.5,"is_new":true,"drank_on":"2026-09-01","logo":null},
     {"seq":81,"name":"Rothaus Pils / Tannen Zäpfle","brewery":"Badische Staatsbrauerei Rothaus","style":"Pilsner","origin_cc":"DE","abv":5.1,"method":"Draft","city":"New York","region":"New York","country":"USA","cc":"US","rating":2.75,"is_new":true,"drank_on":"2026-09-01","logo":null},
     {"seq":82,"name":"Pabst Blue Ribbon","brewery":"Pabst Brewing Company","style":"Lager","origin_cc":"US","abv":4.7,"method":"Can","city":"New Rochelle","region":"New York","country":"USA","cc":"US","rating":3.25,"is_new":true,"drank_on":"2026-09-01","logo":null},
-    {"seq":83,"name":"Killsner","brewery":"Kills Boro Brewing Co.","style":"Pilsner","origin_cc":"US","abv":5,"method":"Can","city":"New York","region":"New York","country":"USA","cc":"US","rating":2.75,"is_new":true,"drank_on":"2026-09-01","logo":null}
+    {"seq":83,"name":"Killsner","brewery":"Kills Boro Brewing Co.","style":"Pilsner","origin_cc":"US","abv":5,"method":"Can","city":"New York","region":"New York","country":"USA","cc":"US","rating":2.75,"is_new":true,"drank_on":"2026-09-01","logo":null},
+    {"seq":84,"name":"Hofbräu Oktoberfestbier","brewery":"Hofbräu München","style":"Lager","origin_cc":"DE","abv":6.3,"method":"Bottle","city":"New Rochelle","region":"New York","country":"USA","cc":"US","rating":2.5,"is_new":true,"drank_on":"2026-09-01","logo":null}
   ],
   "brand_domains": [
     {"beer_name":"Affligem Tripel","domains":["affligembeer.com","affligembeer.be"],"logo":"logos/affligem-tripel.svg"},
@@ -287,6 +288,7 @@
     {"beer_name":"Hofbräu Dunkel","domains":["hofbraeu-muenchen.de"],"logo":"logos/hofbrau-dunkel.svg"},
     {"beer_name":"Hop Commander","domains":["captainlawrencebrewing.com"],"logo":"logos/hop-commander.webp"},
     {"beer_name":"Hofbräu Münchner Weiße","domains":["hofbraeu-muenchen.de"],"logo":"logos/hofbrau-munchner-weisse.svg"},
+    {"beer_name":"Hofbräu Oktoberfestbier","domains":["hofbraeu-muenchen.de"],"logo":"logos/hofbrau-oktoberfestbier.svg"},
     {"beer_name":"Narragansett Lager","domains":["narragansettbeer.com"],"logo":"logos/narragansett-lager.webp"},
     {"beer_name":"Peroni Nastro Azzurro","domains":["peroni.it"],"logo":"logos/peroni-nastro-azzurro.webp"},
     {"beer_name":"Peroni Original","domains":["peroni.it"],"logo":"logos/peroni-original.webp"},
