@@ -112,12 +112,13 @@ let beers=[
   {beer:"Radeberger Pilsner",                   style:"Pilsner",        origin:"DE",    abv:4.8,method:"Bottle",city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
   {beer:"Presidente",                           style:"Pilsner",        origin:"DO",    abv:5.0,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
   {beer:"Heineken Silver",                      style:"Lager",          origin:"NL",    abv:4.0,method:"Draft", city:"Queens",         region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
-  // SEP 2026 (5 reviews)
+  // SEP 2026 (6 reviews)
   {beer:"Amstel Light",                         style:"Lager",          origin:"NL",    abv:3.5,method:"Bottle",city:"Tarrytown",      region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Rothaus Pils / Tannen Zäpfle",         style:"Pilsner",        origin:"DE",    abv:5.1,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.75,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Pabst Blue Ribbon",                    style:"Lager",          origin:"US",    abv:4.7,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.25,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Killsner",                             style:"Pilsner",        origin:"US",    abv:5.0,method:"Can",   city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.75,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Hitachino Nest White Ale",             style:"Wheat Beer",     origin:"JP",    abv:5.5,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:5.00,isNew:true, month:"Sep",monthN:9,year:2026},
+  {beer:"Hofbräu Oktoberfestbier",              style:"Lager",          origin:"DE",    abv:6.3,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -155,7 +156,7 @@ let drunkLocs=[
 // ── BREWERIES — where each beer is actually made
 let breweries=[
   {name:"Weihenstephaner",                   location:"Freising, Bavaria",                       country:"Germany",           cc:"DE",    lang:"de",beers:"Weihenstephaner Hefeweissbier",                                                            lat:48.3953,lng:11.7291,  ratings:[4.50]},
-  {name:"Hofbräu München",                   location:"Munich, Bavaria",                         country:"Germany",           cc:"DE",    lang:"de",beers:"Hofbräu Münchner Weiße · Hofbräu Dunkel",                                                  lat:48.1351,lng:11.5820,  ratings:[4.75,2.75]},
+  {name:"Hofbräu München",                   location:"Munich, Bavaria",                         country:"Germany",           cc:"DE",    lang:"de",beers:"Hofbräu Münchner Weiße · Hofbräu Dunkel · Hofbräu Oktoberfestbier",                         lat:48.1351,lng:11.5820,  ratings:[4.75,2.75,2.50]},
   {name:"Guinness (St. James's Gate)",       location:"Dublin, Leinster",                        country:"Ireland",           cc:"IE",    lang:"en",beers:"Guinness Draught",                                                                         lat:53.3418,lng:-6.2868,  ratings:[4.00]},
   {name:"Harp / Diageo",                     location:"Dundalk, County Louth",                   country:"Ireland",           cc:"IE",    lang:"en",beers:"Harp Lager",                                                                               lat:54.0039,lng:-6.3703,  ratings:[4.25]},
   {name:"Duvel Moortgat",                    location:"Puurs-Sint-Amands, Antwerp",              country:"Belgium",           cc:"BE",    lang:"nl",beers:"Duvel",                                                                                    lat:51.0727,lng:4.2897,   ratings:[4.25]},
@@ -302,6 +303,7 @@ const BRAND_DOMAINS = {
 "Hofbräu Dunkel":"hofbraeu-muenchen.de",
 "Hop Commander":"captainlawrencebrewing.com",
 "Hofbräu Münchner Weiße":"hofbraeu-muenchen.de",
+"Hofbräu Oktoberfestbier":"hofbraeu-muenchen.de",
 "Narragansett Lager":"narragansettbeer.com",
 "Peroni Nastro Azzurro":"peroni.it",
 "Peroni Original":"peroni.it",
@@ -401,6 +403,7 @@ const BRAND_LOGOS = {
 "Hoegaarden":"logos/hoegaarden.webp",
 "Hofbräu Dunkel":"logos/hofbrau-dunkel.svg",
 "Hofbräu Münchner Weiße":"logos/hofbrau-munchner-weisse.svg",
+"Hofbräu Oktoberfestbier":"logos/hofbrau-oktoberfestbier.svg",
 "Hop Commander":"logos/hop-commander.webp",
 "IJwit":"logos/ijwit.svg",
 "Ichnusa Anima Sarda":"logos/ichnusa-anima-sarda.webp",

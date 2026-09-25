@@ -1,5 +1,5 @@
 {
-  "at": "2026-09-25T22:51:33.523Z",
+  "at": "2026-09-23T21:23:36.187Z",
   "total": 106,
   "fetched": [
     {
@@ -733,10 +733,6 @@
       "file": "logos/augustiner-helles.svg"
     },
     {
-      "beer": "Big Wave Golden Ale",
-      "file": "logos/big-wave-golden-ale.webp"
-    },
-    {
       "beer": "Bloodline Blood Orange IPA",
       "file": "logos/bloodline-blood-orange-ipa.webp"
     },
@@ -769,16 +765,8 @@
       "file": "logos/harp-lager.webp"
     },
     {
-      "beer": "Hitachino Nest White Ale",
-      "file": "logos/hitachino-nest-white-ale.webp"
-    },
-    {
       "beer": "Hop Commander",
       "file": "logos/hop-commander.webp"
-    },
-    {
-      "beer": "Killsner",
-      "file": "logos/killsner.webp"
     },
     {
       "beer": "La Fin Du Monde",
@@ -859,6 +847,22 @@
     {
       "beer": "Żywiec",
       "file": "logos/zywiec.webp"
+    },
+    {
+      "beer": "Killsner",
+      "file": "logos/killsner.webp"
+    },
+    {
+      "beer": "Big Wave Golden Ale",
+      "file": "logos/big-wave-golden-ale.webp"
+    },
+    {
+      "beer": "Hofbräu Oktoberfestbier",
+      "file": "logos/hofbrau-oktoberfestbier.svg"
+    },
+    {
+      "beer": "Hitachino Nest White Ale",
+      "file": "logos/hitachino-nest-white-ale.webp"
     }
   ],
   "missing": []
