@@ -371,6 +371,16 @@ walk. It replaced a drawn stand-in (a fir cone and wordmark) from the same
 session, which never had the real artwork to work from. Stored at the fetcher's
 own 256px cap; no tile needed — the figure's colours and the red script both
 read on `--bg` at full saturation.
+`hitachino-nest-white-ale.webp` is the same kind of cut: Kiuchi's own White
+Ale roundel (the owl on the blue-and-white `WHITE` badge), taken from the
+owner's check-in screenshot at 150px and masked to the circle, transparent
+around it. Every fetcher tier for `hitachino.cc` and `kiuchibrewery.co.jp`
+answered 403 from the session that added it. Untappd's bucket does hold the
+same label, under the older name-style key
+`site/beer_logos/beer-HitachinoNestWhiteAle_1573.jpeg`, and it was checked
+against the cut — it is the identical artwork at 100px on a white square, so
+the screenshot's larger copy was kept. No tile needed: the roundel's blue and
+white read on `--bg` as they are.
 
 ## Marks that were right, and still did not render
 

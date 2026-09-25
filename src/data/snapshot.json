@@ -136,7 +136,8 @@
     {"name":"Amstel Brouwerij (Heineken)","location":"Amsterdam, Noord-Holland","country":"Netherlands","cc":"NL","lang":"nl","native_name":null,"lat":52.3601,"lng":4.9114},
     {"name":"Badische Staatsbrauerei Rothaus","location":"Grafenhausen, Baden-Württemberg","country":"Germany","cc":"DE","lang":"de","native_name":null,"lat":47.8333,"lng":8.2167},
     {"name":"Pabst Brewing Company","location":"Milwaukee, Wisconsin","country":"USA","cc":"US","lang":"en","native_name":null,"lat":43.0389,"lng":-87.9065},
-    {"name":"Kills Boro Brewing Co.","location":"Staten Island, New York","country":"USA","cc":"US","lang":"en","native_name":null,"lat":40.6444,"lng":-74.0989}
+    {"name":"Kills Boro Brewing Co.","location":"Staten Island, New York","country":"USA","cc":"US","lang":"en","native_name":null,"lat":40.6444,"lng":-74.0989},
+    {"name":"Kiuchi Brewery","location":"Naka, Ibaraki","country":"Japan","cc":"JP","lang":"ja","native_name":"常陸野ネスト ホワイトエール","lat":36.4686,"lng":140.4681}
   ],
   "beers": [
     {"seq":1,"name":"Grolsch","brewery":"Grolsch","style":"Pilsner","origin_cc":"NL","abv":5,"method":"Bottle","city":"Hengelo","region":"Overijssel","country":"Netherlands","cc":"NL","rating":3.5,"is_new":false,"drank_on":"2026-01-01","logo":null},
@@ -221,7 +222,8 @@
     {"seq":80,"name":"Amstel Light","brewery":"Amstel Brouwerij (Heineken)","style":"Lager","origin_cc":"NL","abv":3.5,"method":"Bottle","city":"Tarrytown","region":"New York","country":"USA","cc":"US","rating":2.5,"is_new":true,"drank_on":"2026-09-01","logo":null},
     {"seq":81,"name":"Rothaus Pils / Tannen Zäpfle","brewery":"Badische Staatsbrauerei Rothaus","style":"Pilsner","origin_cc":"DE","abv":5.1,"method":"Draft","city":"New York","region":"New York","country":"USA","cc":"US","rating":2.75,"is_new":true,"drank_on":"2026-09-01","logo":null},
     {"seq":82,"name":"Pabst Blue Ribbon","brewery":"Pabst Brewing Company","style":"Lager","origin_cc":"US","abv":4.7,"method":"Can","city":"New Rochelle","region":"New York","country":"USA","cc":"US","rating":3.25,"is_new":true,"drank_on":"2026-09-01","logo":null},
-    {"seq":83,"name":"Killsner","brewery":"Kills Boro Brewing Co.","style":"Pilsner","origin_cc":"US","abv":5,"method":"Can","city":"New York","region":"New York","country":"USA","cc":"US","rating":2.75,"is_new":true,"drank_on":"2026-09-01","logo":null}
+    {"seq":83,"name":"Killsner","brewery":"Kills Boro Brewing Co.","style":"Pilsner","origin_cc":"US","abv":5,"method":"Can","city":"New York","region":"New York","country":"USA","cc":"US","rating":2.75,"is_new":true,"drank_on":"2026-09-01","logo":null},
+    {"seq":84,"name":"Hitachino Nest White Ale","brewery":"Kiuchi Brewery","style":"Wheat Beer","origin_cc":"JP","abv":5.5,"method":"Can","city":"New Rochelle","region":"New York","country":"USA","cc":"US","rating":5,"is_new":true,"drank_on":"2026-09-01","logo":null}
   ],
   "brand_domains": [
     {"beer_name":"Affligem Tripel","domains":["affligembeer.com","affligembeer.be"],"logo":"logos/affligem-tripel.svg"},
@@ -268,6 +270,7 @@
     {"beer_name":"Hertog Jan","domains":["hertogjan.nl"],"logo":"logos/hertog-jan.webp"},
     {"beer_name":"Hoegaarden","domains":["hoegaarden.com"],"logo":"logos/hoegaarden.webp"},
     {"beer_name":"IJwit","domains":["brouwerijhetij.nl"],"logo":"logos/ijwit.svg"},
+    {"beer_name":"Hitachino Nest White Ale","domains":["hitachino.cc","kiuchibrewery.co.jp"],"logo":"logos/hitachino-nest-white-ale.webp"},
     {"beer_name":"Killsner","domains":["killsboro.com"],"logo":"logos/killsner.webp"},
     {"beer_name":"Kirin Ichiban","domains":["kirin.co.jp"],"logo":"logos/kirin-ichiban.svg"},
     {"beer_name":"Kronenbourg 1664","domains":["1664.com","kronenbourg1664.com"],"logo":"logos/kronenbourg-1664.svg"},
@@ -420,7 +423,8 @@
     {"beer_name":"Narragansett Lager","avg":3.23},
     {"beer_name":"Big Wave Golden Ale","avg":3.52},
     {"beer_name":"Belhaven Scottish Stout","avg":3.45},
-    {"beer_name":"Samuel Adams Summer Ale","avg":3.5}
+    {"beer_name":"Samuel Adams Summer Ale","avg":3.5},
+    {"beer_name":"Hitachino Nest White Ale","avg":3.6}
   ],
   "app_meta": [
     {"key":"untappd_last_refreshed","value":"2026-05-05"},
