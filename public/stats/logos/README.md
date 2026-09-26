@@ -65,14 +65,18 @@ beer *badly*, here it names it plainly.
 
 `busch-light` · `natural-light`
 
-Both arrived as retro reviews with every source still walled off: the brand
-sites, the favicon services, Untappd's pages (so no bucket key either) and
-Wikimedia. `busch-light.svg` is half real. The `BUSCH` wordmark is Busch's
-own, traced in `detain/svg-logos` (`svg/b/busch-beer.svg`) and clipped above
-its `Beer` line. The blue field, the mountains and `LIGHT` are drawn after the
-can. `natural-light.svg` is fully drawn: the white `Natural` script and the
-silver `LIGHT` band on navy. No collection reachable from here has it. These
-are the first two files to replace when a real mark can be reached.
+Both supplied by the owner, since no brand site, favicon service or Untappd
+page is reachable from here. For one commit they were drawings: a traced
+`BUSCH` wordmark over a drawn mountain tile, and a hand-set `Natural` script.
+The owner's files replace them.
+
+- `busch-light.webp` — the mountain roundel with `BUSCH LIGHT` and
+  `BREWED IN U.S.A.`. The owner's copy sat on a photograph of a river, so it
+  is cut out along the roundel and the `BUSCH` banner that overhangs it, and
+  the grey outer ring goes with the photograph.
+- `natural-light.webp` — the blue `Natural` and red `LIGHT` wordmark, already
+  on transparency, cropped to the ink. It reads on the charcoal ground with no
+  tile.
 
 ## Marks from Untappd's own bucket
 

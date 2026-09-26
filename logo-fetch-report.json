@@ -866,11 +866,11 @@
     },
     {
       "beer": "Busch Light",
-      "file": "logos/busch-light.svg"
+      "file": "logos/busch-light.webp"
     },
     {
       "beer": "Natural Light",
-      "file": "logos/natural-light.svg"
+      "file": "logos/natural-light.webp"
     }
   ],
   "missing": []
