@@ -61,6 +61,19 @@ not an improvement on one that names the right one. That is the opposite call
 to the two Modelos below, and deliberately — there the drawing named the right
 beer *badly*, here it names it plainly.
 
+## Busch Light and Natural Light
+
+`busch-light` · `natural-light`
+
+Both arrived as retro reviews with every source still walled off: the brand
+sites, the favicon services, Untappd's pages (so no bucket key either) and
+Wikimedia. `busch-light.svg` is half real. The `BUSCH` wordmark is Busch's
+own, traced in `detain/svg-logos` (`svg/b/busch-beer.svg`) and clipped above
+its `Beer` line. The blue field, the mountains and `LIGHT` are drawn after the
+can. `natural-light.svg` is fully drawn: the white `Natural` script and the
+silver `LIGHT` band on navy. No collection reachable from here has it. These
+are the first two files to replace when a real mark can be reached.
+
 ## Marks from Untappd's own bucket
 
 `hop-commander` · `killsner` · `big-wave-golden-ale`
