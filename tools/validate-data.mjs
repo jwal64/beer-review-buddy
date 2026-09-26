@@ -62,6 +62,7 @@ beers.forEach((b, i) => {
   if (!METHODS.includes(b.method)) err(where, `method "${b.method}" is not one of ${METHODS.join(', ')}`);
   if (!isQuarter(b.rating)) err(where, `rating ${b.rating} is not 0–5 in quarter steps`);
   if (typeof b.isNew !== 'boolean') err(where, 'isNew must be true or false');
+  if ('retro' in b && b.retro !== true) err(where, 'retro is either true or left out');
   const mi = MONTHS.indexOf(b.month);
   if (mi === -1) err(where, `month "${b.month}" is not a 3-letter abbreviation`);
   else if (b.monthN !== mi + 1) err(where, `monthN ${b.monthN} does not match month "${b.month}"`);

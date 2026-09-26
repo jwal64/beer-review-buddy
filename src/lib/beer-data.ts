@@ -209,6 +209,11 @@ export function formatMonth(date: string) {
   return MONTH_FORMAT.format(new Date(date + "T00:00:00"));
 }
 
+/** When a review happened, as printed: "September 2026", or "Retro" for one graded from memory. */
+export function whenLabel(beer: Pick<Beer, "retro" | "drank_on">) {
+  return beer.retro ? "Retro" : formatMonth(beer.drank_on);
+}
+
 // The "New" badge, mirrored from `isDisplayNew()` in public/stats/app.js:
 // `is_new` marks a beer as never reviewed before, for good — it doesn't
 // expire. Showing that badge forever would make it noise, so the badge only

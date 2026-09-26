@@ -170,6 +170,7 @@ export type MonthPoint = {
 export function byMonth(beers: Beer[]): MonthPoint[] {
   const acc = new Map<string, number[]>();
   for (const b of beers) {
+    if (b.retro) continue; // no real month to put it in
     const key = b.drank_on.slice(0, 7);
     acc.set(key, [...(acc.get(key) ?? []), beerRating(b)]);
   }
@@ -201,6 +202,7 @@ export function bySeason(beers: Beer[]) {
   ];
   const acc = names.map(() => [] as number[]);
   for (const b of beers) {
+    if (b.retro) continue;
     const m = Number(b.drank_on.slice(5, 7)) - 1;
     if (m >= 0 && m < 12) acc[m]!.push(beerRating(b));
   }

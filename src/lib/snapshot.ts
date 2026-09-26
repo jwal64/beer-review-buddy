@@ -37,6 +37,13 @@ export interface Beer {
   is_new: boolean;
   /** data.js records a month, not a day, so this is the first of that month. */
   drank_on: string;
+  /**
+   * Graded from memory, for a beer drunk before the log began. It has no real
+   * date — `drank_on` is only when it was logged — so it is shown as "Retro"
+   * (`whenLabel`), sorts behind every dated review and stays out of the
+   * month-by-month charts.
+   */
+  retro: boolean;
   /** A logo for this pour only, overriding the brand's. Rarely set. */
   logo: string | null;
 }
@@ -117,6 +124,7 @@ export const BEERS: Beer[] = raw.beers
   .map((b) => ({ ...b, id: slug("beer", b.name, b.drank_on) }))
   .sort(
     (a, b) =>
+      Number(a.retro) - Number(b.retro) ||
       String(b.drank_on).localeCompare(String(a.drank_on)) ||
       (Number(b.seq) || 0) - (Number(a.seq) || 0),
   );

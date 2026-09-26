@@ -4,7 +4,7 @@ import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
 import { QueryError } from "@/components/QueryError";
-import { flagEmoji, formatMonth, useBeers, useCountries, type Beer } from "@/lib/beer-data";
+import { flagEmoji, whenLabel, useBeers, useCountries, type Beer } from "@/lib/beer-data";
 import { placeLabel } from "@/lib/place";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
@@ -150,7 +150,7 @@ function HomePage() {
                 <h2 className="font-display text-lg font-semibold">Recent pours</h2>
                 {stats.recent[0] && (
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Last poured {formatMonth(stats.recent[0].drank_on)}
+                    Last poured {whenLabel(stats.recent[0])}
                   </p>
                 )}
               </div>
@@ -171,7 +171,7 @@ function HomePage() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold">{b.name}</p>
                     <p className="truncate text-xs text-muted-foreground">
-                      {placeLabel(b)} · {formatMonth(b.drank_on)}
+                      {placeLabel(b)} · {whenLabel(b)}
                     </p>
                   </div>
                   <Rating value={Number(b.rating)} showValue={false} />

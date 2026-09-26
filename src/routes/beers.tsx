@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/sheet";
 import {
   flagEmoji,
-  formatMonth,
+  whenLabel,
   isDisplayNew,
   useBeers,
   useCountries,
@@ -53,7 +53,7 @@ const byRating: Cmp = (a, b) => Number(b.rating) - Number(a.rating);
 // `name` turns a brewery's country code into the name it sorts by, so "GB-SCT"
 // files under Scotland rather than beside Germany's "DE".
 const SORTS = {
-  Recent: () => (a, b) => b.drank_on.localeCompare(a.drank_on),
+  Recent: () => (a, b) => Number(a.retro) - Number(b.retro) || b.drank_on.localeCompare(a.drank_on),
   Rating: () => byRating,
   Name: () => (a, b) => a.name.localeCompare(b.name),
   ABV: () => (a, b) => Number(b.abv ?? 0) - Number(a.abv ?? 0),
@@ -241,9 +241,7 @@ function BeersPage() {
                     </p>
                     <div className="mt-1 flex items-center gap-2">
                       <Rating value={Number(b.rating)} />
-                      <span className="text-[11px] text-muted-foreground">
-                        {formatMonth(b.drank_on)}
-                      </span>
+                      <span className="text-[11px] text-muted-foreground">{whenLabel(b)}</span>
                     </div>
                   </div>
                 </button>
@@ -292,7 +290,7 @@ function BeersPage() {
                       }`,
                     ],
                     ["Drunk in", placeLabel(selected) || "—"],
-                    ["When", formatMonth(selected.drank_on)],
+                    ["When", whenLabel(selected)],
                   ].map(([k, v]) => (
                     <div key={k} className="rounded-xl border border-border bg-card p-3">
                       <dt className="text-[11px] text-muted-foreground">{k}</dt>

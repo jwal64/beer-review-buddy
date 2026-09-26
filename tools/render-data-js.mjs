@@ -117,6 +117,7 @@ export function renderDataJs(D) {
     ['rating',  b => `rating:${fixed(b.rating, 2)},`],
     ['isNew',   b => `isNew:${b.isNew},`],
     ['when',    b => `month:${q(b.month)},monthN:${b.monthN},year:${b.year}` +
+                     (b.retro ? ',retro:true' : '') +
                      (b.logo ? `,logo:${q(b.logo)}` : '')],
   ]);
   let group = null;
