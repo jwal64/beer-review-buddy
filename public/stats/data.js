@@ -112,13 +112,15 @@ let beers=[
   {beer:"Radeberger Pilsner",                   style:"Pilsner",        origin:"DE",    abv:4.8,method:"Bottle",city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
   {beer:"Presidente",                           style:"Pilsner",        origin:"DO",    abv:5.0,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
   {beer:"Heineken Silver",                      style:"Lager",          origin:"NL",    abv:4.0,method:"Draft", city:"Queens",         region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Aug",monthN:8,year:2026},
-  // SEP 2026 (6 reviews)
+  // SEP 2026 (8 reviews)
   {beer:"Amstel Light",                         style:"Lager",          origin:"NL",    abv:3.5,method:"Bottle",city:"Tarrytown",      region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Rothaus Pils / Tannen Zäpfle",         style:"Pilsner",        origin:"DE",    abv:5.1,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.75,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Pabst Blue Ribbon",                    style:"Lager",          origin:"US",    abv:4.7,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.25,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Killsner",                             style:"Pilsner",        origin:"US",    abv:5.0,method:"Can",   city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.25,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Hitachino Nest White Ale",             style:"Wheat Beer",     origin:"JP",    abv:5.5,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:5.00,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Hofbräu Oktoberfestbier",              style:"Lager",          origin:"DE",    abv:6.3,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
+  {beer:"Busch Light",                          style:"Lager",          origin:"US",    abv:4.1,method:"Can",   city:"Clemson",        region:"South Carolina",      country:"USA",        cc:"US",rating:2.25,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
+  {beer:"Natural Light",                        style:"Lager",          origin:"US",    abv:4.2,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -164,7 +166,7 @@ let breweries=[
   {name:"Heineken",                          location:"Amsterdam, Noord-Holland",                country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Heineken · Heineken Silver",                                                               lat:52.3578,lng:4.8918,   ratings:[3.25,3.00]},
   {name:"Grolsch",                           location:"Enschede, Overijssel",                    country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Grolsch · Grolsch Puur Weizen · Frisse Lentebok",                                          lat:52.2215,lng:6.8937,   ratings:[3.50,5.00,3.25]},
   {name:"Bavaria NV (Hertog Jan)",           location:"Arcen, Limburg",                          country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Hertog Jan",                                                                               lat:51.4862,lng:6.1741,   ratings:[2.00]},
-  {name:"Anheuser-Busch",                    location:"St. Louis, Missouri",                     country:"USA",               cc:"US",    lang:"en",beers:"Michelob Ultra · Bud Light · Budweiser",                                                   lat:38.6072,lng:-90.2124, ratings:[2.50,3.00,3.00]},
+  {name:"Anheuser-Busch",                    location:"St. Louis, Missouri",                     country:"USA",               cc:"US",    lang:"en",beers:"Michelob Ultra · Bud Light · Budweiser · Busch Light · Natural Light",                     lat:38.6072,lng:-90.2124, ratings:[2.50,3.00,3.00,2.25,2.00]},
   {name:"Molson Coors",                      location:"Golden, Colorado",                        country:"USA",               cc:"US",    lang:"en",beers:"Coors Light",                                                                              lat:39.7555,lng:-105.2211,ratings:[3.00]},
   {name:"Grupo Modelo",                      location:"Mexico City, CDMX",                       country:"Mexico",            cc:"MX",    lang:"es",beers:"Modelo Especial · Negra Modelo · Corona Extra · Modelo Oro",                               lat:19.4274,lng:-99.1677, ratings:[3.25,3.50,3.75,3.00]},
   {name:"Cervecería Estrella Jalisco",       location:"Guadalajara, Jalisco",                    country:"Mexico",            cc:"MX",    lang:"es",beers:"Estrella Jalisco",                                                                         lat:20.6597,lng:-103.3496,ratings:[3.75]},
@@ -255,6 +257,7 @@ const BRAND_DOMAINS = {
 "Brahma":"brahma.com.br",
 "Bud Light":"budlight.com",
 "Budweiser":"budweiser.com",
+"Busch Light":["busch.com","buschbeer.com"],
 "Carlsberg":"carlsberg.com",
 "Carlsberg Elephant":"carlsberg.com",
 "Castle Lager":["castlelager.co.za","castlelager.com"],
@@ -307,6 +310,7 @@ const BRAND_DOMAINS = {
 "Narragansett Lager":"narragansettbeer.com",
 "Peroni Nastro Azzurro":"peroni.it",
 "Peroni Original":"peroni.it",
+"Natural Light":"naturallight.com",
 "Newcastle Brown Ale":["newcastlebrown.com","newcastlebrownale.com"],
 "Norrlands Guld":"norrlandsguld.se",
 "Ocean SJU":"oceanlabbrewing.com",
@@ -373,6 +377,7 @@ const BRAND_LOGOS = {
 "Brahma":"logos/brahma.webp",
 "Bud Light":"logos/bud-light.webp",
 "Budweiser":"logos/budweiser.webp",
+"Busch Light":"logos/busch-light.webp",
 "Carlsberg":"logos/carlsberg.svg",
 "Carlsberg Elephant":"logos/carlsberg-elephant.svg",
 "Castle Lager":"logos/castle-lager.webp",
@@ -422,6 +427,7 @@ const BRAND_LOGOS = {
 "Miller Lite":"logos/miller-lite.webp",
 "Modelo Especial":"logos/modelo-especial.webp",
 "Modelo Oro":"logos/modelo-oro.webp",
+"Natural Light":"logos/natural-light.webp",
 "Mythos":"logos/mythos.webp",
 "Narragansett Lager":"logos/narragansett-lager.webp",
 "Negra Modelo":"logos/negra-modelo.webp",

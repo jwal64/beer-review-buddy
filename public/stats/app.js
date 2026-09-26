@@ -280,11 +280,21 @@ function cardLogo(name){
 const MONTH_FULL = {Jan:'January',Feb:'February',Mar:'March',Apr:'April',May:'May',Jun:'June',Jul:'July',Aug:'August',Sep:'September',Oct:'October',Nov:'November',Dec:'December'};
 const MONTH_COLORS = ['#e9a23b','#5b9fe3','#46c68a','#9b87e8','#d4bd52','#e5646f','#4bb5ad','#cf7ba4','#7fa8d4','#e07a4c','#a992e0','#8ab861'];
 
+// A retro review (`retro:true`) is a beer drunk before the log began, graded
+// from memory. It has no real date — its month and year are only when it was
+// logged, which keeps data.js in order — so it is printed as "Retro", sits at
+// the start of the review timeline, and stays out of every month-by-month
+// chart, the recent feed and the trend. It still counts everywhere else.
+const whenLabel=b=>b.retro?'Retro':`${b.month} ${b.year}`;
+const whenKey=b=>b.retro?'retro':`${b.monthN}-${b.year}`;
+const whenOrd=b=>b.retro?0:b.year*12+b.monthN;
+const datedBeers=()=>beers.filter(b=>!b.retro);
+
 function getMonthlyData(){
   // Single pass: group beers by year+month so the same month name in different
   // years never merges, and bucket order stays truly chronological.
   const orderMap={},monthAbbr={},monthYearMap={},byMonth={};
-  beers.forEach(b=>{
+  datedBeers().forEach(b=>{
     const key=`${b.month} ${b.year}`;
     if(!(key in orderMap)){orderMap[key]=b.year*12+b.monthN;monthAbbr[key]=b.month;monthYearMap[key]=b.year;byMonth[key]=[];}
     byMonth[key].push(b);
@@ -764,8 +774,9 @@ const methodQ=rankable(mO.map((m,i)=>({m,a:mA[i],c:mCt[i]})).filter(x=>x.c),o=>o
 const bestMethodRow=methodQ[0]||{m:'—',a:0,c:0};
 const bestMethod=bestMethodRow.m, bestMethodAvg=bestMethodRow.a, bestMethodCt=bestMethodRow.c;
 
-const last5=beers.slice(-5).map(b=>b.rating);
-const prev5=beers.slice(-10,-5).map(b=>b.rating);
+const dated=datedBeers();
+const last5=dated.slice(-5).map(b=>b.rating);
+const prev5=dated.slice(-10,-5).map(b=>b.rating);
 const trendDelta=last5.length&&prev5.length?avg(last5)-avg(prev5):0;
 const trendLabel=trendDelta>0.1?'Rising':trendDelta<-0.1?'Declining':'Flat';
 const trendCls=trendDelta>0.1?'up':trendDelta<-0.1?'dn':'fl';
@@ -780,12 +791,12 @@ document.getElementById('mktPanel').innerHTML=`
 
 // Recent activity feed — last 6 pours, newest first (beers[] is chronological)
 const recentEl=document.getElementById('recentFeed');
-if(recentEl) recentEl.innerHTML=[...beers].slice(-6).reverse().map(b=>`
+if(recentEl) recentEl.innerHTML=dated.slice(-6).reverse().map(b=>`
   <div class="feed-row" data-beer="${esc(b.beer)}" role="button" tabindex="0">
     ${logoImg(b.beer,20)}
     <div class="feed-main">
       <span class="feed-name">${esc(b.beer)}${isDisplayNew(b)?'<span class="new-tag">New</span>':''}</span>
-      <span class="feed-meta">${esc(b.style)} · ${esc(b.method)} · ${placeLabel(b.city,b.region,b.country,b.cc,{flag:false})} · ${esc(b.month)} ${b.year}</span>
+      <span class="feed-meta">${esc(b.style)} · ${esc(b.method)} · ${placeLabel(b.city,b.region,b.country,b.cc,{flag:false})} · ${esc(whenLabel(b))}</span>
     </div>
     <span class="rb ${rbC(b.rating)}">${b.rating.toFixed(2)}</span>
   </div>`).join('');
@@ -904,7 +915,7 @@ function renderTable(data){
         <td style="color:var(--info)">${b.abv.toFixed(1)}%</td>
         <td style="color:var(--text-3)">${esc(b.method)}</td>
         <td style="color:var(--text-3)">${placeLabel(b.city,b.region,b.country,b.cc)}</td>
-        <td style="color:var(--text-3)">${esc(b.month)} ${b.year}</td>
+        <td style="color:var(--text-3)">${esc(whenLabel(b))}</td>
         <td><span class="rb ${rbC(b.rating)}">${b.rating.toFixed(2)}</span></td>
         <td style="color:var(--accent-hi);font-size:12px">${strs(b.rating)}</td>
       </tr>`;}).join('');
@@ -921,7 +932,7 @@ const BEER_SORT_CMP={
   abv:(a,b)=>a.abv-b.abv,
   method:(a,b)=>a.method.localeCompare(b.method),
   city:(a,b)=>a.city.localeCompare(b.city),
-  month:(a,b)=>(a.year*12+a.monthN)-(b.year*12+b.monthN),
+  month:(a,b)=>whenOrd(a)-whenOrd(b),
   rating:(a,b)=>a.rating-b.rating
 };
 function updateBeerSortHeaders(){
@@ -953,7 +964,7 @@ function applyBeerFilter(){
   const data=beers.filter(b=>
     (!st||b.style===st)&&
     (!or||b.origin===or)&&
-    (!mo||`${b.monthN}-${b.year}`===mo)&&
+    (!mo||whenKey(b)===mo)&&
     (!q||b.beer.toLowerCase().includes(q)||b.style.toLowerCase().includes(q)||b.country.toLowerCase().includes(q)||b.city.toLowerCase().includes(q)));
   data.sort((a,b)=>beerSort.dir*BEER_SORT_CMP[beerSort.key](a,b));
   updateBeerSortHeaders();
@@ -980,7 +991,7 @@ try {
   // Month-consumed filter — one option per month/year present in the data, chronological
   const monthEl=document.getElementById('beerMonthFilter');
   const monthMap=new Map();
-  beers.forEach(b=>monthMap.set(`${b.monthN}-${b.year}`,{label:`${b.month} ${b.year}`,ord:b.year*12+b.monthN}));
+  beers.forEach(b=>monthMap.set(whenKey(b),{label:whenLabel(b),ord:whenOrd(b)}));
   const mf=document.createDocumentFragment();
   [...monthMap.entries()].sort((a,b)=>a[1].ord-b[1].ord).forEach(([v,m])=>{const o=document.createElement('option');o.value=v;o.textContent=m.label;mf.appendChild(o);});
   monthEl.appendChild(mf);
@@ -1044,7 +1055,7 @@ function openBeerModal(name){
           <td style="color:var(--text-3)">${esc(b.method)}</td>
           <td style="color:var(--text-2)">${esc(b.city)}, ${esc(b.region)}</td>
           <td>${FLAGS[b.cc]||''} ${esc(b.country)}</td>
-          <td style="color:var(--text-3);font-size:12px">${esc(b.month)} ${b.year}</td>
+          <td style="color:var(--text-3);font-size:12px">${esc(whenLabel(b))}</td>
         </tr>`).join('')}
       </tbody>
     </table>
@@ -1315,7 +1326,8 @@ function passportCountries(){
     dRec.drank.count++;
     dRec.drank.cities.add(b.city);
     dRec.drank.ratings.push(b.rating);
-    if(dRec.firstYear==null||b.year<dRec.firstYear||(b.year===dRec.firstYear&&b.monthN<dRec.firstMonthN)){
+    // A retro pour has no real date, so it never sets "first visited".
+    if(!b.retro&&(dRec.firstYear==null||b.year<dRec.firstYear||(b.year===dRec.firstYear&&b.monthN<dRec.firstMonthN))){
       dRec.firstYear=b.year;dRec.firstMonthN=b.monthN;dRec.firstMonth=b.month;
     }
   });
@@ -1751,7 +1763,7 @@ function buildPassportLayer(map){
       `<span style="color:var(--text);font-weight:700;font-size:13px">${FLAGS[r.cc]||''} ${esc(r.country)}</span><br>`+
       `<span style="color:var(--text-2);font-size:13px">${roleLabel}</span>`+
       (r.brewed?`<div style="margin-top:4px;font-size:13px;color:var(--text-2)">🏭 ${r.brewed.names.length} brewer${r.brewed.names.length>1?'ies':'y'} · ${r.brewed.count} pour${r.brewed.count>1?'s':''}</div>`:'')+
-      (r.drank?`<div style="font-size:13px;color:var(--text-2)">🍺 ${r.drank.cities.length} cit${r.drank.cities.length>1?'ies':'y'} · ${r.drank.count} pour${r.drank.count>1?'s':''} · first ${r.firstMonth} ${r.firstYear}</div>`:'');
+      (r.drank?`<div style="font-size:13px;color:var(--text-2)">🍺 ${r.drank.cities.length} cit${r.drank.cities.length>1?'ies':'y'} · ${r.drank.count} pour${r.drank.count>1?'s':''}${r.firstYear?` · first ${r.firstMonth} ${r.firstYear}`:''}</div>`:'');
     L.circleMarker([lat,lng],{radius:9,fillColor:color,color:THEME.bg,weight:1,opacity:.9,fillOpacity:.85})
       .bindTooltip(`${FLAGS[r.cc]||''} ${esc(r.country)}`,{direction:'top',className:'mtip'})
       .bindPopup(popHtml(html),{className:'dpop'}).addTo(group);
@@ -2116,15 +2128,18 @@ function drawTemporal(){
   // ── Review timeline — chronological rating trend with 5-review rolling avg
   // (relocated from the former Analysis tab). Single pass builds labels, rating
   // data, point colors, and the rolling average in O(n).
-  const tlLabels=new Array(beers.length),tlData=new Array(beers.length),tlColors=new Array(beers.length),tlRoll=new Array(beers.length);
+  // Retro reviews have no date, so they open the timeline, labelled "Retro";
+  // the dated ones follow in order and keep their #1, #2, … numbering.
+  const tl=[...beers.filter(b=>b.retro),...datedBeers()],nRetro=tl.length-datedBeers().length;
+  const tlLabels=new Array(tl.length),tlData=new Array(tl.length),tlColors=new Array(tl.length),tlRoll=new Array(tl.length);
   let rollSum=0;
-  for(let i=0;i<beers.length;i++){
-    const r=beers[i].rating;
-    tlLabels[i]=`#${i+1}`;
+  for(let i=0;i<tl.length;i++){
+    const r=tl[i].rating;
+    tlLabels[i]=tl[i].retro?'Retro':`#${i+1-nRetro}`;
     tlData[i]=r;
     tlColors[i]=rC(r);
     rollSum+=r;
-    if(i>=5)rollSum-=beers[i-5].rating;
+    if(i>=5)rollSum-=tl[i-5].rating;
     tlRoll[i]=(rollSum/Math.min(i+1,5)).toFixed(2);
   }
   safeChart('timelineChart',document.getElementById('timelineChart'),{type:'line',
@@ -2391,7 +2406,7 @@ function drawWantToTry(){
     const miss=r._miss,vsWorld=r._mine-r._world;
     const verdict=miss>0.25?'Beat the guess':miss<-0.25?'Fell short':'Called it';
     const vColor=miss>0.25?THEME.pos:miss<-0.25?THEME.neg:THEME.warn;
-    const when=r._reviews.length?`${r._reviews[r._reviews.length-1].month} ${r._reviews[r._reviews.length-1].year}`:'';
+    const when=r._reviews.length?whenLabel(r._reviews[r._reviews.length-1]):'';
     return `<tr data-beer="${esc(r._name)}" tabindex="0">
       <td>${logoImg(r._name,24)}</td>
       <td class="wt-cell-beer">${esc(r._name)}<span>${esc(r.style)}${when?' · '+esc(when):''}</span></td>

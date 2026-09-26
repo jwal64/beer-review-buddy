@@ -263,7 +263,15 @@ next fetch overwrites it.
 ```
 
 Append it at the end of `beers[]` (the list reads as a diary, oldest first),
-under its month's comment header. The existing lines are written with padded
+under its month's comment header.
+
+**Retro reviews.** A beer drunk before the log began and graded from memory
+gets `retro:true` after `year` (and normally `isNew:false`). Its
+`month`/`monthN`/`year` are the month it was *logged*, which keeps the diary
+in order, but no surface shows that date: both print "Retro" (`whenLabel()` in
+`app.js` and in `src/lib/beer-data.ts`), the review timeline opens with it, and
+it stays out of every month-by-month chart, the recent feed, the trend and
+the passport's "first visited". It still counts in every average and ranking. The existing lines are written with padded
 columns; a hand-added line does not need to match the padding.
 
 ### UK Exception: Split GB by Constituent Country

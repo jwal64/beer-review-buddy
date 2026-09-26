@@ -61,6 +61,23 @@ not an improvement on one that names the right one. That is the opposite call
 to the two Modelos below, and deliberately — there the drawing named the right
 beer *badly*, here it names it plainly.
 
+## Busch Light and Natural Light
+
+`busch-light` · `natural-light`
+
+Both supplied by the owner, since no brand site, favicon service or Untappd
+page is reachable from here. For one commit they were drawings: a traced
+`BUSCH` wordmark over a drawn mountain tile, and a hand-set `Natural` script.
+The owner's files replace them.
+
+- `busch-light.webp` — the mountain roundel with `BUSCH LIGHT` and
+  `BREWED IN U.S.A.`. The owner's copy sat on a photograph of a river, so it
+  is cut out along the roundel and the `BUSCH` banner that overhangs it, and
+  the grey outer ring goes with the photograph.
+- `natural-light.webp` — the blue `Natural` and red `LIGHT` wordmark, already
+  on transparency, cropped to the ink. It reads on the charcoal ground with no
+  tile.
+
 ## Marks from Untappd's own bucket
 
 `hop-commander` · `killsner` · `big-wave-golden-ale`

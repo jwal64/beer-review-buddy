@@ -80,6 +80,10 @@ export function toRows(D) {
       city: b.city, region: b.region, country: b.country, cc: b.cc,
       rating: b.rating, is_new: b.isNew,
       drank_on: monthStart(b.year, b.monthN),
+      // A retro review is a beer drunk before the log began and graded from
+      // memory. It has no real date: `drank_on` is only when it was logged,
+      // which keeps the diary in order, and every surface prints "Retro".
+      retro: b.retro === true,
       logo: b.logo ?? null,
     })),
 
@@ -142,6 +146,7 @@ export function fromRows(rows) {
       method: b.method, city: b.city, region: b.region, country: b.country,
       cc: b.cc, rating: num(b.rating), isNew: !!b.is_new, month, monthN, year,
     };
+    if (b.retro) entry.retro = true;
     if (b.logo) entry.logo = b.logo;
 
     if (b.brewery) {
