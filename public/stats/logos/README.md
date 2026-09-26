@@ -470,3 +470,47 @@ what makes that true — **if you hand-place or hand-edit a file, add it to
 it. Nothing automated can tell a brand's mark from a photograph of a bottle or
 from a generated grey letter — all three load, are the right size, and pass
 every check there is.
+
+## The shortlist's thirteen new countries
+
+`cass-fresh` · `ciuc-premium` · `club-colombia-dorada` · `cristal` ·
+`efes-pilsener` · `karlovacko` · `lapin-kulta` · `lasko-zlatorog` ·
+`niksicko-pivo` · `obolon-premium-extra-brew` · `saku-originaal` ·
+`steinlager-classic` · `zagorka`
+
+Added with the want-to-try entries for Turkey, South Korea, New Zealand,
+Finland, Croatia, Estonia, Ukraine, Bulgaria, Peru, Colombia, Montenegro,
+Romania and Slovenia. Same egress wall as every section above, so every file is
+hand-placed and listed under `kept`. Each one is the brand's own artwork — none
+is a drawing — from one of the two sources this environment can reach.
+
+**Eight are Untappd's current labels**, from `untappd.s3.amazonaws.com` by
+exact key. The keys came from web searches over Untappd's own pages; the bucket
+answered `200` to each, which is the proof the key is real. All are the 100px
+`_sm` size, which is the only one the bucket holds for them.
+
+| Beer | key | treatment |
+|------|-----|-----------|
+| Efes Pilsener | `beer_logos/beer-17259_8f37c_sm.jpeg` | the blue `EFES PILSENER` label; white flooded out from the border |
+| Cass Fresh | `beer_logos/beer-3700_7ea8e_sm.jpeg` | the current blue `Cass` script; navy on charcoal fails, so it keeps its white ground as a rounded tile |
+| Steinlager Classic | `beer_logos/beer-5992_1a751_sm.jpeg` | the red ribbon on the silver badge; border flood |
+| Saku Originaal | `beer_logos/beer-SakuOriginaal_59424.jpeg` | the full-bleed blue `saku ORIGINAAL` panel, trimmed and given the ⅙-side radius |
+| Cristal | `beer_logos/beer-11414_a9033_sm.jpeg` | the current oval label, *La Cerveza del Perú*; border flood |
+| Club Colombia Dorada | `beer_logos/beer-_11678_sm_41322575fd2d880191a73414edfc0d.jpeg` | the gold crest and red wordmark, on its white ground as a tile |
+| Ciuc Premium | `beer_logos/beer-183478_52fc9_sm.jpeg` | the current mark (blue roundel, red `CiUC`, green `PREMIUM`), white tile |
+| Laško Zlatorog | `brewery_logos/brewery-1959_206d3.jpeg` | Laško's current green mark with the chamois and `1825` — the lockup on the Zlatorog can; the white bands above and below are trimmed |
+
+**Five are vector traces from `detain/svg-logos`**, where the collection's mark
+is the one the brand uses now — Untappd's labels for Zagorka (`beer-_19721_fd6bf…`)
+and Nikšićko (`beer-_62554_sm_b471b…`) were checked and carry the same artwork,
+softer. Plate lifted off, cropped to the ink, 256px WebP: `karlovacko`
+(`karlovacko.svg`), `lapin-kulta` (`lapin-kulta-3.svg`), `niksicko-pivo`,
+`zagorka`, and `obolon-premium-extra-brew` (`obolon.svg`, which keeps its own
+green field; Untappd has only a neck label for this beer).
+
+The collection had older marks for five of the eight above, and those were in
+the tree for one commit: Cass's retired eagle crest, Efes's thin pre-2010
+wordmark, Saku's ribbon, Ciuc's red shield, and a black `PIVOVARNA LAŠKO`
+wordmark that named the brewery, not the beer. All five were the brand's
+artwork, but none of them is what is on the can now. That is the difference
+to look for when a vector file looks right.
