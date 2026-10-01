@@ -34,6 +34,7 @@ const { FLAGS, CNAMES, beers, drunkLocs, breweries, BRAND_DOMAINS,
 // A data.js written before the logos moved into the repo has no map at all;
 // read it as empty so the check below reports every beer rather than throwing.
 const BRAND_LOGOS = D.BRAND_LOGOS ?? {};
+const BEER_FACTS = D.BEER_FACTS ?? {};
 
 // A country code has to carry both a flag and a display name — one without the
 // other renders a blank or the literal code.
@@ -171,6 +172,30 @@ for (const [name, value] of Object.entries(BRAND_DOMAINS)) {
 }
 for (const name of logoBeers)
   if (!BRAND_DOMAINS[name]) err(`BRAND_DOMAINS`, `"${name}" renders a logo but has no entry`);
+
+// ── BEER FACTS ────────────────────────────────────────────────
+// Facts about each beer — sub-style, colour, body, and the brewery's published
+// IBU and calories. Every logged beer needs an entry so the charts that group
+// by these never silently drop one; a figure nobody publishes is null, and
+// null is fine — for a beer nobody could identify, colour and body too. What
+// is not fine is a guess written as a number.
+const FACT_COLORS = ['Pale', 'Gold', 'Amber', 'Dark'];
+const FACT_BODIES = ['Light', 'Medium', 'Full'];
+for (const [name, f] of Object.entries(BEER_FACTS ?? {})) {
+  const where = `BEER_FACTS["${name}"]`;
+  if (!beerNames.has(name)) warn(where, 'no logged beer has this name');
+  if (!isStr(f.sub)) err(where, 'sub (the specific style) is missing');
+  if (f.color !== null && !FACT_COLORS.includes(f.color)) err(where, `color "${f.color}" is not one of ${FACT_COLORS.join(' / ')}`);
+  if (f.body !== null && !FACT_BODIES.includes(f.body)) err(where, `body "${f.body}" is not one of ${FACT_BODIES.join(' / ')}`);
+  if (f.ibu !== null && (!isNum(f.ibu) || f.ibu < 0 || f.ibu > 120))
+    err(where, `ibu ${f.ibu} must be a number from 0 to 120, or null`);
+  if (f.cal !== null && (!isNum(f.cal) || f.cal < 30 || f.cal > 400))
+    err(where, `cal ${f.cal} must be a number from 30 to 400 per 12 fl oz, or null`);
+  if (!Array.isArray(f.adjuncts) || f.adjuncts.some(a => !isStr(a)))
+    err(where, 'adjuncts must be an array of strings');
+}
+for (const name of beerNames)
+  if (!BEER_FACTS[name]) err('BEER_FACTS', `"${name}" has no entry`);
 
 // ── BRAND LOGOS ───────────────────────────────────────────────
 // The committed file for each brand. This is the check that makes "every beer

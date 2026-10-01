@@ -390,6 +390,33 @@ A single beer can still override its brand's file with `logo:"logos/<file>"`
 on its own `beers[]` entry — that is the per-review escape hatch, for artwork
 that belongs to one pour rather than to the brand.
 
+### Step 2.7: Add the beer's facts to `BEER_FACTS` (REQUIRED)
+
+What the beer *is*, apart from how it was rated. Keyed by beer name, like the
+logo, because these are facts about the beer rather than about one pour — a
+beer drunk twice has one entry. `npm run check` fails on a logged beer with
+none.
+
+```js
+"Grolsch":{sub:"Dutch Pilsner",color:"Pale",body:"Light",ibu:12,cal:142,adjuncts:[]},
+```
+
+- `sub` — the specific style, from the vocabulary already in the file (reuse a
+  name rather than coining a near-duplicate; the Beer profile chart groups on it).
+- `color` — `Pale`, `Gold`, `Amber` or `Dark`. `body` — `Light`, `Medium` or `Full`.
+- `ibu` and `cal` (per 12 fl oz) — **the brewery's published figure, or `null`.**
+  Never an estimate and never borrowed from a similar beer: the charts count
+  only the beers that have the figure and say how many that was, so a guess
+  poisons a result that is otherwise honest. Convert per-100 ml by ×3.55.
+  Homebrew-clone recipes are not a source.
+- `adjuncts` — documented non-barley-malt ingredients (`rice`, `corn`,
+  `wheat`, `coriander`, `orange peel`, `sugar`…), or `[]` when none is documented.
+
+A beer that cannot be identified at all gets `color:null, body:null` rather than
+a guess (`Ocean SJU` is one). The projection (`beer_facts` in
+`tools/snapshot-rows.mjs`), the row type (`BeerFactsRow` in `src/lib/snapshot.ts`)
+and the round trip all carry it, so `npm run snapshot` after editing.
+
 ### Step 3: Research checklist
 
 1. **Brewery location** — city and region of the original site.
