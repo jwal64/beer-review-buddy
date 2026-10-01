@@ -63,6 +63,34 @@ export function brandLogosBlock(logos) {
   ];
 }
 
+// One line per beer, keys sorted, so a new beer is a one-line diff and the
+// generator and a hand edit cannot disagree about order. `null` is written out
+// rather than left off: it says "looked, and nobody publishes it", which an
+// absent key does not.
+export function beerFactsBlock(facts) {
+  const text = v => (v == null ? 'null' : q(v));
+  const entry = f =>
+    `{sub:${text(f.sub)},color:${text(f.color)},body:${text(f.body)},` +
+    `ibu:${f.ibu == null ? 'null' : f.ibu},cal:${f.cal == null ? 'null' : f.cal},` +
+    `adjuncts:[${(f.adjuncts ?? []).map(q).join(',')}]}`;
+  return [
+    RULE,
+    '// BEER FACTS — what each beer is, apart from how it was rated',
+    RULE,
+    '// Keyed by beer name, like the logo: these are facts about the beer, not',
+    '// about one pour. `sub` is the specific style, `color` is Pale / Gold /',
+    '// Amber / Dark, `body` is Light / Medium / Full, `ibu` and `cal` (per 12',
+    '// fl oz) are the brewery\'s published figures — null when nobody publishes',
+    '// one, never an estimate — and `adjuncts` are documented non-barley-malt',
+    '// ingredients. `npm run check` fails on a beer with no entry.',
+    RULE,
+    'const BEER_FACTS = {',
+    ...Object.keys(facts ?? {}).sort().map(k => `${q(k)}:${entry(facts[k])},`),
+    '};',
+    '',
+  ];
+}
+
 export function renderDataJs(D) {
   const out = [];
   const push = (...lines) => out.push(...lines);
@@ -179,6 +207,9 @@ export function renderDataJs(D) {
 
   // ── Brand logos
   push(...brandLogosBlock(D.BRAND_LOGOS));
+
+  // ── Beer facts
+  push(...beerFactsBlock(D.BEER_FACTS));
 
   // ── Untappd consensus
   push(

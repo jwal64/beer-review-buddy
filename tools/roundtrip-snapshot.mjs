@@ -75,8 +75,8 @@ for (const [name, key, cmp] of [['breweries', 'name', compareBrewery], ['drunkLo
   for (const [k, v] of a) if (b.has(k)) cmp(`${name}["${k}"]`, v, b.get(k));
 }
 
-for (const name of ['FLAGS', 'CNAMES', 'BRAND_DOMAINS', 'BRAND_LOGOS', 'UNTAPPD_GLOBAL_AVGS']) {
-  const a = before[name], b = after[name];
+for (const name of ['FLAGS', 'CNAMES', 'BRAND_DOMAINS', 'BRAND_LOGOS', 'BEER_FACTS', 'UNTAPPD_GLOBAL_AVGS']) {
+  const a = before[name] ?? {}, b = after[name] ?? {};
   compare(`${name}: which keys exist`, Object.keys(a).sort(), Object.keys(b).sort());
   for (const k of Object.keys(a)) compare(`${name}["${k}"]`, a[k], b[k]);
 }

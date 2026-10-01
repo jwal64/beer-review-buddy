@@ -28,7 +28,7 @@
 
 export const TABLES = [
   'countries', 'locations', 'breweries', 'beers',
-  'brand_domains', 'want_to_try', 'untappd_averages', 'app_meta',
+  'brand_domains', 'beer_facts', 'want_to_try', 'untappd_averages', 'app_meta',
 ];
 
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -94,6 +94,15 @@ export function toRows(D) {
     brand_domains: Object.entries(D.BRAND_DOMAINS).map(([beer_name, v]) => ({
       beer_name, domains: Array.isArray(v) ? v : [v],
       logo: D.BRAND_LOGOS?.[beer_name] ?? null,
+    })),
+
+    // What each beer is, as opposed to how it was rated: its sub-style, colour,
+    // body and the figures the brewery publishes. Keyed by name, like the logo,
+    // because these are facts about the beer rather than about one pour. A
+    // figure nobody publishes is null — never an estimate.
+    beer_facts: Object.entries(D.BEER_FACTS ?? {}).map(([beer_name, f]) => ({
+      beer_name, sub: f.sub ?? null, color: f.color ?? null, body: f.body ?? null,
+      ibu: f.ibu ?? null, cal: f.cal ?? null, adjuncts: f.adjuncts ?? [],
     })),
 
     want_to_try: D.WANT_TO_TRY.map((e, i) => ({
@@ -182,6 +191,14 @@ export function fromRows(rows) {
     if (d.logo) BRAND_LOGOS[d.beer_name] = d.logo;
   }
 
+  const BEER_FACTS = {};
+  for (const f of rows.beer_facts ?? [])
+    BEER_FACTS[f.beer_name] = {
+      sub: f.sub, color: f.color, body: f.body,
+      ibu: f.ibu == null ? null : num(f.ibu), cal: f.cal == null ? null : num(f.cal),
+      adjuncts: f.adjuncts ?? [],
+    };
+
   const UNTAPPD_GLOBAL_AVGS = {};
   for (const u of rows.untappd_averages ?? []) UNTAPPD_GLOBAL_AVGS[u.beer_name] = num(u.avg);
 
@@ -194,7 +211,7 @@ export function fromRows(rows) {
   const meta = Object.fromEntries((rows.app_meta ?? []).map(m => [m.key, m.value]));
 
   return {
-    FLAGS, CNAMES, beers, drunkLocs, breweries, BRAND_DOMAINS, BRAND_LOGOS,
+    FLAGS, CNAMES, beers, drunkLocs, breweries, BRAND_DOMAINS, BRAND_LOGOS, BEER_FACTS,
     UNTAPPD_GLOBAL_AVGS, WANT_TO_TRY,
     UNTAPPD_LAST_REFRESHED: meta.untappd_last_refreshed ?? '',
     UNTAPPD_REFRESH_INTERVAL_DAYS: Number(meta.untappd_refresh_interval_days ?? 14),

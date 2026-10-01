@@ -82,6 +82,20 @@ export interface BrandDomainRow {
   logo: string | null;
 }
 
+/**
+ * What a beer is, apart from how it was rated. `ibu` and `cal` (per 12 fl oz)
+ * are the figures a brewery publishes — null where nobody does, never a guess.
+ */
+export interface BeerFactsRow {
+  beer_name: string;
+  sub: string | null;
+  color: "Pale" | "Gold" | "Amber" | "Dark" | null;
+  body: "Light" | "Medium" | "Full" | null;
+  ibu: number | null;
+  cal: number | null;
+  adjuncts: string[];
+}
+
 export interface WantToTryRow {
   seq: number | null;
   beer: string;
@@ -106,6 +120,7 @@ interface RawSnapshot {
   breweries: BreweryRow[];
   beers: Omit<Beer, "id">[];
   brand_domains: BrandDomainRow[];
+  beer_facts: BeerFactsRow[];
   want_to_try: WantToTryRow[];
   untappd_averages: UntappdAverageRow[];
 }
@@ -142,6 +157,8 @@ export const COUNTRIES: CountryRow[] = [...raw.countries].sort((a, b) =>
 );
 
 export const BRAND_DOMAINS: BrandDomainRow[] = raw.brand_domains;
+
+export const BEER_FACTS: BeerFactsRow[] = raw.beer_facts;
 
 export const WANT_TO_TRY: WantToTryRow[] = [...raw.want_to_try].sort(
   (a, b) => (Number(a.seq) || 0) - (Number(b.seq) || 0),
