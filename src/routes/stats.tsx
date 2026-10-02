@@ -10,6 +10,6 @@ import { createFileRoute, redirect } from "@tanstack/react-router";
 // router is bounced to the file explicitly.
 export const Route = createFileRoute("/stats")({
   beforeLoad: () => {
-    throw redirect({ href: "/stats/index.html" });
+    throw redirect({ href: `${import.meta.env.BASE_URL}stats/index.html` });
   },
 });
