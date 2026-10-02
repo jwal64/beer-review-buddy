@@ -24,8 +24,9 @@ happening — silently, for days at a time, across three merges, while every
 check stayed green. Both surfaces read the database and let it win, so a beer
 that had been added, checked, committed and merged was simply not on the site
 and nothing said so. The database has been removed rather than worked around:
-there is no second copy of the log to drift, no migration to apply, and no
-step between merging and being live.
+there is no second copy of the log to drift and no migration to apply. One
+manual step remains between merging and being live, and it is Lovable's:
+**Publish** (see step 4 below).
 
 ## Making Changes with Claude
 
@@ -47,9 +48,20 @@ follows the same loop, and the loop is what makes it land on Lovable:
    npm run smoke          # if public/stats/ changed (needs a browser)
    ```
 
-4. **Merge to `main`.** That is the publish button, and the whole of it:
-   Lovable syncs the commit and redeploys, and what deploys is what shows.
-   A branch that is only pushed exists on GitHub and nowhere else.
+4. **Merge to `main`, then Publish in Lovable.** Merging is what gets the
+   change *into Lovable*: Lovable syncs `main` into its editor and preview.
+   It does **not** put it on the live site. The published site only changes
+   when the owner opens Lovable's publish dialog and clicks **Publish
+   changes** — a step nothing in this repo can trigger. So a merged, green,
+   synced change can sit off the live site indefinitely; when the owner
+   says "it's merged but not on the site", the answer is almost always that
+   publish. Say so at the end of every change: *merged — now Publish in
+   Lovable*. A branch that is only pushed exists on GitHub and nowhere else.
+
+   If Lovable's Git settings say it and GitHub have **diverged** (each has
+   commits the other lacks), any new push to `main` makes Lovable take
+   GitHub's version; edits it could not sync land on a `lovable-sync`
+   branch on GitHub. Merge anything worth keeping from there into `main`.
 
 A remote Claude session gets its dependencies automatically — the
 `SessionStart` hook in `.claude/hooks/session-start.sh` runs `npm install` when
@@ -223,14 +235,15 @@ places already in the log rather than a free-text box.
 npm run fetch-logos        # 2. the logo (needs internet); then look at it:
 npm run logo-sheet
 npm run check && npm run snapshot   # 3. check, then write what the app reads
-# 4. commit all of it, merge to main. That is the publish button.
+# 4. commit all of it, merge to main
+# 5. the owner clicks Publish → Publish changes in Lovable. That is the publish button.
 ```
 
-**It is live when that merge deploys.** Both surfaces read the committed log
-and nothing else — the stats page loads `data.js` directly, the app the
-snapshot projected from it — so there is no database to be behind, no
-migration to apply, and no step between merging and being live. Step 6 is the
-long version of why that is worth saying out loud.
+**It is live when the owner publishes in Lovable after the merge.** Both
+surfaces read the committed log and nothing else — the stats page loads
+`data.js` directly, the app the snapshot projected from it — so there is no
+database to be behind and no migration to apply. Step 6 is the long version
+of why that is worth saying out loud.
 
 Two things no check can do for you, both worth thirty seconds: **look at the
 logo sheet** — nothing automated tells a brand's mark from a photograph of a
@@ -449,18 +462,23 @@ showing the log as it stood before your edit.
 
 Commit `data.js` and `src/data/snapshot.json` together, and merge to `main`.
 
-### Step 6: There is no step 6
+### Step 6: Publish in Lovable
 
-**It is live when the merge deploys.** Both surfaces read the committed log
-and nothing else:
+Merging syncs the change into Lovable; it does not deploy it. The owner opens
+Lovable's publish dialog and clicks **Publish changes**, and then it is live.
+Tell the owner this in the reply that reports the merge. Toasted Lager sat
+merged, green and synced but off the site on 2 October for exactly this
+reason, while this file claimed the merge was the whole of publishing.
+
+After that, both surfaces read the committed log and nothing else:
 
 | Surface | Reads |
 |---------|-------|
 | the stats site, `/stats` | `public/stats/data.js`, as a `<script>` |
 | the app | `src/data/snapshot.json`, bundled |
 
-No database, no migration to apply, nothing between merging and being live,
-and nothing that can be a beer behind. The app makes no data request at all,
+No database, no migration to apply, and nothing that can be a beer behind
+once it is published. The app makes no data request at all,
 which is also why it works offline and paints instantly.
 
 This is worth spelling out because for a long stretch it was the opposite, and
