@@ -14,7 +14,6 @@ import {
   LOCATIONS,
   COUNTRIES,
   BRAND_DOMAINS,
-  BEER_FACTS,
   WANT_TO_TRY,
   UNTAPPD_AVERAGES,
 } from "@/lib/snapshot";
@@ -24,7 +23,6 @@ import type {
   LocationRow,
   CountryRow,
   BrandDomainRow,
-  BeerFactsRow,
   WantToTryRow,
   UntappdAverageRow,
 } from "@/lib/snapshot";
@@ -35,7 +33,6 @@ export type {
   LocationRow,
   CountryRow,
   BrandDomainRow,
-  BeerFactsRow,
   WantToTryRow,
   UntappdAverageRow,
 };
@@ -131,25 +128,6 @@ export function useBrandDomains() {
 // domains are what happens when a beer has no file yet.
 export function useBrandLogos() {
   return useQuery({ ...brandDomainsQuery(), select: selectBrandLogos });
-}
-
-// Beer name → what the beer is: sub-style, colour, body and the brewery's
-// published IBU and calories. The select is at module scope for the same
-// reason as the two above — an inline arrow would hand back a new Map on every
-// render. See "Map Rule: The Pop-out Stays Open" in CLAUDE.md.
-const selectBeerFacts = (rows: BeerFactsRow[]) => {
-  const map = new Map<string, BeerFactsRow>();
-  for (const row of rows) map.set(row.beer_name, row);
-  return map;
-};
-
-export function useBeerFacts() {
-  return useQuery({
-    queryKey: ["beer_facts"],
-    queryFn: () => BEER_FACTS,
-    select: selectBeerFacts,
-    ...STATIC,
-  });
 }
 
 // The standing shortlist of beers not yet drunk. Nothing is ever deleted from

@@ -35,7 +35,7 @@ const EXPORTS = [
 // older file — one written before the binding existed — loads and reads as
 // empty, rather than throwing a ReferenceError from the collector and taking
 // every check down with it.
-const OPTIONAL = ["BRAND_LOGOS", "BEER_FACTS"];
+const OPTIONAL = ["BRAND_LOGOS"];
 
 export function loadData(root = ROOT) {
   const src = readFileSync(join(root, "data.js"), "utf8");

@@ -575,7 +575,7 @@ const NAV_ITEMS=[...document.querySelectorAll('.nav-item')];
 const BN_ITEMS=[...document.querySelectorAll('#bottomnav .bn-item')];
 // Geography / Over-time / What-to-try now live as sub-sections inside the
 // single INSIGHTS tab. Asking for one of these jumps to Insights + that sub.
-const INSIGHTS_SUBS=['geo','temporal','profile','markets'];
+const INSIGHTS_SUBS=['geo','temporal','markets'];
 let _insightsSub='geo';
 // The context bar restates where you are and what the page is for — the old
 // header said the same thing on all four tabs.
@@ -651,7 +651,6 @@ function showInsightsSubtab(name){
   const lazyDraws={
     geo:      [['_cD',drawCountry],['_ciD',drawCity],['_langD',drawLanguage]],
     temporal: [['_tmpD',drawTemporal]],
-    profile:  [['_prfD',drawProfile]],
     markets:  [['_ciX',drawContrarian],['_wtD',drawWantToTry]]
   };
   for(const [flag,fn] of lazyDraws[name]||[]){
@@ -1212,78 +1211,6 @@ function drawLanguage(){
       options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:ttWithN(i=>lS[i].c)},scales:{x:{min:0,max:5,grid:{color:THEME.grid},ticks:{color:THEME.tick}},y:{grid:{display:false},ticks:{color:THEME.label,font:{size:10}}}}}
     });
   } catch(e){ console.error('Language init error:',e); }
-}
-
-// ══════════════════════════════════════════════════════════════
-// BEER PROFILE — what each beer is, held against how I rated it
-// ══════════════════════════════════════════════════════════════
-// BEER_FACTS (data.js) is keyed by beer name. Every figure in it is a published
-// one or null, so a chart here only counts the beers that have the figure and
-// says how many that was — a bitterness chart over 30 of 87 beers is a result
-// about those 30, not about the log.
-const FACT_ORDER={
-  color:['Pale','Gold','Amber','Dark'],
-  body:['Light','Medium','Full']
-};
-// The raw tags in BEER_FACTS stay as documented; the chart reads them grouped.
-const ADJ_GROUPS=[
-  ['corn',/^(corn|maize)$/],['rice',/^rice$/],['wheat / oats',/^(wheat|oats)$/],
-  ['sugar / syrup',/sugar|syrup/],['citrus',/lemon|orange/],['spices',/coriander|nutmeg|grains of paradise|spice/]
-];
-const adjGroup=t=>{const g=ADJ_GROUPS.find(([,re])=>re.test(t));return g?g[0]:t;};
-const IBU_BANDS=[['Under 15',0,15],['15–24',15,25],['25–39',25,40],['40 and up',40,Infinity]];
-const CAL_BANDS=[['Under 110',0,110],['110–139',110,140],['140–159',140,160],['160 and up',160,Infinity]];
-// Group reviews by a fact about the beer. keyFn returns a label, or null when
-// the beer has no such fact (it is left out, not counted as "unknown").
-function groupByFact(keyFn){
-  const m={};
-  beers.forEach(b=>{
-    const f=(typeof BEER_FACTS!=='undefined'&&BEER_FACTS[b.beer])||null;
-    const k=f?keyFn(f,b):null;
-    if(k==null)return;
-    (m[k]=m[k]||{l:k,t:0,c:0}).t+=b.rating;m[k].c++;
-  });
-  return Object.values(m).map(o=>({l:o.l,a:o.t/o.c,c:o.c}));
-}
-const inBand=(bands,v)=>{const x=bands.find(([,lo,hi])=>v>=lo&&v<hi);return x?x[0]:null;};
-function drawFactChart(id,groups,sorted){
-  const el=document.getElementById(id);
-  if(!el)return;
-  const g=sorted?[...groups].sort(rankBy(o=>o.a,o=>o.c)):groups;
-  if(!g.length){el.closest('.bb-body').innerHTML='<p class="wt-scoreline">No published figures yet.</p>';return;}
-  safeChart(id,el,{type:'bar',
-    data:{labels:g.map(d=>`${d.l} ${nLabel(d.c)}`),datasets:[{data:g.map(d=>+d.a.toFixed(2)),backgroundColor:g.map(d=>barFill(THEME.accent,d.c)),borderWidth:0}]},
-    options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:ttWithN(i=>g[i].c)},scales:{x:{min:0,max:5,grid:{color:THEME.grid},ticks:{color:THEME.tick}},y:{grid:{display:false},ticks:{color:THEME.label,font:{size:10}}}}}
-  });
-}
-function drawProfile(){
-  window._prfD=true;
-  try{
-    const facts=typeof BEER_FACTS!=='undefined'?BEER_FACTS:{};
-    drawFactChart('subStyleChart',groupByFact(f=>f.sub),true);
-    // Colour and body read as a scale, so they keep their natural order rather
-    // than being ranked.
-    const ordered=(key)=>FACT_ORDER[key].map(l=>groupByFact(f=>f[key]).find(o=>o.l===l)).filter(Boolean);
-    drawFactChart('colorChart',ordered('color'),false);
-    drawFactChart('bodyChart',ordered('body'),false);
-    const bandOrdered=(bands,fn)=>{const g=groupByFact(fn);return bands.map(([l])=>g.find(o=>o.l===l)).filter(Boolean);};
-    drawFactChart('ibuChart',bandOrdered(IBU_BANDS,f=>f.ibu==null?null:inBand(IBU_BANDS,f.ibu)),false);
-    drawFactChart('calChart',bandOrdered(CAL_BANDS,f=>f.cal==null?null:inBand(CAL_BANDS,f.cal)),false);
-    // Adjuncts: one bar per ingredient that at least one beer documents, plus
-    // the all-malt beers for comparison. A beer with two adjuncts counts in both.
-    const byAdj={};
-    beers.forEach(b=>{
-      const f=facts[b.beer]; if(!f)return;
-      const tags=f.adjuncts&&f.adjuncts.length?f.adjuncts:['none documented'];
-      // Collapse near-duplicates (corn / maize, every kind of lemon) so a beer
-      // with "orange peel" and "coriander" counts once under each group.
-      new Set(tags.map(adjGroup)).forEach(t=>{(byAdj[t]=byAdj[t]||{l:t,t:0,c:0}).t+=b.rating;byAdj[t].c++;});
-    });
-    drawFactChart('adjunctChart',Object.values(byAdj).map(o=>({l:o.l,a:o.t/o.c,c:o.c})),true);
-    const have=k=>beers.filter(b=>facts[b.beer]&&facts[b.beer][k]!=null).length;
-    const cov=document.getElementById('profileCoverage');
-    if(cov)cov.textContent=`Bitterness is published for ${have('ibu')} of ${beers.length} reviews and calories for ${have('cal')}. Charts count only those beers; where a brewery publishes nothing the figure is left blank rather than guessed.`;
-  }catch(e){console.error('Profile init error:',e);}
 }
 
 // ══════════════════════════════════════════════════════════════

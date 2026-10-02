@@ -13,8 +13,6 @@ import {
   useBreweries,
   useCountries,
   useUntappdAverages,
-  useBeerFacts,
-  type Beer,
   useWantToTry,
 } from "@/lib/beer-data";
 import {
@@ -480,39 +478,6 @@ function DivergingList({
   );
 }
 
-// ── Beer profile ──────────────────────────────────────────────
-// What each beer is (BEER_FACTS), held against how it was rated. Every figure
-// is a published one or null, so a chart counts only the beers that have it.
-const COLOR_ORDER = ["Pale", "Gold", "Amber", "Dark"];
-const BODY_ORDER = ["Light", "Medium", "Full"];
-const IBU_BANDS: Array<[string, number, number]> = [
-  ["Under 15", 0, 15],
-  ["15–24", 15, 25],
-  ["25–39", 25, 40],
-  ["40 and up", 40, Infinity],
-];
-const CAL_BANDS: Array<[string, number, number]> = [
-  ["Under 110", 0, 110],
-  ["110–139", 110, 140],
-  ["140–159", 140, 160],
-  ["160 and up", 160, Infinity],
-];
-// The raw tags stay as documented; the chart reads them grouped.
-const ADJ_GROUPS: Array<[string, RegExp]> = [
-  ["corn", /^(corn|maize)$/],
-  ["rice", /^rice$/],
-  ["wheat / oats", /^(wheat|oats)$/],
-  ["sugar / syrup", /sugar|syrup/],
-  ["citrus", /lemon|orange/],
-  ["spices", /coriander|nutmeg|grains of paradise|spice/],
-];
-const adjGroup = (t: string) => ADJ_GROUPS.find(([, re]) => re.test(t))?.[0] ?? t;
-const inBand = (bands: Array<[string, number, number]>, v: number) =>
-  bands.find(([, lo, hi]) => v >= lo && v < hi)?.[0];
-/** Colour, body and bands read as a scale, so they keep their order instead of being ranked. */
-const inOrder = (groups: Group[], order: string[]) =>
-  order.map((l) => groups.find((g) => g.label === l)).filter((g): g is Group => !!g);
-
 // ── The page ──────────────────────────────────────────────────
 
 function InsightsPage() {
@@ -521,7 +486,6 @@ function InsightsPage() {
   const { data: breweries } = useBreweries();
   const { data: shortlist } = useWantToTry();
   const { data: world } = useUntappdAverages();
-  const { data: facts } = useBeerFacts();
 
   const s = useMemo(() => {
     const list = beers ?? [];
@@ -531,50 +495,6 @@ function InsightsPage() {
     const cities = groupRatings(list, (b) => b.city, beerRating);
     const methods = groupRatings(list, (b) => b.method, beerRating);
     const breweryGroups = groupRatings(list, (b) => b.brewery, beerRating);
-    const factOf = (b: Beer) => facts?.get(b.name);
-    const bandOf = (bands: Array<[string, number, number]>, v: number | null | undefined) =>
-      v == null ? null : (inBand(bands, v) ?? null);
-    const profile = {
-      subStyles: groupRatings(list, (b) => factOf(b)?.sub, beerRating),
-      colors: inOrder(
-        groupRatings(list, (b) => factOf(b)?.color, beerRating),
-        COLOR_ORDER,
-      ),
-      bodies: inOrder(
-        groupRatings(list, (b) => factOf(b)?.body, beerRating),
-        BODY_ORDER,
-      ),
-      ibu: inOrder(
-        groupRatings(list, (b) => bandOf(IBU_BANDS, factOf(b)?.ibu), beerRating),
-        IBU_BANDS.map(([l]) => l),
-      ),
-      cal: inOrder(
-        groupRatings(list, (b) => bandOf(CAL_BANDS, factOf(b)?.cal), beerRating),
-        CAL_BANDS.map(([l]) => l),
-      ),
-      // A beer with two adjuncts counts under each group; an all-malt one under "none documented".
-      adjuncts: (() => {
-        const acc = new Map<string, { total: number; count: number }>();
-        for (const b of list) {
-          const f = factOf(b);
-          if (!f) continue;
-          const tags = f.adjuncts.length ? f.adjuncts : ["none documented"];
-          for (const t of new Set(tags.map(adjGroup))) {
-            const cur = acc.get(t) ?? { total: 0, count: 0 };
-            cur.total += beerRating(b);
-            cur.count += 1;
-            acc.set(t, cur);
-          }
-        }
-        return groupRatings(
-          [...acc.entries()],
-          ([label]) => label,
-          ([, v]) => v.total / v.count,
-        ).map((g) => ({ ...g, count: acc.get(g.label)?.count ?? g.count }));
-      })(),
-      ibuCount: list.filter((b) => factOf(b)?.ibu != null).length,
-      calCount: list.filter((b) => factOf(b)?.cal != null).length,
-    };
     const globalAvg = averageRating(list);
     const styleMap = new Map(styles.map((g) => [g.label, g]));
     const originMap = new Map(origins.map((g) => [g.label, g]));
@@ -607,7 +527,6 @@ function InsightsPage() {
       abvPairs,
       abvR: correlation(abvPairs.map((p) => [p.abv, p.rating] as [number, number])),
       contrarian: contrarianRows(list, world ?? new Map()),
-      profile,
       bestStyle: rankable(styles)[0],
       weakestStyle: rankable(styles).at(-1),
       topCountry: rankable(origins)[0],
@@ -623,7 +542,7 @@ function InsightsPage() {
         .sort((a, b) => b.avg - a.avg || a.label.localeCompare(b.label))
         .slice(0, 6),
     };
-  }, [beers, breweries, shortlist, world, facts]);
+  }, [beers, breweries, shortlist, world]);
 
   const countryName = (cc?: string) => countries?.find((c) => c.cc === cc)?.name ?? cc ?? "Unknown";
 
@@ -793,36 +712,6 @@ function InsightsPage() {
 
           <Panel title="Best pours" caption="every session averaged">
             <BarList groups={s.bestBeers} plain />
-          </Panel>
-
-          <Panel title="Ratings by sub-style" caption={RANK_HINT}>
-            <BarList groups={s.profile.subStyles} limit={12} />
-          </Panel>
-
-          <Panel title="Ratings by colour" caption="pale to dark">
-            <BarList groups={s.profile.colors} />
-          </Panel>
-
-          <Panel title="Ratings by body" caption="light to full">
-            <BarList groups={s.profile.bodies} />
-          </Panel>
-
-          <Panel
-            title="Ratings by bitterness"
-            caption={`IBU · published for ${s.profile.ibuCount} of ${s.total}`}
-          >
-            <BarList groups={s.profile.ibu} />
-          </Panel>
-
-          <Panel
-            title="Ratings by calories"
-            caption={`per 12 fl oz · published for ${s.profile.calCount} of ${s.total}`}
-          >
-            <BarList groups={s.profile.cal} />
-          </Panel>
-
-          <Panel title="Ratings by ingredient" caption="documented adjuncts">
-            <BarList groups={s.profile.adjuncts} />
           </Panel>
         </TabsContent>
 
