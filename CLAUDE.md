@@ -58,15 +58,6 @@ follows the same loop, and the loop is what makes it land on Lovable:
    publish. Say so at the end of every change: *merged — now Publish in
    Lovable*. A branch that is only pushed exists on GitHub and nowhere else.
 
-   **The copy that needs no Publish.** `.github/workflows/pages.yml` builds
-   `main` on every push (after `npm run check`) and publishes it to GitHub
-   Pages: the app at `https://jwal64.github.io/beer-review-buddy/`, the stats
-   site under `/stats/`. It builds with `vite.pages.config.ts` (SPA mode plus
-   a `base` for the subpath), never with Lovable's `vite.config.ts`. That is
-   why the app's few hard-coded paths go through `import.meta.env.BASE_URL`
-   (`"/"` in Lovable's build). Keep new absolute paths in `src/` going
-   through it too, or they work on Lovable and 404 on Pages.
-
    If Lovable's Git settings say it and GitHub have **diverged** (each has
    commits the other lacks), any new push to `main` makes Lovable take
    GitHub's version; edits it could not sync land on a `lovable-sync`

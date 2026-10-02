@@ -943,7 +943,7 @@ function InsightsPage() {
       {/* The static site carries the things a phone screen cannot: the full
           world maps, the passport, and every chart at desk size. */}
       <a
-        href={`${import.meta.env.BASE_URL}stats/index.html`}
+        href="/stats/index.html"
         className="mt-7 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-secondary"
       >
         <ExternalLink size={18} className="shrink-0 text-primary" />
