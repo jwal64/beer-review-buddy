@@ -46,7 +46,7 @@ export function isSuspectFavicon(url: string, naturalWidth: number) {
  * `public/stats/logos/`, so it resolves under /stats/; anything absolute is a
  * hotlink recorded as-is (npm run check already warns about those). */
 function localLogoUrl(logo: string) {
-  return /^https?:\/\//.test(logo) ? logo : `/stats/${logo}`;
+  return /^https?:\/\//.test(logo) ? logo : `${import.meta.env.BASE_URL}stats/${logo}`;
 }
 
 /** Every URL worth trying for a beer's logo, best first. */
