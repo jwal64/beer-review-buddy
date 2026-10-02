@@ -1,5 +1,5 @@
 {
-  "at": "2026-10-01T16:56:20.862Z",
+  "at": "2026-09-23T21:23:36.187Z",
   "total": 122,
   "fetched": [
     {
@@ -15,12 +15,12 @@
     {
       "beer": "Almaza Pilsener",
       "file": "logos/almaza-pilsener.webp",
-      "source": "google faviconV2",
+      "source": "site og:image",
       "domain": "almaza.com.lb",
-      "from": "196×196 png",
-      "stored": "196px",
-      "url": "https://t3.gstatic.com/faviconV2?client=SOCIAL&type=FAVICON&fallback_opts=TYPE,SIZE,URL&url=https://almaza.com.lb&size=256",
-      "bytes": 9526
+      "from": "1454×873 png",
+      "stored": "1454px",
+      "url": "https://bucket.almaza.com.lb/www.almaza.com.lb/public/data/files/Almaza.png",
+      "bytes": 48626
     },
     {
       "beer": "Asahi Super Dry",
@@ -733,10 +733,6 @@
       "file": "logos/augustiner-helles.svg"
     },
     {
-      "beer": "Big Wave Golden Ale",
-      "file": "logos/big-wave-golden-ale.webp"
-    },
-    {
       "beer": "Bloodline Blood Orange IPA",
       "file": "logos/bloodline-blood-orange-ipa.webp"
     },
@@ -745,32 +741,8 @@
       "file": "logos/budweiser.webp"
     },
     {
-      "beer": "Busch Light",
-      "file": "logos/busch-light.webp"
-    },
-    {
-      "beer": "Cass Fresh",
-      "file": "logos/cass-fresh.webp"
-    },
-    {
-      "beer": "Ciuc Premium",
-      "file": "logos/ciuc-premium.webp"
-    },
-    {
-      "beer": "Club Colombia Dorada",
-      "file": "logos/club-colombia-dorada.webp"
-    },
-    {
-      "beer": "Cristal",
-      "file": "logos/cristal.webp"
-    },
-    {
       "beer": "Daura",
       "file": "logos/daura.svg"
-    },
-    {
-      "beer": "Efes Pilsener",
-      "file": "logos/efes-pilsener.webp"
     },
     {
       "beer": "Estrella Jalisco",
@@ -793,36 +765,12 @@
       "file": "logos/harp-lager.webp"
     },
     {
-      "beer": "Hitachino Nest White Ale",
-      "file": "logos/hitachino-nest-white-ale.webp"
-    },
-    {
-      "beer": "Hofbräu Oktoberfestbier",
-      "file": "logos/hofbrau-oktoberfestbier.svg"
-    },
-    {
       "beer": "Hop Commander",
       "file": "logos/hop-commander.webp"
     },
     {
-      "beer": "Karlovačko",
-      "file": "logos/karlovacko.webp"
-    },
-    {
-      "beer": "Killsner",
-      "file": "logos/killsner.webp"
-    },
-    {
       "beer": "La Fin Du Monde",
       "file": "logos/la-fin-du-monde.webp"
-    },
-    {
-      "beer": "Lapin Kulta",
-      "file": "logos/lapin-kulta.webp"
-    },
-    {
-      "beer": "Laško Zlatorog",
-      "file": "logos/lasko-zlatorog.webp"
     },
     {
       "beer": "Leffe Blonde",
@@ -841,24 +789,12 @@
       "file": "logos/modelo-oro.webp"
     },
     {
-      "beer": "Natural Light",
-      "file": "logos/natural-light.webp"
-    },
-    {
       "beer": "Negra Modelo",
       "file": "logos/negra-modelo.webp"
     },
     {
       "beer": "Newcastle Brown Ale",
       "file": "logos/newcastle-brown-ale.webp"
-    },
-    {
-      "beer": "Nikšićko Pivo",
-      "file": "logos/niksicko-pivo.webp"
-    },
-    {
-      "beer": "Obolon Premium Extra Brew",
-      "file": "logos/obolon-premium-extra-brew.webp"
     },
     {
       "beer": "Pabst Blue Ribbon",
@@ -885,10 +821,6 @@
       "file": "logos/rothaus-pils-tannen-zapfle.webp"
     },
     {
-      "beer": "Saku Originaal",
-      "file": "logos/saku-originaal.webp"
-    },
-    {
       "beer": "Singha",
       "file": "logos/singha.svg"
     },
@@ -899,10 +831,6 @@
     {
       "beer": "Sol",
       "file": "logos/sol.svg"
-    },
-    {
-      "beer": "Steinlager Classic",
-      "file": "logos/steinlager-classic.webp"
     },
     {
       "beer": "Stiegl Goldbräu",
@@ -917,12 +845,84 @@
       "file": "logos/wrench.webp"
     },
     {
-      "beer": "Zagorka",
-      "file": "logos/zagorka.webp"
-    },
-    {
       "beer": "Żywiec",
       "file": "logos/zywiec.webp"
+    },
+    {
+      "beer": "Killsner",
+      "file": "logos/killsner.webp"
+    },
+    {
+      "beer": "Big Wave Golden Ale",
+      "file": "logos/big-wave-golden-ale.webp"
+    },
+    {
+      "beer": "Hofbräu Oktoberfestbier",
+      "file": "logos/hofbrau-oktoberfestbier.svg"
+    },
+    {
+      "beer": "Hitachino Nest White Ale",
+      "file": "logos/hitachino-nest-white-ale.webp"
+    },
+    {
+      "beer": "Busch Light",
+      "file": "logos/busch-light.webp"
+    },
+    {
+      "beer": "Natural Light",
+      "file": "logos/natural-light.webp"
+    },
+    {
+      "beer": "Cass Fresh",
+      "file": "logos/cass-fresh.webp"
+    },
+    {
+      "beer": "Ciuc Premium",
+      "file": "logos/ciuc-premium.webp"
+    },
+    {
+      "beer": "Club Colombia Dorada",
+      "file": "logos/club-colombia-dorada.webp"
+    },
+    {
+      "beer": "Cristal",
+      "file": "logos/cristal.webp"
+    },
+    {
+      "beer": "Efes Pilsener",
+      "file": "logos/efes-pilsener.webp"
+    },
+    {
+      "beer": "Karlovačko",
+      "file": "logos/karlovacko.webp"
+    },
+    {
+      "beer": "Lapin Kulta",
+      "file": "logos/lapin-kulta.webp"
+    },
+    {
+      "beer": "Laško Zlatorog",
+      "file": "logos/lasko-zlatorog.webp"
+    },
+    {
+      "beer": "Nikšićko Pivo",
+      "file": "logos/niksicko-pivo.webp"
+    },
+    {
+      "beer": "Obolon Premium Extra Brew",
+      "file": "logos/obolon-premium-extra-brew.webp"
+    },
+    {
+      "beer": "Saku Originaal",
+      "file": "logos/saku-originaal.webp"
+    },
+    {
+      "beer": "Steinlager Classic",
+      "file": "logos/steinlager-classic.webp"
+    },
+    {
+      "beer": "Zagorka",
+      "file": "logos/zagorka.webp"
     }
   ],
   "missing": []
