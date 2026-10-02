@@ -103,6 +103,7 @@ never draws a logo taller than 64px, so that is enough.
 | Hop Commander | `beer_logos/beer-871255_7b1a9_sm.jpeg` | the green `HOP COMMANDER` wordmark from the can |
 | Killsner | `brewery_logos/brewery-277977_93f5e.jpeg` | Kills Boro's own mark, the hand-lettered `KILLS BORO` in its black splash |
 | Big Wave Golden Ale | `beer_logos/beer-9657_f1704_sm.jpeg` | the current can: the hibiscus over `KONA BIG WAVE`, `Liquid Aloha` and the wave, on ocean blue |
+| Toasted Lager | `beer_logos/beer-5907_7f523_sm.jpeg` | Blue Point's round `TOASTED LAGER` badge: the red buoy on blue waves; white flooded out from the corners, the cream badge reads on charcoal as it is |
 
 **Killsner is the one with a caveat.** Several searches named a label key for
 it, `beer-4183963_1e922`, and the bucket answers `403` to every extension and

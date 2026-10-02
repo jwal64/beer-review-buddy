@@ -1,6 +1,6 @@
 {
   "at": "2026-10-01T16:56:20.862Z",
-  "total": 122,
+  "total": 123,
   "fetched": [
     {
       "beer": "Affligem Tripel",
@@ -911,6 +911,10 @@
     {
       "beer": "Tennent's",
       "file": "logos/tennents.svg"
+    },
+    {
+      "beer": "Toasted Lager",
+      "file": "logos/toasted-lager.webp"
     },
     {
       "beer": "Wrench",

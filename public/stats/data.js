@@ -121,6 +121,8 @@ let beers=[
   {beer:"Hofbräu Oktoberfestbier",              style:"Lager",          origin:"DE",    abv:6.3,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Busch Light",                          style:"Lager",          origin:"US",    abv:4.1,method:"Can",   city:"Clemson",        region:"South Carolina",      country:"USA",        cc:"US",rating:2.25,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
   {beer:"Natural Light",                        style:"Lager",          origin:"US",    abv:4.2,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
+  // OCT 2026 (1 review)
+  {beer:"Toasted Lager",                        style:"Lager",          origin:"US",    abv:5.5,method:"Draft", city:"Queens",         region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:true, month:"Oct",monthN:10,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -226,6 +228,7 @@ let breweries=[
   {name:"Badische Staatsbrauerei Rothaus",   location:"Grafenhausen, Baden-Württemberg",         country:"Germany",           cc:"DE",    lang:"de",beers:"Rothaus Pils / Tannen Zäpfle",                                                            lat:47.8333,lng:8.2167,   ratings:[2.75]},
   {name:"Pabst Brewing Company",             location:"Milwaukee, Wisconsin",                    country:"USA",               cc:"US",    lang:"en",beers:"Pabst Blue Ribbon",                                                                        lat:43.0389,lng:-87.9065,ratings:[3.25]},
   {name:"Kills Boro Brewing Co.",            location:"Staten Island, New York",                 country:"USA",               cc:"US",    lang:"en",beers:"Killsner",                                                                                 lat:40.6444,lng:-74.0989, ratings:[2.25]},
+  {name:"Blue Point Brewing Company", location:"Patchogue, New York", country:"USA", cc:"US", lang:"en", beers:"Toasted Lager", lat:40.7609, lng:-73.0225, ratings:[2.00]},
   {name:"Kiuchi Brewery",                    location:"Naka, Ibaraki",                           country:"Japan",             cc:"JP",    lang:"ja",beers:"Hitachino Nest White Ale",                                  nativeName:"常陸野ネスト ホワイトエール", lat:36.4686,lng:140.4681, ratings:[5.00]},
 ];
 
@@ -288,6 +291,7 @@ const BRAND_DOMAINS = {
 "IJwit":"brouwerijhetij.nl",
 "Hitachino Nest White Ale":["hitachino.cc","kiuchibrewery.co.jp"],
 "Killsner":"killsboro.com",
+"Toasted Lager":"bluepointbrewing.com",
 "Kirin Ichiban":"kirin.co.jp",
 "Kronenbourg 1664":["1664.com","kronenbourg1664.com"],
 "La Chouffe Blonde":"achouffe.be",
@@ -433,6 +437,7 @@ const BRAND_LOGOS = {
 "Ichnusa Anima Sarda":"logos/ichnusa-anima-sarda.webp",
 "Karlovačko":"logos/karlovacko.webp",
 "Killsner":"logos/killsner.webp",
+"Toasted Lager":"logos/toasted-lager.webp",
 "Kirin Ichiban":"logos/kirin-ichiban.svg",
 "Kronenbourg 1664":"logos/kronenbourg-1664.svg",
 "La Chouffe Blonde":"logos/la-chouffe-blonde.svg",
@@ -555,6 +560,7 @@ const BEER_FACTS = {
 "Hop Commander":{sub:"American IPA",color:"Gold",body:"Medium",ibu:65,cal:null,adjuncts:[]},
 "IJwit":{sub:"Witbier",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:["wheat","coriander","lemon"]},
 "Ichnusa Anima Sarda":{sub:"International Pale Lager",color:"Gold",body:"Light",ibu:null,cal:null,adjuncts:[]},
+"Toasted Lager":{sub:"American Amber Lager",color:"Amber",body:"Medium",ibu:28,cal:null,adjuncts:[]},
 "Killsner":{sub:"German Pilsner",color:"Pale",body:"Light",ibu:36,cal:null,adjuncts:[]},
 "Kirin Ichiban":{sub:"Japanese Lager",color:"Gold",body:"Light",ibu:21,cal:145,adjuncts:[]},
 "Kronenbourg 1664":{sub:"International Pale Lager",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
@@ -628,6 +634,7 @@ const UNTAPPD_GLOBAL_AVGS={
   "Erdinger Weißbier":3.78,"Miller Lite":2.51,"Pacífico Clara":3.65,
   "Narragansett Lager":3.23,"Big Wave Golden Ale":3.52,"Belhaven Scottish Stout":3.45,
   "Samuel Adams Summer Ale":3.50,"Hitachino Nest White Ale":3.60,
+  "Toasted Lager":3.51,
 };
 
 // ══════════════════════════════════════════════════════════════
