@@ -121,8 +121,9 @@ let beers=[
   {beer:"Hofbräu Oktoberfestbier",              style:"Lager",          origin:"DE",    abv:6.3,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Busch Light",                          style:"Lager",          origin:"US",    abv:4.1,method:"Can",   city:"Clemson",        region:"South Carolina",      country:"USA",        cc:"US",rating:2.25,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
   {beer:"Natural Light",                        style:"Lager",          origin:"US",    abv:4.2,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
-  // OCT 2026 (1 review)
+  // OCT 2026 (2 reviews)
   {beer:"Toasted Lager",                        style:"Lager",          origin:"US",    abv:5.5,method:"Draft", city:"Queens",         region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:true, month:"Oct",monthN:10,year:2026},
+  {beer:"Othmar Blond",                         style:"Belgian Ale",    origin:"NL",    abv:6.5,method:"Bottle",city:"Lonneker",       region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -138,6 +139,7 @@ let drunkLocs=[
   {city:"Uncasville",     region:"Connecticut",         country:"USA",        cc:"US",lat:41.4775,lng:-72.0892},
   {city:"Queens",         region:"New York",            country:"USA",        cc:"US",lat:40.7282,lng:-73.7949},
   {city:"Oldenzaal",      region:"Overijssel",          country:"Netherlands",cc:"NL",lat:52.3107,lng:6.9280},
+  {city:"Lonneker",       region:"Overijssel",          country:"Netherlands",cc:"NL",lat:52.2517,lng:6.9156},
   {city:"Nijmegen",       region:"Gelderland",          country:"Netherlands",cc:"NL",lat:51.8426,lng:5.8528},
   {city:"Antwerp",        region:"Antwerp",             country:"Belgium",    cc:"BE",lat:51.2194,lng:4.4025},
   {city:"Boston",         region:"Massachusetts",       country:"USA",        cc:"US",lat:42.3601,lng:-71.0589},
@@ -229,6 +231,7 @@ let breweries=[
   {name:"Pabst Brewing Company",             location:"Milwaukee, Wisconsin",                    country:"USA",               cc:"US",    lang:"en",beers:"Pabst Blue Ribbon",                                                                        lat:43.0389,lng:-87.9065,ratings:[3.25]},
   {name:"Kills Boro Brewing Co.",            location:"Staten Island, New York",                 country:"USA",               cc:"US",    lang:"en",beers:"Killsner",                                                                                 lat:40.6444,lng:-74.0989, ratings:[2.25]},
   {name:"Blue Point Brewing Company", location:"Patchogue, New York", country:"USA", cc:"US", lang:"en", beers:"Toasted Lager", lat:40.7609, lng:-73.0225, ratings:[2.00]},
+  {name:"Othmar Bierbrouwerij", location:"Ootmarsum, Overijssel", country:"Netherlands", cc:"NL", lang:"nl", beers:"Othmar Blond", lat:52.4081, lng:6.9001, ratings:[3.00]},
   {name:"Kiuchi Brewery",                    location:"Naka, Ibaraki",                           country:"Japan",             cc:"JP",    lang:"ja",beers:"Hitachino Nest White Ale",                                  nativeName:"常陸野ネスト ホワイトエール", lat:36.4686,lng:140.4681, ratings:[5.00]},
 ];
 
@@ -292,6 +295,7 @@ const BRAND_DOMAINS = {
 "Hitachino Nest White Ale":["hitachino.cc","kiuchibrewery.co.jp"],
 "Killsner":"killsboro.com",
 "Toasted Lager":"bluepointbrewing.com",
+"Othmar Blond":"othmar.eu",
 "Kirin Ichiban":"kirin.co.jp",
 "Kronenbourg 1664":["1664.com","kronenbourg1664.com"],
 "La Chouffe Blonde":"achouffe.be",
@@ -438,6 +442,7 @@ const BRAND_LOGOS = {
 "Karlovačko":"logos/karlovacko.webp",
 "Killsner":"logos/killsner.webp",
 "Toasted Lager":"logos/toasted-lager.webp",
+"Othmar Blond":"logos/othmar-blond.svg",
 "Kirin Ichiban":"logos/kirin-ichiban.svg",
 "Kronenbourg 1664":"logos/kronenbourg-1664.svg",
 "La Chouffe Blonde":"logos/la-chouffe-blonde.svg",
@@ -561,6 +566,7 @@ const BEER_FACTS = {
 "IJwit":{sub:"Witbier",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:["wheat","coriander","lemon"]},
 "Ichnusa Anima Sarda":{sub:"International Pale Lager",color:"Gold",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Toasted Lager":{sub:"American Amber Lager",color:"Amber",body:"Medium",ibu:28,cal:null,adjuncts:[]},
+"Othmar Blond":{sub:"Belgian Blonde",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
 "Killsner":{sub:"German Pilsner",color:"Pale",body:"Light",ibu:36,cal:null,adjuncts:[]},
 "Kirin Ichiban":{sub:"Japanese Lager",color:"Gold",body:"Light",ibu:21,cal:145,adjuncts:[]},
 "Kronenbourg 1664":{sub:"International Pale Lager",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
@@ -634,7 +640,7 @@ const UNTAPPD_GLOBAL_AVGS={
   "Erdinger Weißbier":3.78,"Miller Lite":2.51,"Pacífico Clara":3.65,
   "Narragansett Lager":3.23,"Big Wave Golden Ale":3.52,"Belhaven Scottish Stout":3.45,
   "Samuel Adams Summer Ale":3.50,"Hitachino Nest White Ale":3.60,
-  "Toasted Lager":3.51,
+  "Toasted Lager":3.51,"Othmar Blond":3.50,
 };
 
 // ══════════════════════════════════════════════════════════════

@@ -381,9 +381,9 @@ For a brand that no source has, draw or save the logo into
 fetcher leaves a file it did not write alone, `--force` included — but only
 because `logo-fetch-report.json` records which files are its own, so **a file
 you hand-place or hand-edit has to be added to `kept` there** or the next run
-overwrites it. Thirty-four logos are here that way; two of them are drawn
+overwrites it. Fifty-two logos are here that way; three of them are drawn
 approximations rather than the brand's own artwork, and
-`public/stats/logos/README.md` lists those two and says why each one had to be
+`public/stats/logos/README.md` lists those three and says why each one had to be
 drawn. It also records where the rest came from, which matters when this
 environment's egress policy blocks every logo source: `npm run fetch-logos`
 resolves nothing here, but anonymous git reads of public GitHub repositories

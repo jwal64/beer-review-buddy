@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Othmar Blond">
+  <rect width="512" height="512" rx="60" fill="#111111"/>
+  <rect x="28" y="28" width="456" height="456" rx="40" fill="none" stroke="#ffffff" stroke-width="4"/>
+  <g fill="#ffffff">
+    <path d="M256 104 l26 26 -26 26 -26 -26 z"/>
+    <path d="M140 132 q58 -34 92 -2 l-10 8 q-34 -22 -82 -6 z"/>
+    <path d="M372 132 q-58 -34 -92 -2 l10 8 q34 -22 82 -6 z"/>
+  </g>
+  <g text-anchor="middle" font-family="'Old English Text MT', 'UnifrakturMaguntia', Georgia, 'Times New Roman', serif" font-weight="700" fill="#ffffff">
+    <text x="256" y="292" font-size="118">Othmar</text>
+  </g>
+  <rect x="116" y="322" width="280" height="4" fill="#ffffff"/>
+  <text x="256" y="398" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-weight="700" font-size="62" letter-spacing="10" fill="#3d7bd6">BLOND</text>
+</svg>

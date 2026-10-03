@@ -39,11 +39,17 @@ For a brand no source has, save the file yourself — any format a browser
 renders (`.svg`, `.png`, `.webp`, `.jpg`) — as `<beer-name-slugified>.<ext>`,
 and add its entry to `BRAND_LOGOS`. `logos/daura.svg` is the worked example.
 
-Two files are here that way, and both are **drawn approximations in the
+Three files are here that way, and all three are **drawn approximations in the
 house idiom** — a brand-coloured field, the wordmark, one characteristic
 device — not the brand's own artwork:
 
-`augustiner-helles` · `daura`
+`augustiner-helles` · `daura` · `othmar-blond`
+
+`othmar-blond` joined them on 3 October 2026: Othmar's site (`othmar.eu`),
+every favicon service and Untappd's pages all answer `403` here, and the
+label's key in Untappd's bucket (beer `1121256`) could not be found. It is drawn after the
+label in the check-in photo — white `Othmar` over a blue `BLOND` on black — and the
+first file to replace if a real one turns up.
 
 There were twelve, then four, then five when `killsner` joined them; the
 section below this one is where three of those five went. The two left are what

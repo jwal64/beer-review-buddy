@@ -62,6 +62,7 @@
     {"city":"Uncasville","region":"Connecticut","country":"USA","cc":"US","lat":41.4775,"lng":-72.0892},
     {"city":"Queens","region":"New York","country":"USA","cc":"US","lat":40.7282,"lng":-73.7949},
     {"city":"Oldenzaal","region":"Overijssel","country":"Netherlands","cc":"NL","lat":52.3107,"lng":6.928},
+    {"city":"Lonneker","region":"Overijssel","country":"Netherlands","cc":"NL","lat":52.2517,"lng":6.9156},
     {"city":"Nijmegen","region":"Gelderland","country":"Netherlands","cc":"NL","lat":51.8426,"lng":5.8528},
     {"city":"Antwerp","region":"Antwerp","country":"Belgium","cc":"BE","lat":51.2194,"lng":4.4025},
     {"city":"Boston","region":"Massachusetts","country":"USA","cc":"US","lat":42.3601,"lng":-71.0589},
@@ -151,6 +152,7 @@
     {"name":"Pabst Brewing Company","location":"Milwaukee, Wisconsin","country":"USA","cc":"US","lang":"en","native_name":null,"lat":43.0389,"lng":-87.9065},
     {"name":"Kills Boro Brewing Co.","location":"Staten Island, New York","country":"USA","cc":"US","lang":"en","native_name":null,"lat":40.6444,"lng":-74.0989},
     {"name":"Blue Point Brewing Company","location":"Patchogue, New York","country":"USA","cc":"US","lang":"en","native_name":null,"lat":40.7609,"lng":-73.0225},
+    {"name":"Othmar Bierbrouwerij","location":"Ootmarsum, Overijssel","country":"Netherlands","cc":"NL","lang":"nl","native_name":null,"lat":52.4081,"lng":6.9001},
     {"name":"Kiuchi Brewery","location":"Naka, Ibaraki","country":"Japan","cc":"JP","lang":"ja","native_name":"常陸野ネスト ホワイトエール","lat":36.4686,"lng":140.4681}
   ],
   "beers": [
@@ -241,7 +243,8 @@
     {"seq":85,"name":"Hofbräu Oktoberfestbier","brewery":"Hofbräu München","style":"Lager","origin_cc":"DE","abv":6.3,"method":"Bottle","city":"New Rochelle","region":"New York","country":"USA","cc":"US","rating":2.5,"is_new":true,"drank_on":"2026-09-01","retro":false,"logo":null},
     {"seq":86,"name":"Busch Light","brewery":"Anheuser-Busch","style":"Lager","origin_cc":"US","abv":4.1,"method":"Can","city":"Clemson","region":"South Carolina","country":"USA","cc":"US","rating":2.25,"is_new":false,"drank_on":"2026-09-01","retro":true,"logo":null},
     {"seq":87,"name":"Natural Light","brewery":"Anheuser-Busch","style":"Lager","origin_cc":"US","abv":4.2,"method":"Can","city":"New Rochelle","region":"New York","country":"USA","cc":"US","rating":2,"is_new":false,"drank_on":"2026-09-01","retro":true,"logo":null},
-    {"seq":88,"name":"Toasted Lager","brewery":"Blue Point Brewing Company","style":"Lager","origin_cc":"US","abv":5.5,"method":"Draft","city":"Queens","region":"New York","country":"USA","cc":"US","rating":2,"is_new":true,"drank_on":"2026-10-01","retro":false,"logo":null}
+    {"seq":88,"name":"Toasted Lager","brewery":"Blue Point Brewing Company","style":"Lager","origin_cc":"US","abv":5.5,"method":"Draft","city":"Queens","region":"New York","country":"USA","cc":"US","rating":2,"is_new":true,"drank_on":"2026-10-01","retro":false,"logo":null},
+    {"seq":89,"name":"Othmar Blond","brewery":"Othmar Bierbrouwerij","style":"Belgian Ale","origin_cc":"NL","abv":6.5,"method":"Bottle","city":"Lonneker","region":"Overijssel","country":"Netherlands","cc":"NL","rating":3,"is_new":true,"drank_on":"2026-10-01","retro":false,"logo":null}
   ],
   "brand_domains": [
     {"beer_name":"Affligem Tripel","domains":["affligembeer.com","affligembeer.be"],"logo":"logos/affligem-tripel.svg"},
@@ -292,6 +295,7 @@
     {"beer_name":"Hitachino Nest White Ale","domains":["hitachino.cc","kiuchibrewery.co.jp"],"logo":"logos/hitachino-nest-white-ale.webp"},
     {"beer_name":"Killsner","domains":["killsboro.com"],"logo":"logos/killsner.webp"},
     {"beer_name":"Toasted Lager","domains":["bluepointbrewing.com"],"logo":"logos/toasted-lager.webp"},
+    {"beer_name":"Othmar Blond","domains":["othmar.eu"],"logo":"logos/othmar-blond.svg"},
     {"beer_name":"Kirin Ichiban","domains":["kirin.co.jp"],"logo":"logos/kirin-ichiban.svg"},
     {"beer_name":"Kronenbourg 1664","domains":["1664.com","kronenbourg1664.com"],"logo":"logos/kronenbourg-1664.svg"},
     {"beer_name":"La Chouffe Blonde","domains":["achouffe.be"],"logo":"logos/la-chouffe-blonde.svg"},
@@ -415,6 +419,7 @@
     {"beer_name":"IJwit","sub":"Witbier","color":"Gold","body":"Medium","ibu":null,"cal":null,"adjuncts":["wheat","coriander","lemon"]},
     {"beer_name":"Ichnusa Anima Sarda","sub":"International Pale Lager","color":"Gold","body":"Light","ibu":null,"cal":null,"adjuncts":[]},
     {"beer_name":"Toasted Lager","sub":"American Amber Lager","color":"Amber","body":"Medium","ibu":28,"cal":null,"adjuncts":[]},
+    {"beer_name":"Othmar Blond","sub":"Belgian Blonde","color":"Gold","body":"Medium","ibu":null,"cal":null,"adjuncts":[]},
     {"beer_name":"Killsner","sub":"German Pilsner","color":"Pale","body":"Light","ibu":36,"cal":null,"adjuncts":[]},
     {"beer_name":"Kirin Ichiban","sub":"Japanese Lager","color":"Gold","body":"Light","ibu":21,"cal":145,"adjuncts":[]},
     {"beer_name":"Kronenbourg 1664","sub":"International Pale Lager","color":"Gold","body":"Medium","ibu":null,"cal":null,"adjuncts":[]},
@@ -563,7 +568,8 @@
     {"beer_name":"Belhaven Scottish Stout","avg":3.45},
     {"beer_name":"Samuel Adams Summer Ale","avg":3.5},
     {"beer_name":"Hitachino Nest White Ale","avg":3.6},
-    {"beer_name":"Toasted Lager","avg":3.51}
+    {"beer_name":"Toasted Lager","avg":3.51},
+    {"beer_name":"Othmar Blond","avg":3.5}
   ],
   "app_meta": [
     {"key":"untappd_last_refreshed","value":"2026-05-05"},
