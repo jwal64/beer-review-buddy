@@ -203,6 +203,12 @@ only.
 
 ## Standard Operating Procedure: Adding a Beer
 
+**Every new beer entry follows the `/add-beer` skill**
+(`.claude/skills/add-beer/SKILL.md`): start from the latest `main`, the data
+steps below, `npm run check && npm run snapshot`, one commit with `data.js` and
+`snapshot.json` pushed straight to `main` (no rebase/squash/force-push), then
+remind the owner to Publish in Lovable.
+
 This is the normal flow — the owner describes a beer they drank, and a Claude
 session makes these edits. Everything happens in `public/stats/data.js`, and
 one command generates everything downstream of it.
