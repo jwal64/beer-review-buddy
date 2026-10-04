@@ -14,7 +14,7 @@
 // the site. The log lives in one file now, and what is committed is what is
 // shown.
 //
-// tools/roundtrip-supabase.mjs proves the projection loses nothing, and
+// tools/roundtrip-snapshot.mjs proves the projection loses nothing, and
 // `npm run check` fails when snapshot.json is out of step with data.js — the
 // one way this file can now be wrong is by being stale.
 import snapshot from "@/data/snapshot.json";

@@ -65,9 +65,9 @@ checked, committed and merged appeared for one frame and then vanished, or
 never appeared at all, with every check green. The database was removed rather
 than worked around.
 
-Anything under `supabase/` is the remains of that store and is wired to
-nothing. `src/integrations/supabase/` still holds auto-generated files that
-nothing imports; leave them or remove them, but do not wire them back up.
+The `supabase/` directory, `src/integrations/supabase/` and the
+`@supabase/supabase-js` dependency have been deleted. If Lovable regenerates
+a Supabase client, leave it unimported — do not wire a database back up.
 
 `src/routes/add.tsx` is the phone capture, and it deliberately **writes
 nothing**. It files a GitHub issue against `.github/ISSUE_TEMPLATE/add-a-beer.yml`
