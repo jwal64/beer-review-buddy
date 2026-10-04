@@ -6,18 +6,17 @@
 // Premium", "Kirin Ichiban", "Modelo Especial", "Kronenbourg 1664". Every one
 // of those had quietly stopped resolving.
 //
-// So the domains come from the brand_domains table instead, which is the same
-// place the static site reads them from. One list, one set of names, and a beer
-// added here carries its logo to both.
+// So the domains come from BRAND_DOMAINS in the log instead: one list, one set
+// of names.
 //
-// The source chain is the stats site's, tier for tier:
+// The source chain, tier by tier:
 //   committed logos/ file → Google favicons → Icon Horse → DuckDuckGo → monogram
 // Tiered by SOURCE, not by domain: every domain a beer lists is tried at each
 // tier before dropping to the next, because a real logo for a beer's second
 // domain beats a 16px favicon for its first.
 //
 // Brandfetch used to lead the chain and no longer appears in it: it answers
-// 403 to the public client ID both surfaces embedded, for every domain and
+// 403 to the public client ID the app embedded, for every domain and
 // every URL shape, so it resolved nothing for anybody while looking like a
 // working tier. The committed file took its place — a logo we hold cannot be
 // withdrawn by the service that was lending it.

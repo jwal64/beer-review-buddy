@@ -5,8 +5,7 @@ import { cn } from "@/lib/utils";
 import { styleColor } from "@/lib/style-colors";
 
 // Walks the tiered source chain (committed logos/ file → Google favicons →
-// Icon Horse → DuckDuckGo) one <img> at a time, the same order the stats site
-// uses. Normally the first source answers and nothing else is asked: every
+// Icon Horse → DuckDuckGo) one <img> at a time. Normally the first source answers and nothing else is asked: every
 // beer's logo is a file in this repo. A source that errors advances the chain;
 // so does a Google favicon that "loads" at 16px, which is the service's
 // generic globe standing in for a domain it doesn't know. The styled monogram

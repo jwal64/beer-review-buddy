@@ -39,11 +39,7 @@ A place is written "New Rochelle, New York, United States" on every surface.
 
 - **`src/lib/place.ts` must exist** and export `placeLabel`. Do not delete it,
   and do not inline it back into its callers: `src/routes/map.tsx`,
-  `src/routes/beers.tsx`, `src/routes/index.tsx`, `src/components/BeerForm.tsx`.
-- **`public/stats/app.js` must keep its `placeLabel` helper** and its call
-  sites. It returns escaped HTML and takes `{flag, lead}`.
-- The beers table's separate City / Region / Country **columns** are the one
-  deliberate exception and stay split.
+  `src/routes/beers.tsx`, `src/routes/index.tsx`.
 
 ### 3. The app reads the committed log, not a network
 
@@ -75,13 +71,20 @@ and the entry is written by hand afterwards, because a brewery's coordinates,
 language, native name and logo are research rather than form fields. Do not
 "finish" it by giving it a database, an API route, or a token to commit with.
 
-The repo's tests — `tools/app-logic-test.mjs` (the rules inside
-`public/stats/app.js`) and `tools/roundtrip-snapshot.mjs` (that the projection
-loses nothing and the committed snapshot is in step) — are plain Node, need
-nothing installed and run in milliseconds. Each is named in the `check` script
+The repo's tests — `tools/app-logic-test.mjs` (the rules inside `src/lib/`:
+the location format, the crossing-off rule, `MIN_N`, the prediction, the date
+labels) and `tools/roundtrip-snapshot.mjs` (that the projection loses nothing
+and the committed snapshot is in step) — are plain Node, need nothing
+installed and run in milliseconds. The modules they import must keep
+importing nothing at runtime (type-only imports are fine), or Node cannot
+load them. Each is named in the `check` script
 **and** has a step in `.github/workflows/checks.yml`, and
 `tools/check-invariants.mjs` fails when a tool is in one and not the other.
 
 `CLAUDE.md` carries the full reasoning under "Features that must survive every
 pass", "Map Rule: The Pop-out Stays Open", "Location Rule: City, Region,
-Country" and "Step 6: There is no step 6".
+Country" and "History".
+
+There is no static stats site any more. `public/stats/` holds only the log
+(`data.js`) and the committed logos; `/stats` redirects to `/insights`. Do not
+recreate a second rendering of the log — build it into the app.

@@ -2,9 +2,8 @@
 // Probes candidate logo sources against real brand domains and reports what
 // each one actually returns — status, type, bytes and pixel size.
 //
-// `npm run logos` answers "does the current chain resolve something?". This
-// answers the question behind it: "which source, at which URL shape, actually
-// has this brand's logo?" — which is what you need when a whole tier has
+// It answers "which source, at which URL shape, actually has this brand's
+// logo?" — which is what you need when a whole tier has
 // quietly stopped answering and every beer is falling through to a 16px
 // favicon.
 //
@@ -12,8 +11,8 @@
 //     node tools/probe-logo-sources.mjs grolsch.com …   # specific ones
 //
 // It needs open internet; behind a proxy that blocks the CDNs every row reads
-// as a failure. Run it on a runner (the Logo audit workflow) if your shell
-// cannot reach them.
+// as a failure. Run it somewhere with open internet if your shell cannot
+// reach them.
 import { loadData } from './load-data.mjs';
 
 const BRANDFETCH_CLIENT_ID = '1idIddY24o2pZE9n2hu';
