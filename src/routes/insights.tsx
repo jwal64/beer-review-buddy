@@ -5,7 +5,6 @@ import { BeerLogo } from "@/components/BeerLogo";
 import { QueryError } from "@/components/QueryError";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExternalLink, ChevronRight } from "lucide-react";
 import {
   averageRating,
   flagEmoji,
@@ -939,22 +938,6 @@ function InsightsPage() {
           </Panel>
         </TabsContent>
       </Tabs>
-
-      {/* The static site carries the things a phone screen cannot: the full
-          world maps, the passport, and every chart at desk size. */}
-      <a
-        href="/stats/index.html"
-        className="mt-7 flex items-center gap-3 rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-secondary"
-      >
-        <ExternalLink size={18} className="shrink-0 text-primary" />
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold">The full stats site</p>
-          <p className="text-xs text-muted-foreground">
-            The world maps, the passport, and every chart at desk size.
-          </p>
-        </div>
-        <ChevronRight size={16} className="shrink-0 text-muted-foreground" />
-      </a>
     </Shell>
   );
 }

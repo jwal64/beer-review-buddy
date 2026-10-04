@@ -435,7 +435,7 @@ function LeafletMap({
       // Esri's World Dark Gray canvas — keyless, unlike Carto's basemaps,
       // which now stamp "API KEY REQUIRED" across anonymous requests. Base
       // paints the ground, Reference adds the place labels; native tiles stop
-      // at zoom 16. The stats site's maps use the same provider.
+      // at zoom 16.
       const esri = (v: string) =>
         `https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_${v}/MapServer/tile/{z}/{y}/{x}`;
       L.tileLayer(esri("Base"), {

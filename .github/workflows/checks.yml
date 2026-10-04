@@ -1,8 +1,7 @@
 name: Data check
 
-# The stats site has no build step, so nothing else would notice a beer added
-# with a country code that has no flag, a brewery that was never registered or
-# a missing brand domain. This runs the same checks CLAUDE.md asks for —
+# Nothing else would notice a beer added with a country code that has no flag,
+# a brewery that was never registered or a missing brand domain. This runs the same checks CLAUDE.md asks for —
 # including over the pushes Lovable makes to main when the app is edited there.
 
 # A branch push and its pull request are the same commit, so running on both
@@ -29,10 +28,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # 22, not 20: Node 20 went end-of-life in April 2026, and the app-logic
-      # test imports src/lib/place.ts directly — 22 strips the types itself,
-      # which is what lets one test hold the app's copy of the location format
-      # against the site's without a build step to run first.
+      # 22, not 20: Node 20 went end-of-life in April 2026, and the checks
+      # import modules from src/lib/ directly — 22 strips the types itself, so
+      # they test the app's own code without a build step to run first.
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -57,11 +55,12 @@ jobs:
       - name: Check the standing features are still in place
         run: node tools/check-invariants.mjs
 
-      # The rules inside app.js — the location format, when two spellings are
-      # the same beer, MIN_N, the canonical location, the shortlist's guess.
-      # Nothing else asks whether the code that renders the data still behaves.
-      - name: Test the stats-site logic
+      # The rules inside src/lib/ — the location format, when two spellings are
+      # the same beer, MIN_N, the shortlist's guess, the date labels. Nothing
+      # else asks whether the code that judges the data still behaves. Node 22
+      # imports the .ts modules directly, stripping the types itself.
+      - name: Test the app logic
         run: node tools/app-logic-test.mjs
 
-      - name: Syntax-check the site scripts
-        run: node --check public/stats/data.js && node --check public/stats/app.js
+      - name: Syntax-check the log
+        run: node --check public/stats/data.js

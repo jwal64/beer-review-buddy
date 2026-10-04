@@ -1,6 +1,6 @@
 // How a place is written, everywhere.
 //
-// One format across the app and the stats site: **City, State/Region,
+// One format across the whole app: **City, State/Region,
 // Country** — "New Rochelle, New York, United States". Before this, every
 // surface invented its own: the map popup said "City, Region" with the country
 // on a line of its own, the beer sheet said "City, Country" and dropped the

@@ -1,102 +1,79 @@
 #!/usr/bin/env node
-// Opens the real page in a real browser and checks it still works: both scripts
-// load in the right order, every tab renders, the modal and the command palette
-// open, and a beer name containing quotes and a tag is rendered as text rather
-// than as markup.
+// Opens the real app in a real browser and checks it still works: every route
+// renders its heading with no uncaught errors, the beers list and the insight
+// panels fill in, a map pin's popup stays open after the click that opened it,
+// and the old /stats address lands on Insights.
 //
-// Optional — the only thing here that needs an install:
-//     npm install && npx playwright install chromium
+// It starts `vite dev` itself — the production build targets Cloudflare
+// Workers, which nothing here can run — and drives Chromium against it.
+//
 //     npm run smoke
 //
-// Offline or behind a proxy that blocks the CDNs, point it at local copies of
-// the two libraries (a node_modules with chart.js and leaflet in it will do):
-//     SMOKE_LIB_DIR=./node_modules npm run smoke
-import { createServer } from "node:http";
-import { readFile, stat } from "node:fs/promises";
-import { existsSync } from "node:fs";
-import { join, extname, normalize } from "node:path";
-import { ROOT } from "./load-data.mjs";
+// CHROMIUM_PATH for an environment that has a browser but not the one
+// Playwright expects to find (the session hook sets it in agent containers).
+import { spawn } from "node:child_process";
+import { createServer } from "node:net";
 
 let chromium;
 try {
   ({ chromium } = await import("playwright"));
 } catch {
-  console.error(
-    "\nplaywright is not installed — run `npm install && npx playwright install chromium`.\n",
-  );
+  console.error("\nplaywright is not installed — run `npm install`.\n");
   process.exit(1);
 }
 
-const LIB = process.env.SMOKE_LIB_DIR;
-// .mjs must be a JavaScript type: live-data.js imports supabase-rows.mjs as a
-// module, and browsers hard-refuse module scripts served as octet-stream.
-const TYPES = {
-  ".html": "text/html",
-  ".js": "text/javascript",
-  ".mjs": "text/javascript",
-  ".css": "text/css",
-  ".json": "application/json",
-  ".svg": "image/svg+xml",
-  ".png": "image/png",
-  ".jpg": "image/jpeg",
-};
-
-// A static server, so the page runs over http:// exactly as it will when hosted.
-const server = createServer(async (req, res) => {
-  const rel = normalize(decodeURIComponent(req.url.split("?")[0])).replace(/^(\.\.[/\\])+/, "");
-  const path = join(ROOT, rel === "/" ? "index.html" : rel);
-  try {
-    if (!(await stat(path)).isFile()) throw new Error("not a file");
-    res.writeHead(200, { "content-type": TYPES[extname(path)] ?? "application/octet-stream" });
-    res.end(await readFile(path));
-  } catch {
-    res.writeHead(404).end("not found");
-  }
+// A free port, so a dev server already running on the default one is no
+// obstacle and never the thing being tested.
+const port = await new Promise((resolve) => {
+  const s = createServer();
+  s.listen(0, "127.0.0.1", () => {
+    const { port } = s.address();
+    s.close(() => resolve(port));
+  });
 });
-await new Promise((r) => server.listen(0, "127.0.0.1", r));
-const base = `http://127.0.0.1:${server.address().port}`;
+const base = `http://127.0.0.1:${port}`;
 
-// CHROMIUM_PATH for an environment that has a browser but not the one
-// Playwright expects to find — a container with Chromium preinstalled, which
-// is where the agent sessions run. The other browser-driving tools read it too.
-const browser = await chromium.launch(
-  process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {});
-const page = await browser.newPage();
-const errors = [],
-  failed = [];
+const vite = spawn(
+  "npx",
+  ["vite", "dev", "--host", "127.0.0.1", "--port", String(port), "--strictPort"],
+  { stdio: ["ignore", "pipe", "pipe"], detached: true },
+);
+let viteLog = "";
+vite.stdout.on("data", (d) => (viteLog += d));
+vite.stderr.on("data", (d) => (viteLog += d));
+const stopVite = () => {
+  try {
+    process.kill(-vite.pid);
+  } catch {}
+};
+process.on("exit", stopVite);
 
-if (LIB) {
-  // Registered first, so the specific library routes below take precedence:
-  // everything else off-origin fails immediately instead of hanging.
-  await page.route(
-    (url) => !url.href.startsWith(base),
-    (r) => r.abort(),
-  );
-  const serve = (glob, file, type) =>
-    page.route(glob, async (r) =>
-      existsSync(file) ? r.fulfill({ contentType: type, body: await readFile(file) }) : r.abort(),
-    );
-  await serve("**/chart.umd.js", join(LIB, "chart.js/dist/chart.umd.js"), "text/javascript");
-  await serve("**/leaflet.js", join(LIB, "leaflet/dist/leaflet.js"), "text/javascript");
-  await serve("**/leaflet.css", join(LIB, "leaflet/dist/leaflet.css"), "text/css");
+// Ready when the home page answers, not when the log says so.
+const deadline = Date.now() + 60000;
+for (;;) {
+  try {
+    if ((await fetch(base)).ok) break;
+  } catch {}
+  if (Date.now() > deadline) {
+    console.error(`\nvite dev never answered on ${base}.\n${viteLog}`);
+    process.exit(1);
+  }
+  await new Promise((r) => setTimeout(r, 500));
 }
+
+const browser = await chromium.launch(
+  process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {},
+);
+const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+const errors = [];
+
 // Logos, fonts and map tiles are decoration: the page is expected to render
 // without them, so failures there are not the test's business.
-const DECORATION =
-  /gstatic|google|icon\.horse|duckduckgo|tile|cartocdn|fonts|wikimedia|\.png|\.jpg|\.webp/;
-const NOISE = /Failed to load resource|ERR_FAILED|ERR_TUNNEL|ERR_NAME_NOT_RESOLVED/;
-
+const NOISE = /Failed to load resource|ERR_FAILED|ERR_TUNNEL|ERR_NAME_NOT_RESOLVED|net::/;
 page.on("console", (m) => {
-  if (m.type() === "error" && !NOISE.test(m.text())) errors.push(m.text());
+  if (m.type() === "error" && !NOISE.test(m.text())) errors.push(`${page.url()}: ${m.text()}`);
 });
-page.on("pageerror", (e) => errors.push("uncaught: " + e.message));
-// In offline mode (SMOKE_LIB_DIR) every off-origin request except the two
-// libraries is aborted on purpose — the deliberate aborts (Supabase's live
-// hydration among them) are the mode working, not failures.
-page.on("requestfailed", (r) => {
-  if (LIB && !r.url().startsWith(base)) return;
-  if (!DECORATION.test(r.url())) failed.push(r.url());
-});
+page.on("pageerror", (e) => errors.push(`${page.url()}: uncaught ${e.message}`));
 
 let pass = true;
 const check = async (label, fn) => {
@@ -113,164 +90,72 @@ const check = async (label, fn) => {
   pass = ok && pass;
 };
 
-// Not `networkidle`: logos and map tiles keep the network busy (or hang, when
-// they're blocked). The app is ready once app.js has finished its boot pass.
-await page.goto(`${base}/index.html`, { waitUntil: "domcontentloaded" });
-await page.waitForFunction(
-  () => typeof STATS !== "undefined" && document.querySelector("#beerBody tr"),
-  null,
-  { timeout: 15000 },
-);
+// Not `networkidle`: logos and map tiles keep the network busy, or hang when
+// they're blocked. A route is ready once its heading has hydrated.
+const visit = async (path, heading) => {
+  await page.goto(`${base}${path}`, { waitUntil: "domcontentloaded" });
+  await page.locator("h1", { hasText: heading }).first().waitFor({ timeout: 30000 });
+};
 
-await check("both libraries loaded", () =>
-  page.evaluate(() => typeof Chart === "function" && typeof L === "object"),
-);
-await check("data.js loaded before app.js", () =>
-  page.evaluate(
-    () =>
-      `${beers.length} reviews · ${breweries.length} breweries · ${Object.keys(BRAND_DOMAINS).length} domains`,
-  ),
-);
-await check("statistics computed", () =>
-  page.evaluate(() => STATS.styleRanked.length > 0 && `avg ${STATS.globalAvg.toFixed(2)}`),
-);
-await check(
-  "header totals rendered",
-  async () => (await page.locator("#hdr-subtitle .tb-stat").count()) > 0,
-);
-await check(
-  "recent activity feed",
-  async () => `${await page.locator("#recentFeed .feed-row").count()} rows`,
-);
-
-await page.click('.nav-item[data-tab="beers"]');
-await check("beers table", async () => `${await page.locator("#beerBody tr").count()} rows`);
-await check("beer grid", async () => `${await page.locator("#beerGrid .beer-card").count()} cards`);
-
-await page.click("#beerBody tr >> nth=0");
-await page.waitForTimeout(200);
-await check("beer detail modal", () =>
-  page.evaluate(
-    () =>
-      document.getElementById("beerModal").classList.contains("open") &&
-      document.getElementById("beerModalTitle").textContent,
-  ),
-);
-await page.keyboard.press("Escape");
-
-await page.click('.nav-item[data-tab="maps"]');
-await page.waitForTimeout(600);
-await check("map rendered", () =>
-  page.evaluate(() => !!document.querySelector(".leaflet-container")),
-);
-
-await page.click('.nav-item[data-tab="insights"]');
-await page.waitForTimeout(400);
-await check("insight charts drawn", () =>
-  page.evaluate(() => {
-    const drawn = Object.values(_charts).filter((c) => c && c.data.datasets.length).length;
-    return drawn > 4 && `${drawn} charts`;
-  }),
-);
-
-// What to try: the shortlist has to render, and — the part with no other way
-// of being checked — an entry has to cross itself off the moment a review of
-// it lands. Nothing marks the entry as drunk; the page works it out.
-await page.click('#insights .subtab[data-subtab="markets"]');
-await page.waitForTimeout(300);
-await check("want-to-try shortlist", async () => {
-  const cards = await page.locator("#wtPicks .wt-card").count();
-  const done = await page.locator("#wtDoneBody tr").count();
-  return cards > 0 && done > 0 && `${cards} to try · ${done} crossed off`;
+await check("home", async () => {
+  await visit("/", "JWAL BREW REVIEW");
+  return true;
 });
-await check("trying a shortlisted beer crosses it off", () =>
-  page.evaluate(() => {
-    const before = document.querySelectorAll("#wtPicks .wt-card").length;
-    const pick = WANT_TO_TRY.find((e) => !wtReviews(e));
-    if (!pick) return "nothing left on the shortlist to test with";
-    beers.push({
-      beer: pick.beer,
-      style: pick.style,
-      origin: pick.origin,
-      abv: pick.abv,
-      method: pick.method,
-      city: "New Rochelle",
-      region: "New York",
-      country: "USA",
-      cc: "US",
-      rating: 4,
-      isNew: false,
-      month: "Aug",
-      monthN: 8,
-      year: 2026,
-    });
-    reloadData();
-    const after = document.querySelectorAll("#wtPicks .wt-card").length;
-    const scored = [...document.querySelectorAll("#wtDoneBody tr")].some(
-      (r) => r.dataset.beer === pick.beer,
-    );
-    beers.pop();
-    reloadData();
-    const restored = document.querySelectorAll("#wtPicks .wt-card").length;
-    return (
-      after === before - 1 &&
-      scored &&
-      restored === before &&
-      `${pick.beer} left the list and scored its guess`
-    );
-  }),
-);
 
-await page.locator("body").click({ position: { x: 5, y: 5 } });
-await page.keyboard.press("Control+k");
-await page.waitForTimeout(200);
-await page.fill("#cmd-input", "duvel");
-await page.waitForTimeout(200);
-await check(
-  "command palette search",
-  async () => `${await page.locator("#cmd-results .cmd-item").count()} results`,
-);
-await page.keyboard.press("Escape");
+await check("beers list", async () => {
+  await visit("/beers", "All beers");
+  await page.locator("main ul > li").first().waitFor({ timeout: 15000 });
+  const rows = await page.locator("main ul > li").count();
+  return rows > 0 && `${rows} reviews`;
+});
 
-// esc(): a name that is markup must reach the page as text, and must still
-// round-trip through the data-beer attribute the click handler reads.
-await check("a name containing markup renders as text", () =>
-  page.evaluate(() => {
-    const name = "Test \"<img src=x onerror=alert(1)>' Ale";
-    beers.push({
-      beer: name,
-      style: "Lager",
-      origin: "US",
-      abv: 5,
-      method: "Can",
-      city: "New Rochelle",
-      region: "New York",
-      country: "USA",
-      cc: "US",
-      rating: 3,
-      isNew: false,
-      month: "Aug",
-      monthN: 8,
-      year: 2026,
-    });
-    reloadData();
-    const row = [...document.querySelectorAll("#beerBody tr")].some((r) => r.dataset.beer === name);
-    const injected = document.querySelectorAll(
-      '#beerBody img[src="x"], #beerGrid img[src="x"]',
-    ).length;
-    beers.pop();
-    reloadData();
-    return row && injected === 0 && "name round-tripped, nothing injected";
-  }),
-);
+await check("insights", async () => {
+  await visit("/insights", "Insights");
+  await page.locator("main section h2").first().waitFor({ timeout: 15000 });
+  const panels = await page.locator("main section h2").count();
+  return panels > 3 && `${panels} panels`;
+});
+
+await check("insights tabs", async () => {
+  for (const tab of ["Taste", "Places", "Next"]) {
+    await page.getByRole("tab", { name: tab }).click();
+    await page.waitForTimeout(150);
+  }
+  return "taste · places · next";
+});
+
+await check("add a beer", async () => {
+  await visit("/add", "Add a beer");
+  return true;
+});
+
+// The Map Rule: a click opens the popup, and must not redraw the pins and
+// close it again. Proved by looking, which is what the invariant can't do.
+await check("map pin popup stays open", async () => {
+  await visit("/map", "Beer map");
+  const pins = page.locator(".leaflet-marker-icon");
+  await pins.first().waitFor({ timeout: 15000 });
+  const count = await pins.count();
+  await pins.nth(Math.floor(count / 2)).click({ force: true });
+  await page.locator(".leaflet-popup").waitFor({ timeout: 5000 });
+  await page.waitForTimeout(800);
+  const open = await page.locator(".leaflet-popup").count();
+  return open === 1 && `${count} pins, popup still open`;
+});
+
+await check("/stats redirects to Insights", async () => {
+  await page.goto(`${base}/stats`, { waitUntil: "domcontentloaded" });
+  await page.locator("h1", { hasText: "Insights" }).first().waitFor({ timeout: 30000 });
+  return new URL(page.url()).pathname === "/insights" && "/stats → /insights";
+});
 
 await browser.close();
-server.close();
+stopVite();
 
 if (errors.length) console.log(`\n  console errors:\n    ${errors.join("\n    ")}`);
-if (failed.length) console.log(`\n  failed requests:\n    ${failed.join("\n    ")}`);
-if (!pass || errors.length || failed.length) {
+if (!pass || errors.length) {
   console.log("\nSmoke test failed.\n");
   process.exit(1);
 }
 console.log("\nSmoke test passed.\n");
+process.exit(0);

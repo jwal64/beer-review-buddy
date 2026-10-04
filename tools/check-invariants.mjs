@@ -61,7 +61,7 @@ const RULES = [
     file: "src/lib/place.ts",
     needs: [[/export function placeLabel/, "`export function placeLabel`"]],
     why:
-      "The app's half of the City, Region, Country format. Deleting it, or " +
+      "The City, Region, Country format. Deleting it, or " +
       "inlining it back into its callers, is the revert CLAUDE.md's " +
       '"Location Rule: City, Region, Country" describes.',
   },
@@ -93,13 +93,6 @@ const RULES = [
       "and a city dot answers with the beer, the place and who made it.",
   },
   {
-    file: "public/stats/app.js",
-    needs: [[/^const placeLabel\s*=/m, "`const placeLabel =`"]],
-    why:
-      "The stats site's half of the same format. Without it the map popup, the " +
-      "beers table, the city cards and the highlights each invent their own.",
-  },
-  {
     file: "package.json",
     needs: [
       [/tools\/roundtrip-snapshot\.mjs/, "`tools/roundtrip-snapshot.mjs` in the check script"],
@@ -110,8 +103,8 @@ const RULES = [
       "projection between them has to be proved lossless and proved in step on " +
       "every push — a stale snapshot shows the log as it was before the last " +
       "edit, with nothing else failing. The same goes for the rules inside " +
-      "app.js: the location format, the crossing-off rule, MIN_N, the canonical " +
-      "location and the shortlist's prediction.",
+      "src/lib/: the location format, the crossing-off rule, MIN_N and the " +
+      "shortlist's prediction.",
   },
   {
     // The workflow names its steps one at a time rather than running the whole

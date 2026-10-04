@@ -1,37 +1,34 @@
 # Beer Review Buddy — Development Guide
 
-Everything lives here now. One repo, hosted by Lovable, holding three parts:
+One repo, hosted by Lovable, holding two parts:
 
 | Part | Where | What it is |
 |------|-------|------------|
 | The app | `src/` | React/TanStack, mobile-first: Home, Beers, Map, Insights. Reads the committed log; no network, no writes. |
-| The stats site | `public/stats/` | The full analytics site — charts, maps, the passport, the want-to-try scorecard. Static files, no build step, served whole at `/stats`. Moved intact from `jwal64/JWAL-BEER-REVIEW`. |
-| The tools | `tools/` | Node scripts: validate, snapshot, round-trip, invariants, SRI, smoke, logo audit. Zero-dependency, except the three that drive a browser (smoke, logo audit, logo fetch). |
+| The tools | `tools/` | Node scripts: validate, snapshot, round-trip, invariants, tests, smoke, logo fetch and sheet. Zero-dependency, except the three that drive a browser (smoke, logo fetch, logo sheet). |
+
+There used to be a third — a static stats site in `public/stats/`, carried over
+from `jwal64/JWAL-BEER-REVIEW`. It showed the same log a second time with its
+own copy of every rule, and the app now shows everything worth keeping from it,
+so it was deleted. `/stats` redirects to `/insights`.
 
 There is **one store**, and it is a file:
 
 **`public/stats/data.js`** is the log. Every review, brewery, location, brand
 domain, Untappd average and want-to-try entry is written there, by hand, and
-what is committed is exactly what the site shows. `npm run snapshot` projects
+what is committed is exactly what the app shows. `npm run snapshot` projects
 it into `src/data/snapshot.json`, which is the same data as flat rows — the
 shape the app wants, since the app is a Vite bundle and cannot read a file out
 of `public/`. Both are committed; `npm run check` fails if they disagree.
 
-There used to be a Supabase database as well, and it is worth knowing why
-there isn't. Carrying `data.js` into it meant a generated migration, applying
-a migration was the host's step rather than this repo's, and it stopped
-happening — silently, for days at a time, across three merges, while every
-check stayed green. Both surfaces read the database and let it win, so a beer
-that had been added, checked, committed and merged was simply not on the site
-and nothing said so. The database has been removed rather than worked around:
-there is no second copy of the log to drift and no migration to apply. One
+There is no database (see "History" at the end for why that matters). One
 manual step remains between merging and being live, and it is Lovable's:
 **Publish** (see step 4 below).
 
 ## Making Changes with Claude
 
-Any edit — a feature in the app, a tweak to the stats site, a new beer —
-follows the same loop, and the loop is what makes it land on Lovable:
+Any edit — a feature in the app or a new beer — follows the same loop, and the
+loop is what makes it land on Lovable:
 
 1. **Start from the latest `main`.** Lovable commits its own edits straight to
    `main`, so fetch and merge it into the working branch first — the tree on
@@ -41,11 +38,11 @@ follows the same loop, and the loop is what makes it land on Lovable:
 
    ```sh
    npm run check          # data rules + round-trip + snapshot + bun.lock + tests (always)
-   npm run test           # just the tests, when that is all you changed
+   npm run test           # just the logic tests, when that is all you changed
    npx tsc --noEmit       # if src/ changed
    npx eslint <files>     # if src/ or tools/ changed; prettier --write first
    npx vite build         # if src/, vite.config.ts or package.json changed
-   npm run smoke          # if public/stats/ changed (needs a browser)
+   npm run smoke          # if src/ changed: every route in a real browser
    ```
 
 4. **Merge to `main`, then Publish in Lovable.** Merging is what gets the
@@ -73,11 +70,9 @@ drives a browser fails with "Executable doesn't exist".
 
 The hook finds the repository from its own path, not from `CLAUDE_PROJECT_DIR`.
 That variable is unset in a session with more than one repository attached, and
-under `set -u` reading it ended the hook before it installed anything — silently,
-and looking exactly like a session that needed no dependencies, because the
-`tools/` checks need none and kept working. If `npx tsc`, `npm run smoke` or
-`npm run fetch-logos` ever reports a missing module, check `node_modules` exists
-before believing anything else.
+under `set -u` reading it ended the hook before it installed anything — silently.
+If `npx tsc`, `npm run smoke` or `npm run fetch-logos` ever reports a missing
+module, check `node_modules` exists before believing anything else.
 
 ### Features that must survive every pass
 
@@ -87,8 +82,8 @@ Lovable in `AGENTS.md`:
 
 1. **The map pop-out stays open** — the two module-scope selects in
    `src/lib/beer-data.ts` ("Map Rule: The Pop-out Stays Open" below).
-2. **One location format everywhere** — `placeLabel` in `src/lib/place.ts` and
-   in `public/stats/app.js` ("Location Rule: City, Region, Country" below).
+2. **One location format everywhere** — `placeLabel` in `src/lib/place.ts`
+   ("Location Rule: City, Region, Country" below).
 3. **The app's data layer** — `src/lib/snapshot.ts` (which must export `BEERS`
    and import `@/data/snapshot.json`) and `src/lib/beer-data.ts` importing from
    it. This is the whole of how the app gets the log. Pointing any of it back
@@ -105,8 +100,7 @@ its merge back into `main` resolved every file it had touched in favour of its
 own copy — so `src/lib/place.ts` was deleted, the hoisted selects were folded
 back inline, and the CLAUDE.md section describing both was dropped, all inside
 a merge commit called "Hardened map & insights" whose stated subject was
-something else entirely. The same pass also deleted an already-applied
-migration file, `supabase/migrations/20260903121905_drop_redundant_logo_constraint.sql`.
+something else entirely.
 
 **So the rule for any pass, Lovable's or a Claude session's, is:** start from
 the current `main`, and when a merge asks which side of a file to keep, keep
@@ -119,43 +113,36 @@ not mean to remove `placeLabel`, don't.
 `tools/app-logic-test.mjs` — plain Node, no network, milliseconds. `npm run
 check` runs it and CI gives it a step of its own; `npm run test` runs it alone.
 
-It pins the rules inside `public/stats/app.js`: `esc()`, both halves of the
-location format, `wtNorm()`, the `MIN_N` helpers, the rating ramp,
-`computeCanonLoc()`, `predictRating()` and `isDisplayNew()`. Three are worth
-knowing about:
+It imports the app's own modules — `src/lib/place.ts`, `src/lib/insights.ts`,
+`src/lib/when.ts` — and pins `placeLabel`, `wtNorm()`, the `MIN_N` helpers,
+`groupRatings()`, `summarise()`, `predictRating()`, `whenLabel()` and
+`isDisplayNew()`. Node 22.18+ strips the types itself, so there is no build
+step; what makes a module loadable is that it **imports nothing at runtime**
+(type-only imports are erased). Keep it that way for anything under test: a
+module that reaches for `@/…`, React or React Query cannot be loaded in plain
+Node. That is why the date helpers live in `when.ts` rather than in
+`beer-data.ts`, which re-exports them.
 
-- **The two `placeLabel`s are compared to each other**, over every location in
-  `drunkLocs`. Nothing else does: the format is written twice, once in
-  `src/lib/place.ts` and once in `app.js`, and a check that only asks whether
-  both exist passes happily while they disagree.
-- **`computeCanonLoc()` is dormant** — every beer is currently reviewed in
-  exactly one city, so none of it runs against the committed data. It starts
-  running by itself the first time a beer is logged in a second city, which is
-  the worst moment to discover an untested rule.
-- **`predictRating()`'s `MIN_N` fallback is invisible.** A wrong one still
-  returns a plausible number, so nothing on the page would look broken.
+`predictRating()`'s `MIN_N` fallback is worth knowing about: a wrong one still
+returns a plausible number, so nothing on the page would look broken.
 
-The declarations are lifted out of `app.js` and evaluated by `loadAppScope()`
-in `tools/load-data.mjs`, so the tests run the site's own definitions rather
-than a copy, and app.js keeps its no-imports, no-exports shape. A test that
-fails with "app.js has no top-level declaration of …" means the declaration was
-renamed or indented, not that the rule broke.
+`tools/roundtrip-snapshot.mjs` is the other half of the safety net: the app
+reads `src/data/snapshot.json` rather than `data.js`, so it sends the data
+through the projection and back and fails if anything comes back different —
+and fails if the committed snapshot is out of step with `data.js`. A stale
+snapshot is the one way the app can show the wrong thing, and it is silent, so
+`npm run check` refuses it.
 
-`tools/roundtrip-snapshot.mjs` is the other half of the safety net, and matters
-more than it used to: the app reads `src/data/snapshot.json` rather than
-`data.js`, so it sends the data through the projection and back and fails if
-anything comes back different — and fails if the committed snapshot is out of
-step with `data.js`. A stale snapshot is the one way the app can now show the
-wrong thing, and it is silent, so `npm run check` refuses it.
+`npm run smoke` (`tools/smoke-test.mjs`) starts `vite dev` and drives Chromium
+through every route at phone size: each heading renders with no uncaught
+error, the beers list and the insight panels fill in, a map pin's popup is
+still open after the click that opened it, and `/stats` lands on Insights. It
+uses the dev server because the production build targets Cloudflare Workers.
 
 `check-invariants.mjs` asks whether a feature is still *there*; the tests ask
 whether it still *behaves*. Adding a tool to the `check` script also requires a
 step for it in `.github/workflows/checks.yml`; `check-invariants.mjs` compares
-the two and fails when they drift.
-
-`npx tsc --noEmit` type-checks `src/`, and `npm run smoke` drives the built
-page in a browser. Nothing yet covers the React components or the drawing half
-of `app.js`.
+the two and fails when they drift. `npx tsc --noEmit` type-checks `src/`.
 
 ### Git rules (Lovable)
 
@@ -173,11 +160,11 @@ only.
 - **`package.json` changes need `bun.lock` updated too** (`bun install`).
   Lovable builds with bun; a manifest the lockfile disagrees with fails its
   install. CI and the session hook use npm, which is fine — just keep both
-  files in the same commit. `npm run check` enforces this now
+  files in the same commit. `npm run check` enforces this
   (`tools/check-lockfile.mjs`), so a forgotten `bun install` fails here rather
   than in a Lovable deploy after the merge. It compares the two files as text:
-  `bun install --frozen-lockfile` cannot be the check, because eleven
-  resolution URLs in `bun.lock` point at Lovable's own registry mirror
+  `bun install --frozen-lockfile` cannot be the check, because some resolution
+  URLs in `bun.lock` point at Lovable's own registry mirror
   (`europe-west4-npm.pkg.dev/lovable-core-prod`), which answers 403 to anyone
   outside their sandbox. Editing only the `scripts` block needs no
   `bun install` — the lockfile records dependencies, and the check only reads
@@ -191,15 +178,12 @@ only.
 - **`src/lib/snapshot.ts` owns the app's row types.** They are hand-written
   and describe exactly what `npm run snapshot` emits. Add a field to a row and
   it is added in both places, or `npx tsc --noEmit` says so.
-- **The stats site stays dependency-free.** `public/stats/` is plain browser
-  JavaScript served as-is — no imports in `data.js`/`app.js`, no build step,
-  CDN scripts pinned with SRI hashes (`npm run sri` re-derives them; never
-  hand-write one). `data.js` and `app.js` are the whole of it — there is no
-  module code there at all now, and nothing on the page fetches anything but
-  the two pinned CDN libraries.
-- **Secrets stay out.** There is nothing to authenticate to any more, so
-  there is no key in the tree at all. Keep it that way: a feature that needs a
-  secret needs a conversation first.
+- **`data.js` stays plain data.** No imports, no exports, no functions —
+  `tools/load-data.mjs` executes it in an empty context, so anything reaching
+  for `window`, `fetch` or `document` fails the check.
+- **Secrets stay out.** There is nothing to authenticate to, so there is no
+  key in the tree at all. Keep it that way: a feature that needs a secret
+  needs a conversation first.
 
 ## Standard Operating Procedure: Adding a Beer
 
@@ -225,8 +209,7 @@ Two ways in, and they meet in the same place — an edit to `data.js`.
    be: a brewery's coordinates, its language, a native name and a fetched logo
    are research, not form fields, which is exactly what the screenshot is handed
    over for.
-2. **Straight to a Claude session** — the screenshot and where it was drunk,
-   the way it has always worked.
+2. **Straight to a Claude session** — the screenshot and where it was drunk.
 
 Either way the work below is the same. **When starting from an issue, close it
 with the commit** (`Closes #N`) so the queue drains.
@@ -238,19 +221,13 @@ places already in the log rather than a free-text box.
 ### The short version
 
 ```sh
-# 1. edit public/stats/data.js — the review, the brewery, the domain, the city
+# 1. edit public/stats/data.js — the review, the brewery, the domain, the facts, the city
 npm run fetch-logos        # 2. the logo (needs internet); then look at it:
 npm run logo-sheet
 npm run check && npm run snapshot   # 3. check, then write what the app reads
-# 4. commit all of it, merge to main
-# 5. the owner clicks Publish → Publish changes in Lovable. That is the publish button.
+# 4. commit all of it, open a PR into main
+# 5. once merged, the owner clicks Publish → Publish changes in Lovable
 ```
-
-**It is live when the owner publishes in Lovable after the merge.** Both
-surfaces read the committed log and nothing else — the stats page loads
-`data.js` directly, the app the snapshot projected from it — so there is no
-database to be behind and no migration to apply. Step 6 is the long version
-of why that is worth saying out loud.
 
 Two things no check can do for you, both worth thirty seconds: **look at the
 logo sheet** — nothing automated tells a brand's mark from a photograph of a
@@ -282,17 +259,15 @@ next fetch overwrites it.
  month:"Mar", monthN:3, year:2026},
 ```
 
-Append it at the end of `beers[]` (the list reads as a diary, oldest first),
-under its month's comment header.
 
 **Retro reviews.** A beer drunk before the log began and graded from memory
 gets `retro:true` after `year` (and normally `isNew:false`). Its
 `month`/`monthN`/`year` are the month it was *logged*, which keeps the diary
-in order, but no surface shows that date: both print "Retro" (`whenLabel()` in
-`app.js` and in `src/lib/beer-data.ts`), the review timeline opens with it, and
-it stays out of every month-by-month chart, the recent feed, the trend and
-the passport's "first visited". It still counts in every average and ranking. The existing lines are written with padded
-columns; a hand-added line does not need to match the padding.
+in order, but the app never shows that date: it prints "Retro" (`whenLabel()`
+in `src/lib/when.ts`) and keeps the review out of every month-by-month chart
+and the recent feed. It still counts in every average and ranking. The
+existing lines are written with padded columns; a hand-added line does not
+need to match the padding.
 
 ### UK Exception: Split GB by Constituent Country
 
@@ -332,8 +307,8 @@ the beer's name to its `beers` string (` · `-separated) and its rating to
 **Point the coordinates at the brewery, not at its city.** Two breweries in one
 city that both carry the city-centre point land on the same pixel at every
 zoom, and the one written later paints over the earlier one and takes its
-clicks with it — so that brewery's beers have no reachable pin, on the app's
-map or the stats site's, and nothing about the page looks wrong. It has
+clicks with it — so that brewery's beers have no reachable pin on the map,
+and nothing about the page looks wrong. It has
 happened twice, to Amstel under Heineken and to Miller Lite under Pabst, both
 times by copying the coordinates of the brewery already there. `npm run check`
 now fails on two breweries sharing a point.
@@ -344,8 +319,8 @@ are written out, and `npm run check` fails if they disagree with the reviews.
 
 ### Step 2.5: Add the brand domain to `BRAND_DOMAINS` (REQUIRED)
 
-A beer with no entry renders the 🍺 placeholder forever — in the app and on the
-stats page both; there is no name-based guess behind it.
+A beer with no entry and no logo file renders a monogram forever; there is no
+name-based guess behind it.
 
 ```js
 "Radeberger Pilsner":"radeberger.de",
@@ -456,7 +431,8 @@ and the round trip all carry it, so `npm run snapshot` after editing.
 
 Without it the maps drop the review, and `npm run check` fails.
 
-### Step 5: Check, publish the snapshot, commit
+
+### Step 5: Check, write the snapshot, commit
 
 ```sh
 npm run check       # every rule above, plus the projection round trip
@@ -467,74 +443,41 @@ npm run snapshot    # writes src/data/snapshot.json — what the app reads
 forgotten `npm run snapshot` is caught here rather than by the app quietly
 showing the log as it stood before your edit.
 
-Commit `data.js` and `src/data/snapshot.json` together, and merge to `main`.
+Commit `data.js` and `src/data/snapshot.json` together, and open the PR.
 
 ### Step 6: Publish in Lovable
 
 Merging syncs the change into Lovable; it does not deploy it. The owner opens
 Lovable's publish dialog and clicks **Publish changes**, and then it is live.
-Tell the owner this in the reply that reports the merge. Toasted Lager sat
+Tell the owner this in the reply that reports the PR. Toasted Lager sat
 merged, green and synced but off the site on 2 October for exactly this
-reason, while this file claimed the merge was the whole of publishing.
-
-After that, both surfaces read the committed log and nothing else:
-
-| Surface | Reads |
-|---------|-------|
-| the stats site, `/stats` | `public/stats/data.js`, as a `<script>` |
-| the app | `src/data/snapshot.json`, bundled |
-
-No database, no migration to apply, and nothing that can be a beer behind
-once it is published. The app makes no data request at all,
-which is also why it works offline and paints instantly.
-
-This is worth spelling out because for a long stretch it was the opposite, and
-that cost more than anything else in this project. Adding a beer used to end
-with "merge to `main` — Lovable applies the migration", and that last step is
-the one part that did not happen in this repo and that nothing here could
-force. It silently stopped happening on 2 September and stayed stopped across
-three merges. Both surfaces let the database win — the stats page painted the
-new beer and then *replaced it with the database's answer*, and the app read
-Supabase and nothing else — so a beer that had been added, checked, committed
-and merged appeared for one frame and then vanished, or never appeared at all.
-Every check was green throughout, because every check was asking whether the
-file was right, and the file was right.
-
-The fix was to stop having two copies of the log. The database is gone, along
-with the 22 migrations, the migration generator, the live-sync verifier and
-its workflow, the nightly sync and the Supabase client. What is committed is
-what is shown.
+reason.
 
 ### Renaming a beer
 
-Rename it in `data.js`, run `npm run snapshot`, commit both. That is all — the
-rename is the whole change, because there is only one copy of the log.
-
-This used to be a hazard worth a section of its own: reviews were matched on
-`name` + `drank_on`, the generated SQL never deleted, so renaming a beer that
-a migration had already applied inserted the new name and stranded the old row,
-which then showed on the site forever as a review `data.js` had no record of.
-Nothing can strand now.
+Rename it in `data.js` — in `beers[]`, the brewery's `beers` string and every
+keyed map (`BRAND_DOMAINS`, `BRAND_LOGOS`, `BEER_FACTS`, `UNTAPPD_GLOBAL_AVGS`)
+— run `npm run snapshot`, commit both. `npm run check` flags any key left
+pointing at the old name.
 
 ## Standard Operating Procedure: The Want-To-Try Shortlist
 
-The `want_to_try` table is the standing list of beers not yet drunk; it reaches
-the site as `WANT_TO_TRY` in `public/stats/data.js`. The "What to try" sub-section of Insights
-renders it, and `predictRating()` scores each entry against my taste so far.
+`WANT_TO_TRY` in `public/stats/data.js` is the standing list of beers not yet
+drunk. The **Next** tab of Insights renders it, and `predictRating()` in
+`src/lib/insights.ts` scores each entry against my taste so far.
 
 ### Nothing is ever removed from it
 
-An entry is not deleted when the beer gets drunk. `drawWantToTry()` looks for a
-review of each entry on every render, and the answer decides which half of the
-section it appears in:
+An entry is not deleted when the beer gets drunk. `scoreShortlist()` in
+`src/lib/insights.ts` looks for a review of each entry on every render, and the
+answer decides which half of the tab it appears in:
 
 - **no review** → it stays on the shortlist, ranked by predicted rating
 - **a review** → it leaves the shortlist and appears under "Crossed off",
   where the guess made beforehand is scored against the rating given after
 
 So the only data-entry step when you finally drink something on the list is the
-normal one: add the review. The section updates itself, the KPI counts move, and
-the calibration chart gains a bar. Deleting the row instead would throw away the
+normal one: add the review. The tab updates itself and the counts move. Deleting the row instead would throw away the
 prediction, which is the only thing that makes the scorecard worth having.
 
 ### Adding an entry
@@ -554,7 +497,7 @@ like anything else. `untappd` is the world's average, from the same source as
 
 ### `as` — when the shelf name isn't the logged name
 
-Crossing off is done by name, through `wtNorm()` in `app.js`: case, accents,
+Crossing off is done by name, through `wtNorm()` in `src/lib/insights.ts`: case, accents,
 apostrophes and punctuation are flattened, and what's left has to match word for
 word. That is deliberately strict — a looser rule would let *Peroni Original*
 cross off *Peroni Nastro Azzurro*.
@@ -580,43 +523,6 @@ already-crossed-off beer's guess is not frozen at the value it had on the day.
 The `MIN_N` rule applies: a style or country average under three reviews falls
 back to the global average rather than bending the prediction toward one pour.
 
-## Rendering Rule: `esc()` Everything
-
-`app.js` builds HTML with template literals and `innerHTML`. **Every value that
-comes from the data goes through `esc()` first** — beer names, brewery names,
-cities, regions, styles, methods:
-
-```js
-`<div class="beer-card" data-beer="${esc(b.beer)}">${esc(b.beer)}</div>`
-```
-
-Not decoration: a beer named `Smithwick's` or a brewery with a `<` in its name
-closes the attribute early and takes the rest of the row with it. `esc()` handles
-`& < > " '` and stringifies whatever it's given, so wrapping a number is never
-wrong — when in doubt, wrap.
-
-Two exceptions, both deliberate:
-
-- **Canvas text** — Chart.js labels and tooltips are drawn, not parsed. Escaping
-  there renders a literal `&amp;`.
-- **Values that are already HTML** — `logoImg(...)`, a nested `.map(...).join('')`,
-  a `cond ? '<span>' : ''`. Escaping those prints the tags.
-
-Leaflet's `bindTooltip` / `bindPopup` **do** parse HTML: escape there.
-
-## CDN Rule: Pin and Hash
-
-Chart.js and Leaflet load from jsDelivr at an exact version with an `integrity`
-hash. Changing either version means re-deriving the hash:
-
-```sh
-npm run sri -- --write
-```
-
-`npm run sri` takes the hash from the npm registry, not from the CDN, and
-verifies the download against the integrity npm published for that version. A
-wrong hash means the browser refuses the file and the charts or the map simply
-never appear — so never hand-write one.
 
 ## Location Rule: City, Region, Country
 
@@ -624,26 +530,15 @@ A place is written one way everywhere: **City, State/Region, Country** —
 "New Rochelle, New York, United States". Not "City, Country" in one place and
 "City, Region" with the country on its own line in the next.
 
-Both surfaces have a helper, and neither one should be inlined again:
-
-| Surface | Helper |
-|---------|--------|
-| the app | `placeLabel(row)` in `src/lib/place.ts` — plain text; the caller adds the flag |
-| the stats site | `placeLabel(city, region, country, cc, opts)` in `app.js` — returns escaped HTML with the flag in front of the country |
-
-Both drop a part the row doesn't have rather than leaving a dangling comma. A
-city and its region can share a name by coincidence rather than identity — New
-York City sits in New York State, Antwerp the city in Antwerp the province —
-so neither helper collapses a region that repeats its city: "New York, New
-York, United States" and "Antwerp, Antwerp, Belgium" are both printed in full,
-because dropping the second one made "New York, USA" read as the state rather
-than the city that was actually drunk in. The stats-site helper takes two
-options: `flag:false` where a flag would be noise, and `lead:false` for the two
-places that have already printed the city in bold above.
-
-Table **columns** are the exception, and stay split: the beers table's City,
-Region and Country columns already read as the format across the row, and
-folding them into one cell would only make the neighbouring column a repeat.
+The helper is `placeLabel(row)` in `src/lib/place.ts` — plain text; the caller
+adds the flag. Do not inline it again. It drops a part the row doesn't have
+rather than leaving a dangling comma. A city and its region can share a name
+by coincidence rather than identity — New York City sits in New York State,
+Antwerp the city in Antwerp the province — so it never collapses a region that
+repeats its city: "New York, New York, United States" and "Antwerp, Antwerp,
+Belgium" are both printed in full, because dropping the second one made
+"New York, USA" read as the state rather than the city that was actually drunk
+in.
 
 ## Map Rule: The Pop-out Stays Open
 
@@ -668,116 +563,61 @@ next to its `label`: the heading names the place in full ("Leuven, Flemish
 Brabant, Belgium") while the rows are still matched on the bare city.
 
 Both of these are guarded by `node tools/check-invariants.mjs`, which
-`npm run check` runs — see "Features that must survive every pass" below.
+`npm run check` runs, and the popup staying open is proved in a browser by
+`npm run smoke`, which clicks a pin and checks the popup is still there —
+see "Features that must survive every pass" above.
 
-## Location Rule: Canonical / Most-Unique Location
 
-When the **same beer** (same `beer` name) has been reviewed in **more than one
-consumption city**, all location-based **aggregation/display** attributes that beer to a
-single **canonical location** — its **most unique** city.
-
-- **Most unique = rarest-visited**: the city with the **fewest total reviews** in the
-  database wins. All of the beer's reviews are folded into (merged onto) that one city.
-- **Home bases are never canonical when an alternative exists**: **New Rochelle** and
-  **New York, New York** are home markets and are never chosen as the canonical location
-  for a beer as long as that beer has any other consumption city. (If a beer's only cities
-  are both home cities, the standard rarest-visited metric decides between them.)
-- **Tie-breaking** is deterministic: `[homePenalty, rawReviewCount, cityName]` — non-home
-  beats home, then fewest reviews, then alphabetical.
-
-### What this affects (and what it doesn't)
-
-- **Relabeled (aggregate views)**: CITY tab chart/cards, the "drunk" map (dots, legend,
-  table), the **markets** count, and TOP MARKET. A folded home-city contribution may cause
-  the markets count to drop — this is intended.
-- **Left honest (per-session logs)**: the main beers table rows, the beer-detail modal's
-  "ALL SESSIONS" list, and the "LATEST" activity readout still show each session's **true**
-  consumption city. The rule never rewrites where an individual pour actually happened.
-
-### Data-entry implication
-
-Keep recording each review's **real** consumption city/region/country/cc as
-normal — do **not** pre-apply this rule when adding data. It is enforced at display time in
-`app.js` by `computeCanonLoc()` / the `CANON_LOC` map (recomputed in `refreshStats()`),
-so it stays correct automatically as data changes. Ensure any consumption city involved
-exists in `drunkLocs[]` as usual.
-
-> Note: as of the latest data, every beer is reviewed in exactly one city, so this rule is
-> currently dormant and changes nothing visible; it activates automatically the first time a
-> beer is logged in a second city.
+Leaflet's `bindPopup` parses HTML, so every data value written into a popup
+goes through the `esc()` at the top of `src/routes/map.tsx`. Everywhere else
+React escapes for you.
 
 ## Ranking Rule: Minimum Sample Size (`MIN_N`)
 
-A group needs **at least `MIN_N` reviews (currently 3)** before its average is allowed to
-win or lose a ranking. Without this, a country visited once tops the table on a single
-generous pour, and a style tried once becomes "my weakest".
+A group needs **at least `MIN_N` reviews (currently 3)** before its average is
+allowed to win or lose a ranking. Without this, a country visited once tops the
+table on a single generous pour, and a style tried once becomes "my weakest".
 
-`MIN_N` and its helpers live at the top of the stats section in `app.js`:
+`MIN_N` and its helpers live at the top of `src/lib/insights.ts`:
 
 | Helper | What it does |
 |--------|--------------|
 | `MIN_N` | The threshold. **The only place the number is written.** |
 | `thin(n)` | `true` when a count is below the threshold |
-| `rankBy(avgFn, countFn)` | Sort comparator: qualified groups first (best average first), thin ones after |
-| `rankable(list, countFn)` | The slice that may be called best/worst; falls back to the whole list if nothing qualifies |
-| `barFill(hex, n)` | Mutes a chart bar's color when the group is thin |
-| `nLabel(n)` | `"(6)"` — the sample size appended to a chart label |
-| `ttWithN(n)` | Chart tooltip that states the sample size and flags thin groups |
-| `stampMinNHints()` | Writes "3+ reviews to rank" into every `[data-minn]` caption |
+| `rankBy(a, b)` | Sort comparator: qualified groups first (best average first), thin ones after |
+| `rankable(groups)` | The slice that may be called best/worst; falls back to the whole list if nothing qualifies |
+| `groupRatings(rows, key, rating)` | Average per key, already ranked |
 
-### What this affects
+It decides the order of every style, country, city, language and brewery list
+on Insights; which group a headline may call best or worst; whether a seasonal
+cell or a taste-profile trait shows a verdict or "need 3"; and, in
+`predictRating()`, whether a style or country average counts as signal at all
+— below `MIN_N` that term falls back to the global average.
 
-- **Ordering**: style, country, city, brewing-language and brewery lists sort qualified
-  first, then thin. `STATS.styleRanked[0]` etc. are therefore always a real result.
-- **Headline callouts** (Highlights panel): best/worst style, top country, top city and
-  best serving method are picked from the qualified subset only.
-- **Country rankings over time** (bump chart): ranks the **running average** through each
-  month, and a country enters the chart the month its cumulative count reaches `MIN_N`.
-- **Seasonal heatmap**: cells under `MIN_N` are left uncolored — the color reads as a
-  verdict, so it's withheld until the sample supports one.
-- **Taste profile**: a trait below `MIN_N` shows "n reviews · need 3" instead of a bar.
-- **What to try** (`predictRating()` + the rationale chips on a shortlist card): a style
-  or country average only counts as signal at `MIN_N`+; below that the term falls back to
-  the global average and the chip claiming "I like X" is not written at all.
-
-### What it does not affect
-
-Nothing is hidden or dropped. Thin groups still chart, still list, and still count toward
-the totals — they sort to the tail and render muted (`.rank-thin` / `.rb-thin` in
-`style.css`). Per-beer views (the beers table, the detail modal, the contrarian chart,
-best/worst pour of a month) are single observations, not averages, so the rule never
-touches them.
-
-### Changing the threshold
-
-Edit `MIN_N` in `app.js` and everything follows, including the on-screen captions —
-they are generated from the constant via `data-minn`, so no text needs updating. Do **not**
-hardcode "3" in HTML or CSS.
+Nothing is hidden or dropped: thin groups still chart, still list and still
+count toward the totals — they sort to the tail. Per-beer views (the beers
+list, a beer's sheet, "my rating vs the world") are single observations, not
+averages, so the rule never touches them. Change the threshold in one place;
+captions are generated from the constant, so do not hardcode "3" anywhere.
 
 ## Logos
 
 **Every beer's logo is a file in this repo.** `public/stats/logos/`, one per
 beer name, named in `BRAND_LOGOS` in data.js and in the `logo` column of
 `brand_domains` behind it. That is where a logo comes from: the same picture on
-every render, working offline, and nobody else's to withdraw.
+every render, working offline, and nobody else's to withdraw. (They used to be
+fetched at page load, until Brandfetch began refusing the public client ID and
+97 of 101 beers rendered Google's default grey globe for a month.)
 
-It was not always. Until this changed, every logo was fetched at page load from
-Brandfetch, then Google, then Icon Horse — and Brandfetch began answering 403
-to the public client ID both surfaces embedded, for every domain and every URL
-shape. The first tier resolved nothing for anybody. 97 of 101 beers fell
-through to Google's *default* 16px favicon and the site rendered a hundred
-identical grey globes for a month. Nothing in the repo had changed; nothing in
-the repo could have prevented it, because every check there was only asked
-whether a beer had a *domain*.
+### The chain
 
-### The chain now
+**committed `logos/` file → Google favicons (256) → Icon Horse → DuckDuckGo → monogram**
 
-**committed `logos/` file → Google favicons (256) → Icon Horse → DuckDuckGo → 🍺**
-
+`beerLogoSources()` in `src/lib/logos.ts` builds it and `BeerLogo` walks it.
 The first tier answers for every beer that has been fetched, so the rest is
-what happens to a beer added through the app's own form before
-`npm run fetch-logos` has run for it. Still tiered by *source*, not by domain:
-every domain a beer lists is tried at each tier before dropping to the next.
+what happens to a beer whose logo has not been fetched yet. Tiered by
+*source*, not by domain: every domain a beer lists is tried at each tier before
+dropping to the next.
 
 Two details in those URLs are load-bearing. Google serves favicons at 16, 32,
 64, 128 and 256; asked for a size it does not serve it answers the 16px default
@@ -839,101 +679,28 @@ recognising if they come back:
 - **a photograph** — a site's biggest header image is often a lifestyle shot.
   Only an element that *calls itself* a logo is taken now.
 
+
 ### What checks what
 
 | What | When | Catches |
 |------|------|---------|
 | `npm run check` | on every push, in CI | a beer with no `BRAND_DOMAINS` entry, **and a beer with no committed logo file** — both are errors |
-| `[DOMAIN CHECK]` console warning | automatically on load | a missing domain, in the browser |
-| `npm run logos` | run it yourself, and monthly in CI | what each beer *actually* resolves to in a browser |
-| `npm run logo-sheet` | after any fetch | whether the thing that resolved is the brand's logo at all |
-
-`npm run logos` (`tools/audit-logos.mjs`) drives `auditLogos()` in headless
-Chromium and exits non-zero on anything that didn't resolve. The **Logo audit**
-workflow runs it on the 1st of each month and opens a `logo-audit` issue
-listing what fell through, closing it once everything resolves again. Read its
-result for two things: **`PLACEHOLDER`** (no source answered; the beer shows 🍺)
-and **`suspect`** (something answered, but at favicon size — a generic globe).
-With a committed file for every beer, both should now be empty; either one
-means a file went missing or a `BRAND_LOGOS` entry points nowhere.
-
-The placeholder is also what you see with no network, or behind a proxy that
-blocks those CDNs — which is why `npm run logos` probes a few brands that
-certainly have logos before auditing anything, and reports the connection
-rather than printing a hundred false failures. It exits 0 on that (a skip, not
-a pass); `--strict` makes it a failure instead, which is what CI uses so a run
-that checked nothing can't read as all-clear.
+| `npm run logo-sheet` | after any fetch | whether the file is the brand's logo at all |
 
 `tools/probe-logo-sources.mjs` is the tool for the next time a whole tier goes
 quiet: it asks every candidate source shape what it actually returns for a real
 brand domain — status, type, bytes, pixel size — which is how the 403 and the
 `sz=512` default were found.
 
-## Design System: Dark
+## Design
 
-A calm, modern dark product surface — deep neutral charcoal ground, softly
-elevated cards, one honey accent, rich (never neon) data color. Hierarchy comes
-from size, weight and muted text. Set throughout in **Plus Jakarta Sans**, one
-family, sentence case.
-
-Three things are deliberately absent, because together they read as a trading
-terminal rather than a product: **monospace type**, **all-caps tracked labels**,
-and **glow**. Don't reintroduce them.
-
-### Where a color is written
-
-**`:root` in `style.css` is the only place.** Do not hardcode a hex anywhere else
-— not in CSS rules, not in inline styles in `app.js`.
-
-`app.js` reads the tokens off `:root` at boot through `cssVar()` and freezes
-them into `THEME` (canvas and Leaflet can't resolve CSS variables). So changing a
-token in `style.css` retints the charts, map markers and passport stamps too, with
-nothing to keep in sync by hand. The literals in the `THEME` object are fallbacks
-for the case where the stylesheet hasn't landed — update them alongside the CSS.
-
-| Token | Role |
-|-------|------|
-| `--bg` | the charcoal ground |
-| `--surface` | cards and panels, one step up |
-| `--surface-2` / `-3` / `-4` | hovers, wells, tracks |
-| `--border` / `--border-strong` | hairlines; `-strong` for fields and edges |
-| `--text` / `--text-2` / `--text-3` | body, secondary, captions |
-| `--accent` / `--accent-hi` | honey: `--accent` fills and draws, `--accent-hi` is the lighter cut for text |
-| `--on-accent` | the near-black ink for text sitting *on* the accent |
-| `--pos` `--neg` `--warn` `--info` `--purple` | semantics |
-| `--edge` | the whisper of a top edge on raised surfaces |
-| `--glow` | a soft focus ring — *not* a bloom |
-
-`--edge` is **composed, never replaced**: a rule that adds a shadow on hover must
-restate it (`box-shadow: var(--edge), var(--shadow-md)`) or the card goes flat.
-
-### Type
-
-One family, one rule worth knowing: Plus Jakarta Sans ships an unusually narrow
-word space (~0.16em against a typical 0.25em) which closes up entirely at caption
-sizes — "Average rating" renders as one word. `body` sets `word-spacing: 0.075em`
-to correct it, and body tracking stays at normal so nothing eats back into it.
-Negative tracking belongs only on large type (`.kpi-val`, `.tb-title`,
-`.merged-section-head`).
-
-`--fs-label` (12px) is the caption size: tile labels, table heads, section
-markers. Sentence case, in `--text-3`.
-
-### Categorical palettes (`app.js`)
-
-Rich, evenly spaced hues held deliberately short of neon — full saturation on a
-dark ground is what tips a chart into looking like a trading screen. A new entry
-should sit at the same middle brightness.
-
-| Constant | Covers |
-|----------|--------|
-| `sC` | beer style → color (add a color here for any new `style`; `npm run check` fails without it) |
-| `rC(r)` | rating → color ramp; mirrors the `.r5`…`.r2` badges in `style.css` |
-| `MONTH_COLORS`, `BUMP_COLORS`, `LANG_COLORS`, `STAMP_INKS` | month, bump-chart, brewing-language and passport series |
-
-`barFill(hex, n)` dims an under-`MIN_N` bar to 70% of its own color — no further.
-Alpha over a dark ground darkens toward mud, and the sort order, the `(n)` in the
-label and the tooltip already carry the "not ranked" reading.
+The app's theme lives in `src/styles.css` as CSS variables (`--background`,
+`--card`, `--primary`, `--muted-foreground`, `--chart-1`…`--chart-5`, …) and
+reaches components through Tailwind (`bg-card`, `text-primary`). Use the
+tokens; do not hardcode a colour in a component. The one exception is the
+categorical style palette, `STYLE_COLORS` in `src/lib/style-colors.ts` — every
+`style` in the log needs an entry there, and `npm run check` fails without one.
+Type is Manrope for text and Sora for display (`font-display`).
 
 ## Language Code Reference
 
@@ -972,3 +739,23 @@ They are stored as `native_name` on the brewery row:
 | Erdinger Weißbier       | Erdinger Weißbier  | German   |
 | Hofbräu Münchner Weiße  | Hofbräu Münchner Weiße | German |
 | Almaza Pilsener         | ألمازة             | Arabic   |
+
+
+## History
+
+**Why there is no database.** Carrying `data.js` into a Supabase database meant
+a generated migration, applying a migration was the host's step rather than
+this repo's, and it stopped happening — silently, from 2 September, across
+three merges, while every check stayed green. Every surface read the database
+and let it win, so a beer that had been added, checked, committed and merged
+appeared for one frame and then vanished, or never appeared at all. Every check
+was asking whether the file was right, and the file was right. The database,
+its 22 migrations, the migration generator, the live-sync verifier, the nightly
+sync and the client are all gone: what is committed is what is shown.
+
+**Why there is no stats site.** `public/stats/` was a second, dependency-free
+rendering of the same log — charts, maps, a passport — with its own copy of the
+location format, the date label, the logo chain, `MIN_N` and the prediction,
+kept in step with the app by tests that compared the two. Every rule written
+twice was a rule that could disagree with itself. The app had grown to cover
+it, so the site was deleted and the tests now pin the app's one copy.

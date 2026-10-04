@@ -7,8 +7,8 @@ the standing rules live in CLAUDE.md and AGENTS.md.
 
 - One committed log, `public/stats/data.js`, projected into
   `src/data/snapshot.json` for the app. No database.
-- Two surfaces: the React app (Home, Beers, Map, Insights) and the static
-  stats site at `/stats`.
+- One surface: the React app (Home, Beers, Map, Insights). `/stats`
+  redirects to Insights.
 - A beer is added by a Claude session following `/add-beer`, as a pull
   request; merging syncs it into Lovable, **Publish** makes it live.
 - Every logo is a committed file under `public/stats/logos/`.
@@ -18,13 +18,14 @@ the standing rules live in CLAUDE.md and AGENTS.md.
 - [x] **Cleanup** — delete the `supabase/` remains, the unused generated
       client in `src/integrations/supabase/` and the `@supabase/supabase-js`
       dependency; rewrite this file.
+- [x] **Delete the static site** — `public/stats/` is down to the log and the
+      logos, and `/stats` redirects to `/insights`. The logic tests pin the
+      app's own `src/lib/`. The SRI tool and the browser logo audit are gone,
+      and the smoke test drives the app (and proves the map popup stays open).
 - [ ] **The log becomes `src/data/log.ts`** — a typed module the app imports
       directly. The projection moves into `src/lib/rows.ts`; `snapshot.json`
-      and the round-trip tooling go. Logos move to `public/logos/`.
-- [ ] **Delete the static site** — remove `public/stats/` and redirect
-      `/stats` to `/insights`. Re-point the logic tests at `src/lib/`. Drop
-      the SRI tool and the browser logo audit; point the smoke test at the
-      app. Rewrite CLAUDE.md around one app.
+      and the round-trip tooling go. Logos move to `public/logos/`, and
+      `public/stats/` goes.
 - [ ] **Passport & gamification** — a `/passport` tab with badges, country
       and continent stamps, monthly streaks and yearly goals (a `GOALS`
       entry in the log), a style-bingo card, and "next stamp" picks from the

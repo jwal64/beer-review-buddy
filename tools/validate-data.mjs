@@ -7,7 +7,11 @@
 // Errors fail the run; warnings are printed and tolerated.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadData, loadStyleColors, loadAppConst, ROOT } from './load-data.mjs';
+import { loadData, ROOT } from './load-data.mjs';
+// The app's own style palette and name normaliser, imported rather than copied
+// so the check and the app can never disagree. Node strips the types itself.
+import { STYLE_COLORS as sC } from '../src/lib/style-colors.ts';
+import { wtNorm } from '../src/lib/insights.ts';
 
 const METHODS = ['Bottle', 'Can', 'Draft', 'Nitro'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
@@ -23,11 +27,6 @@ const isNum = v => typeof v === 'number' && Number.isFinite(v);
 const isQuarter = v => isNum(v) && v >= 0 && v <= 5 && Math.round(v * 4) === v * 4;
 
 const D = loadData();
-const sC = loadStyleColors();
-// app.js's own name normaliser — the one the page uses to decide whether a
-// shortlist entry has already been drunk. Loaded rather than copied so the two
-// can never disagree about it.
-const wtNorm = loadAppConst('wtNorm');
 const { FLAGS, CNAMES, beers, drunkLocs, breweries, BRAND_DOMAINS,
         UNTAPPD_GLOBAL_AVGS, UNTAPPD_LAST_REFRESHED, UNTAPPD_REFRESH_INTERVAL_DAYS,
         WANT_TO_TRY } = D;
@@ -57,7 +56,7 @@ beers.forEach((b, i) => {
   const where = `beers[${i}] ${b.beer || '(unnamed)'}`;
   if (!isStr(b.beer)) err(where, 'beer name is missing');
   if (!isStr(b.style)) err(where, 'style is missing');
-  else if (!sC[b.style]) err(where, `style "${b.style}" has no colour in the sC map in app.js`);
+  else if (!sC[b.style]) err(where, `style "${b.style}" has no colour in STYLE_COLORS in src/lib/style-colors.ts`);
   checkCC(where, 'origin', b.origin);
   if (!isNum(b.abv) || b.abv <= 0 || b.abv > 20) err(where, `abv ${b.abv} is not a plausible number`);
   if (!METHODS.includes(b.method)) err(where, `method "${b.method}" is not one of ${METHODS.join(', ')}`);
@@ -227,8 +226,8 @@ for (const name of logoBeers)
 // weeks while showing the reader nothing, because a file can exist, be the
 // right size and still draw zero pixels. These are the shapes that did it —
 // all cheap to spot in the bytes, none of them visible to any other check.
-// The colour and contrast failures need a browser and live in `npm run logos`
-// and `npm run logo-sheet`; these do not, so they run on every push.
+// The colour and contrast failures need a browser and live in
+// `npm run logo-sheet`; these do not, so they run on every push.
 const svgStub = (src) => {
   // An SVG fetched out of a page often keeps a <use> pointing at a sprite
   // symbol that stayed behind on the site. It is a valid document and it
@@ -286,7 +285,7 @@ const seenWant = new Set();
 WANT_TO_TRY.forEach((e, i) => {
   const where = `WANT_TO_TRY[${i}] ${e.beer || '(unnamed)'}`;
   if (!isStr(e.beer)) return err(where, 'beer name is missing');
-  if (!sC[e.style]) err(where, `style "${e.style}" has no colour in the sC map in app.js`);
+  if (!sC[e.style]) err(where, `style "${e.style}" has no colour in STYLE_COLORS in src/lib/style-colors.ts`);
   checkCC(where, 'origin', e.origin);
   if (!isStr(e.region)) err(where, 'region is missing');
   if (!isNum(e.abv) || e.abv <= 0 || e.abv > 20) err(where, `abv ${e.abv} is not a plausible number`);

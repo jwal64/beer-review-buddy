@@ -1,13 +1,8 @@
 /**
- * The analytics behind the Insights tab.
- *
- * The stats site at /stats works these same numbers out in public/stats/app.js.
- * The rules are restated here rather than imported because that file is
- * dependency-free browser JavaScript served as-is, with no module boundary to
- * reach into. Where a rule appears in both places — MIN_N, the prediction
- * blend, the trait list, the quantile method — the shapes are kept identical
- * on purpose, so the app and the site never disagree about a "best", a
- * "weakest" or a "must try".
+ * The analytics behind the Insights tab: MIN_N and the ranking helpers, the
+ * statistical summary, the taste profile and the shortlist's prediction.
+ * Pure functions with no runtime imports, so tools/app-logic-test.mjs runs
+ * them in plain Node.
  */
 import type { Beer, BreweryRow, WantToTryRow } from "./beer-data";
 
@@ -85,8 +80,7 @@ export function summarise(values: number[]): Summary {
   if (!n) return { mean: 0, median: 0, stdDev: 0, min: 0, max: 0, q1: 0, q3: 0, count: 0 };
   const sorted = [...values].sort((a, b) => a - b);
   const mean = values.reduce((s, v) => s + v, 0) / n;
-  // Index-based quartiles, matching the stats site exactly — a different
-  // method here would print a different Q1 for the same reviews.
+  // Index-based quartiles.
   const median =
     n % 2 === 0 ? (sorted[n / 2 - 1]! + sorted[n / 2]!) / 2 : sorted[Math.floor(n / 2)]!;
   const stdDev = Math.sqrt(values.reduce((s, v) => s + (v - mean) ** 2, 0) / n);
@@ -214,7 +208,7 @@ export function bySeason(beers: Beer[]) {
 }
 
 // ── Taste profile ─────────────────────────────────────────────
-// The same eight traits the stats site draws. A trait measured off one or two
+// Eight traits. A trait measured off one or two
 // pours is noise, so the count travels with the value and the caller says
 // "need 3" rather than drawing a bar that looks like a finding.
 export type Trait = { label: string; avg: number; count: number };
