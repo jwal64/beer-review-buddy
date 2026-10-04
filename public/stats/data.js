@@ -121,9 +121,10 @@ let beers=[
   {beer:"Hofbräu Oktoberfestbier",              style:"Lager",          origin:"DE",    abv:6.3,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Busch Light",                          style:"Lager",          origin:"US",    abv:4.1,method:"Can",   city:"Clemson",        region:"South Carolina",      country:"USA",        cc:"US",rating:2.25,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
   {beer:"Natural Light",                        style:"Lager",          origin:"US",    abv:4.2,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
-  // OCT 2026 (2 reviews)
+  // OCT 2026 (3 reviews)
   {beer:"Toasted Lager",                        style:"Lager",          origin:"US",    abv:5.5,method:"Draft", city:"Queens",         region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Othmar Blond",                         style:"Belgian Ale",    origin:"NL",    abv:6.5,method:"Bottle",city:"Lonneker",       region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
+  {beer:"Duckstein Weizen",                     style:"Wheat Beer",     origin:"DE",    abv:5.3,method:"Draft", city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",rating:4.75,isNew:true, month:"Oct",monthN:10,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -157,6 +158,7 @@ let drunkLocs=[
   {city:"Ischia",         region:"Campania",            country:"Italy",      cc:"IT",lat:40.7333,lng:13.9500},
   {city:"Capri",          region:"Campania",            country:"Italy",      cc:"IT",lat:40.5532,lng:14.2222},
   {city:"Tarrytown",      region:"New York",            country:"USA",        cc:"US",lat:41.0762,lng:-73.8593},
+  {city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",lat:52.5200,lng:13.4050},
 ];
 
 // ── BREWERIES — where each beer is actually made
@@ -233,6 +235,7 @@ let breweries=[
   {name:"Blue Point Brewing Company", location:"Patchogue, New York", country:"USA", cc:"US", lang:"en", beers:"Toasted Lager", lat:40.7609, lng:-73.0225, ratings:[2.00]},
   {name:"Othmar Bierbrouwerij", location:"Ootmarsum, Overijssel", country:"Netherlands", cc:"NL", lang:"nl", beers:"Othmar Blond", lat:52.4081, lng:6.9001, ratings:[3.00]},
   {name:"Kiuchi Brewery",                    location:"Naka, Ibaraki",                           country:"Japan",             cc:"JP",    lang:"ja",beers:"Hitachino Nest White Ale",                                  nativeName:"常陸野ネスト ホワイトエール", lat:36.4686,lng:140.4681, ratings:[5.00]},
+  {name:"Holsten-Brauerei", location:"Hamburg, Hamburg", country:"Germany", cc:"DE", lang:"de", beers:"Duckstein Weizen", lat:53.4790, lng:9.9110, ratings:[4.75]},
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -296,6 +299,7 @@ const BRAND_DOMAINS = {
 "Killsner":"killsboro.com",
 "Toasted Lager":"bluepointbrewing.com",
 "Othmar Blond":"othmar.eu",
+"Duckstein Weizen":"duckstein.de",
 "Kirin Ichiban":"kirin.co.jp",
 "Kronenbourg 1664":["1664.com","kronenbourg1664.com"],
 "La Chouffe Blonde":"achouffe.be",
@@ -441,8 +445,6 @@ const BRAND_LOGOS = {
 "Ichnusa Anima Sarda":"logos/ichnusa-anima-sarda.webp",
 "Karlovačko":"logos/karlovacko.webp",
 "Killsner":"logos/killsner.webp",
-"Toasted Lager":"logos/toasted-lager.webp",
-"Othmar Blond":"logos/othmar-blond.svg",
 "Kirin Ichiban":"logos/kirin-ichiban.svg",
 "Kronenbourg 1664":"logos/kronenbourg-1664.svg",
 "La Chouffe Blonde":"logos/la-chouffe-blonde.svg",
@@ -468,6 +470,8 @@ const BRAND_LOGOS = {
 "Obolon Premium Extra Brew":"logos/obolon-premium-extra-brew.webp",
 "Ocean SJU":"logos/ocean-sju.webp",
 "Orion":"logos/orion.webp",
+"Othmar Blond":"logos/othmar-blond.svg",
+"Duckstein Weizen":"logos/duckstein-weizen.webp",
 "Pabst Blue Ribbon":"logos/pabst-blue-ribbon.webp",
 "Pacífico Clara":"logos/pacifico-clara.svg",
 "Paulaner Hefe":"logos/paulaner-hefe.webp",
@@ -499,6 +503,7 @@ const BRAND_LOGOS = {
 "Tennent's":"logos/tennents.svg",
 "Texels Skuumkoppe":"logos/texels-skuumkoppe.svg",
 "Tiger Beer":"logos/tiger-beer.svg",
+"Toasted Lager":"logos/toasted-lager.webp",
 "Tsingtao":"logos/tsingtao.webp",
 "Tuborg":"logos/tuborg.svg",
 "Tyskie":"logos/tyskie.svg",
@@ -567,6 +572,7 @@ const BEER_FACTS = {
 "Ichnusa Anima Sarda":{sub:"International Pale Lager",color:"Gold",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Toasted Lager":{sub:"American Amber Lager",color:"Amber",body:"Medium",ibu:28,cal:null,adjuncts:[]},
 "Othmar Blond":{sub:"Belgian Blonde",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
+"Duckstein Weizen":{sub:"Hefeweizen",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:["wheat"]},
 "Killsner":{sub:"German Pilsner",color:"Pale",body:"Light",ibu:36,cal:null,adjuncts:[]},
 "Kirin Ichiban":{sub:"Japanese Lager",color:"Gold",body:"Light",ibu:21,cal:145,adjuncts:[]},
 "Kronenbourg 1664":{sub:"International Pale Lager",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
