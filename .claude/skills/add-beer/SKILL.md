@@ -50,15 +50,19 @@ Both must pass (re-run `npm run check` after the snapshot).
 Do not touch `src/lib/place.ts`, `src/lib/snapshot.ts`, or the module-scope
 `selectBrandDomains` / `selectBrandLogos` in `src/lib/beer-data.ts`.
 
-## 5. Commit and push to `main`
+## 5. Commit, push a branch, open a pull request
 
+- Work on a branch cut from the latest `main` (e.g. `claude/add-<beer-slug>`),
+  never directly on `main`.
 - Commit `public/stats/data.js` and `src/data/snapshot.json` (plus any logo
   files and `logo-fetch-report.json`) **together, in one commit**. If the beer
   came from an issue, add `Closes #N`.
-- Push directly to `main`: `git push -u origin main`.
-- **Never rebase, squash, amend or force-push.** If main moved, merge it.
+- Push with `git push -u origin <branch>` and **open a pull request into
+  `main`** (check for a PR template first). Do not merge it: the owner reviews
+  and merges.
+- **Never rebase, squash, amend or force-push.** If main moved, merge it in.
 
 ## 6. Tell the owner
 
-End the reply with: **Pushed to main — now click Publish → Publish changes in
-Lovable** (the live site does not change until they do).
+Link the PR, and end the reply with: **Once you merge it, click Publish →
+Publish changes in Lovable** (the live site does not change until they do).
