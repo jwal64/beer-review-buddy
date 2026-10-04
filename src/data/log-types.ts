@@ -108,3 +108,18 @@ export interface WantToTry {
 
 /** One domain, or several tried in order for a brand at more than one address. */
 export type BrandDomain = string | string[];
+
+/**
+ * A year's targets. Every field but `year` is optional: set only the ones worth
+ * chasing. Counted from dated reviews in that year — a retro review is not a
+ * pour that year.
+ */
+export interface Goal {
+  year: number;
+  /** Reviews logged that year. */
+  reviews?: number;
+  /** Reviews of beers never had before (`isNew`). */
+  newBeers?: number;
+  /** Brewing countries stamped into the passport for the first time that year. */
+  countries?: number;
+}

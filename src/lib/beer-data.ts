@@ -17,6 +17,7 @@ import {
   BEER_FACTS,
   WANT_TO_TRY,
   UNTAPPD_AVERAGES,
+  GOALS,
 } from "@/lib/snapshot";
 import type {
   Beer,
@@ -27,6 +28,7 @@ import type {
   BeerFactsRow,
   WantToTryRow,
   UntappdAverageRow,
+  GoalRow,
 } from "@/lib/snapshot";
 
 export type {
@@ -38,10 +40,11 @@ export type {
   BeerFactsRow,
   WantToTryRow,
   UntappdAverageRow,
+  GoalRow,
 };
 
-// The ten styles the site has a colour for. A style outside this list renders
-// uncoloured there and fails its data check.
+// The ten styles the app has a colour for. A style outside this list renders
+// uncoloured and fails its data check.
 export const STYLES = [
   "Lager",
   "Pilsner",
@@ -158,6 +161,11 @@ export function useBeerFacts() {
 // the scorecard worth having. `seq` is the order it was authored in.
 export function useWantToTry() {
   return useRows<WantToTryRow>("want_to_try", WANT_TO_TRY);
+}
+
+// A year's targets, for the Passport tab. Authored as GOALS in the log.
+export function useGoals() {
+  return useRows<GoalRow>("goals", GOALS);
 }
 
 // The world's average for a beer, keyed by the exact name as reviewed. It is

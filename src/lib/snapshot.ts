@@ -105,6 +105,14 @@ export interface WantToTryRow {
   aka: string[] | null;
 }
 
+/** A year's targets; a target nobody set is null. */
+export interface GoalRow {
+  year: number;
+  reviews: number | null;
+  new_beers: number | null;
+  countries: number | null;
+}
+
 export interface UntappdAverageRow {
   beer_name: string;
   avg: number;
@@ -150,3 +158,5 @@ export const WANT_TO_TRY: WantToTryRow[] = [...raw.want_to_try].sort(
 );
 
 export const UNTAPPD_AVERAGES: UntappdAverageRow[] = raw.untappd_averages;
+
+export const GOALS: GoalRow[] = [...raw.goals].sort((a, b) => a.year - b.year);

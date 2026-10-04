@@ -25,6 +25,7 @@ import type {
   BrandDomain,
   Brewery,
   DrunkLocation,
+  Goal,
   Review,
   WantToTry,
 } from "./log-types.ts";
@@ -711,3 +712,15 @@ export const WANT_TO_TRY: WantToTry[] = [
   {beer:"Ciuc Premium",         style:"Lager",      origin:"RO",    abv:5.0,region:"Miercurea Ciuc, Harghita",   untappd:2.80,method:"Can"   },
   {beer:"Laško Zlatorog",       style:"Lager",      origin:"SI",    abv:4.9,region:"Laško, Savinja",             untappd:3.00,method:"Bottle"},
 ];
+
+// ══════════════════════════════════════════════════════════════
+// GOALS — what each year is chasing, for the Passport tab
+// ══════════════════════════════════════════════════════════════
+// One entry per year; every target is optional. Progress counts dated
+// reviews in that year only, and the Passport tab shows where the count
+// should be by today if the year were on pace.
+// ══════════════════════════════════════════════════════════════
+export const GOALS: Goal[] = [
+  {year:2026, reviews:120, newBeers:80, countries:30},
+];
+

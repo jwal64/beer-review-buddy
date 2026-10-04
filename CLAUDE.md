@@ -4,7 +4,7 @@ One repo, hosted by Lovable, holding three parts:
 
 | Part | Where | What it is |
 |------|-------|------------|
-| The app | `src/` | React/TanStack, mobile-first: Home, Beers, Map, Insights. Reads the committed log; no network, no writes. |
+| The app | `src/` | React/TanStack, mobile-first: Home, Beers, Map, Insights, Passport. Reads the committed log; no network, no writes. |
 | The log | `src/data/log.ts` | Every review, brewery, place, logo and fact — the one store, typed, written by hand. |
 | The tools | `tools/` | Node scripts: validate, lockfile, invariants, tests, smoke, logo fetch and sheet. Zero-dependency, except the three that drive a browser (smoke, logo fetch, logo sheet). |
 
@@ -113,9 +113,12 @@ not mean to remove `placeLabel`, don't.
 check` runs it and CI gives it a step of its own; `npm run test` runs it alone.
 
 It imports the app's own modules — `src/lib/place.ts`, `src/lib/insights.ts`,
-`src/lib/when.ts` — and pins `placeLabel`, `wtNorm()`, the `MIN_N` helpers,
-`groupRatings()`, `summarise()`, `predictRating()`, `whenLabel()` and
-`isDisplayNew()`. Node 22.18+ strips the types itself, so there is no build
+`src/lib/when.ts`, `src/lib/progress.ts` — and pins `placeLabel`, `wtNorm()`,
+the `MIN_N` helpers, `groupRatings()`, `summarise()`, `predictRating()`,
+`whenLabel()`, `isDisplayNew()` and the Passport's badges, stamps, streaks,
+goals and bingo. One test there is a property over the real log: every badge's
+measure only ever grows as reviews are added, which is what lets `badges()`
+binary-search for the review that earned it. Node 22.18+ strips the types itself, so there is no build
 step; what makes a module loadable is that it **imports nothing at runtime**
 (type-only imports are erased). Keep it that way for anything under test: a
 module that reaches for `@/…`, React or React Query cannot be loaded in plain
@@ -423,7 +426,8 @@ and `toRows()` all carry it.
 4. **Native name** — record `nativeName` when it differs from the marketed
    name (Pilsner Urquell → Plzeňský Prazdroj, Sapporo → サッポロビール).
 5. **Country maps** — the brewery's and the city's codes must exist in `FLAGS`
-   and `CNAMES`; add them if not.
+   and `CNAMES`, and in `CONTINENTS` in `src/data/continents.ts` (the
+   Passport sorts every stamp onto a continent); add them if not.
 
 ### Step 4: Add the consumption city to `drunkLocs[]` (if new)
 
@@ -597,6 +601,43 @@ count toward the totals — they sort to the tail. Per-beer views (the beers
 list, a beer's sheet, "my rating vs the world") are single observations, not
 averages, so the rule never touches them. Change the threshold in one place;
 captions are generated from the constant, so do not hardcode "3" anywhere.
+
+## Passport: badges, stamps, streaks and goals
+
+The **Passport** tab reads the log as a game. All of it is worked out in
+`src/lib/progress.ts`, on every render, from the rows — nothing is stored, so a
+badge is earned the moment the review that earns it is committed, and nothing
+can disagree with the log. `src/hooks/use-progress.ts` assembles it once for
+both the tab and the progress strip on Home.
+
+- **Badges** are a declarative list, `BADGES`. Each has a `target` and a
+  `measure(reviews, ctx)` that counts how far a set of reviews has got. **A
+  measure must never decrease as reviews are added** — `badges()` walks the
+  diary to find the review that tipped it, and the logic test checks the
+  property over the real log. Count distinct things or maxima; never an
+  average or a ratio.
+- **Stamps** are the countries beers were brewed in (and, separately, drunk
+  in), each dated by its first review. Against the world they count as
+  sovereign countries: the four UK nations are one United Kingdom and Puerto
+  Rico is the United States (`SOVEREIGN` in `src/data/continents.ts`), though
+  each still gets its own stamp.
+- **Streaks** are consecutive months with a dated review. A streak survives
+  the current month until it ends — last month's run is still alive.
+- **Goals** are authored in the log as `GOALS`, one entry per year, every
+  target optional (`reviews`, `newBeers`, `countries` — brewing countries
+  stamped for the first time that year). The tab shows where each count would
+  be today if the year were on pace. `npm run check` validates the shape.
+- **Style bingo** is colour × body from `BEER_FACTS` — twelve squares; a
+  shortlist beer suggests itself for an empty one only when its own facts are
+  recorded.
+
+**The retro rule applies throughout:** a retro review counts toward a badge
+and stamps a country, but it has no date — it reads "retro" — and never counts
+toward a streak or a year's goal.
+
+Adding a badge is one entry in `BADGES` and, ideally, a case in
+`tools/app-logic-test.mjs`. A new top-level style must be added to `STYLE_SET`
+there too; it is a `Record<Style, true>`, so `tsc` says so.
 
 ## Logos
 

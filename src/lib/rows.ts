@@ -15,6 +15,7 @@ import type * as Log from "../data/log.ts";
 import type {
   BeerFactsRow,
   BrandDomainRow,
+  GoalRow,
   BreweryRow,
   CountryRow,
   LocationRow,
@@ -34,6 +35,7 @@ export interface Rows {
   beer_facts: BeerFactsRow[];
   want_to_try: WantToTryRow[];
   untappd_averages: UntappdAverageRow[];
+  goals: GoalRow[];
 }
 
 // The log records a month, not a day — a review is "Mar 2026", never the 14th.
@@ -137,6 +139,13 @@ export function toRows(log: LogModule): Rows {
     untappd_averages: Object.entries(log.UNTAPPD_GLOBAL_AVGS).map(([beer_name, avg]) => ({
       beer_name,
       avg,
+    })),
+
+    goals: log.GOALS.map((g) => ({
+      year: g.year,
+      reviews: g.reviews ?? null,
+      new_beers: g.newBeers ?? null,
+      countries: g.countries ?? null,
     })),
   };
 }

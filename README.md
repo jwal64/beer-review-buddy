@@ -2,7 +2,8 @@
 
 The whole beer log, in one place, hosted by Lovable:
 
-- **The app** (`/`) — Home, Beers, Map and Insights, mobile-first. It reads
+- **The app** (`/`) — Home, Beers, Map, Insights and Passport (badges,
+  country stamps, streaks, yearly goals and style bingo), mobile-first. It reads
   the committed log and nothing else, so it works offline and paints
   instantly. (`/stats`, the old static stats site, now redirects to Insights.)
 - **`src/data/log.ts`** — the log, the one store: every review, brewery,
@@ -49,6 +50,7 @@ live site changes when you click **Publish → Publish changes** there.
 | `beer_facts` | What each beer is: sub-style, colour, body, published IBU and calories, adjuncts |
 | `want_to_try` | The standing shortlist. Nothing is ever deleted: an entry with a matching review crosses itself off and is scored against the prediction made beforehand |
 | `untappd_averages` | The world's average per beer, for "my rating vs the world" |
+| `goals` | A year's targets for the Passport tab — reviews, new beers, new countries |
 
 Two things the app shows are **not** columns: which beers a brewery makes, and
 what each scored. Both are derived from the reviews, because a beer row names

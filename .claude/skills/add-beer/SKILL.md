@@ -36,6 +36,8 @@ git fetch origin main && git checkout -B main origin/main   # or: git pull origi
 5. **`BEER_FACTS`** — published IBU / calories or `null`. Never guess or borrow.
 6. **`drunkLocs[]`** — make sure the consumption city exists, exactly matching
    the review's city/region/country/cc.
+7. **A new country** (brewing or drinking) needs `FLAGS`, `CNAMES` and a row
+   in `CONTINENTS` in `src/data/continents.ts`.
 
 ## 3. Validate
 

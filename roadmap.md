@@ -7,7 +7,7 @@ the standing rules live in CLAUDE.md and AGENTS.md.
 
 - One committed log, `src/data/log.ts` — typed, imported by the app
   directly. No database, no generated copy.
-- One surface: the React app (Home, Beers, Map, Insights). `/stats`
+- One surface: the React app (Home, Beers, Map, Insights, Passport). `/stats`
   redirects to Insights.
 - A beer is added by a Claude session following `/add-beer`, as a pull
   request; merging syncs it into Lovable, **Publish** makes it live.
@@ -25,7 +25,7 @@ the standing rules live in CLAUDE.md and AGENTS.md.
       directly. The projection moves into `src/lib/rows.ts`; `snapshot.json`
       and the round-trip tooling go. Logos move to `public/logos/`, and
       `public/stats/` goes. CI gains a `tsc` job, which checks the log.
-- [ ] **Passport & gamification** — a `/passport` tab with badges, country
+- [x] **Passport & gamification** — a `/passport` tab with badges, country
       and continent stamps, monthly streaks and yearly goals (a `GOALS`
       entry in the log), a style-bingo card, and "next stamp" picks from the
       shortlist. Logic in `src/lib/progress.ts`, tested in plain Node.
