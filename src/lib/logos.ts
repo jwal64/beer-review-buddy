@@ -41,11 +41,11 @@ export function isSuspectFavicon(url: string, naturalWidth: number) {
   return url.includes("gstatic.com/faviconV2") && naturalWidth > 0 && naturalWidth <= 32;
 }
 
-/** A beer's `logo` column as a URL. `logos/<file>` names a file that lives in
- * `public/stats/logos/`, so it resolves under /stats/; anything absolute is a
- * hotlink recorded as-is (npm run check already warns about those). */
+/** A beer's `logo` field as a URL. `logos/<file>` names a file in
+ * `public/logos/`, served from the site root; anything absolute is a hotlink
+ * recorded as-is (npm run check already warns about those). */
 function localLogoUrl(logo: string) {
-  return /^https?:\/\//.test(logo) ? logo : `/stats/${logo}`;
+  return /^https?:\/\//.test(logo) ? logo : `/${logo}`;
 }
 
 /** Every URL worth trying for a beer's logo, best first. */

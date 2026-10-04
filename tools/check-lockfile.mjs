@@ -24,10 +24,8 @@
 //     node tools/check-lockfile.mjs
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT } from './load-data.mjs';
+import { REPO } from './load-data.mjs';
 
-// ROOT is public/stats/; the manifest and lockfile sit at the repo root.
-const REPO = join(ROOT, '..', '..');
 
 // Bun writes a text lockfile — JSON but for trailing commas, which JSON.parse
 // refuses. Strip those rather than take a dependency on a JSON5 parser.

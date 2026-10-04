@@ -41,13 +41,13 @@ const RULES = [
     file: "src/lib/snapshot.ts",
     needs: [
       [/export const BEERS/, "`export const BEERS`"],
-      [/from "@\/data\/snapshot.json"/, "the import of `@/data/snapshot.json`"],
+      [/from "\.\.\/data\/log\.ts"/, 'the import from `"../data/log.ts"`'],
     ],
     why:
-      "The app's entire data layer. src/data/snapshot.json is data.js " +
-      "projected into rows, and this is what reads it. There is no database " +
-      "behind the app any more, so replacing this with a fetch is not a " +
-      'restoration — see CLAUDE.md, "Adding a Beer".',
+      "The app's entire data layer: it imports the committed log and " +
+      "flattens it into the rows every screen reads. There is no database " +
+      "behind the app, so replacing this with a fetch is not a restoration " +
+      '— see CLAUDE.md, "History".',
   },
   {
     file: "src/lib/beer-data.ts",
@@ -95,16 +95,13 @@ const RULES = [
   {
     file: "package.json",
     needs: [
-      [/tools\/roundtrip-snapshot\.mjs/, "`tools/roundtrip-snapshot.mjs` in the check script"],
+      [/tools\/validate-data\.mjs/, "`tools/validate-data.mjs` in the check script"],
       [/tools\/app-logic-test\.mjs/, "`tools/app-logic-test.mjs` in the check script"],
     ],
     why:
-      "The app reads src/data/snapshot.json rather than data.js, so the " +
-      "projection between them has to be proved lossless and proved in step on " +
-      "every push — a stale snapshot shows the log as it was before the last " +
-      "edit, with nothing else failing. The same goes for the rules inside " +
-      "src/lib/: the location format, the crossing-off rule, MIN_N and the " +
-      "shortlist's prediction.",
+      "Every rule about the log that a type cannot express, and the rules " +
+      "inside src/lib/ — the location format, the crossing-off rule, MIN_N " +
+      "and the shortlist's prediction — are proved on every push.",
   },
   {
     // The workflow names its steps one at a time rather than running the whole

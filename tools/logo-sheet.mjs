@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Renders every file in public/stats/logos/ onto one contact sheet, so the
+// Renders every file in public/logos/ onto one contact sheet, so the
 // hundred logos can be *looked at* rather than trusted.
 //
 // Nothing else in the repo can tell a brand's mark from a photograph of a
@@ -15,13 +15,13 @@
 // look broken on exactly one of the two surfaces this project renders.
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT } from './load-data.mjs';
+import { REPO, PUBLIC } from './load-data.mjs';
 import { imageSize } from './probe-logo-sources.mjs';
 
 const outArg = process.argv.indexOf('--out');
-const OUT = outArg >= 0 ? process.argv[outArg + 1] : join(ROOT, '..', '..', 'logo-sheet.png');
+const OUT = outArg >= 0 ? process.argv[outArg + 1] : join(REPO, 'logo-sheet.png');
 
-const LOGO_DIR = join(ROOT, 'logos');
+const LOGO_DIR = join(PUBLIC, 'logos');
 const MIME = { '.svg': 'image/svg+xml', '.png': 'image/png', '.webp': 'image/webp',
                '.jpg': 'image/jpeg', '.gif': 'image/gif', '.ico': 'image/x-icon' };
 

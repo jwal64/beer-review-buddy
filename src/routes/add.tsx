@@ -15,7 +15,7 @@ const REPO = "jwal64/beer-review-buddy";
 /**
  * Capture a beer from a phone.
  *
- * The log is a committed file — public/stats/data.js — so there is nothing to
+ * The log is a committed file — src/data/log.ts — so there is nothing to
  * write to from here, and nothing worth putting a credential on a phone for.
  * What this page does instead is file the beer as a GitHub issue, which is a
  * queue that survives being at a pub with 4% battery, and which a Claude

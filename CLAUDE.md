@@ -1,27 +1,26 @@
 # Beer Review Buddy — Development Guide
 
-One repo, hosted by Lovable, holding two parts:
+One repo, hosted by Lovable, holding three parts:
 
 | Part | Where | What it is |
 |------|-------|------------|
 | The app | `src/` | React/TanStack, mobile-first: Home, Beers, Map, Insights. Reads the committed log; no network, no writes. |
-| The tools | `tools/` | Node scripts: validate, snapshot, round-trip, invariants, tests, smoke, logo fetch and sheet. Zero-dependency, except the three that drive a browser (smoke, logo fetch, logo sheet). |
-
-There used to be a third — a static stats site in `public/stats/`, carried over
-from `jwal64/JWAL-BEER-REVIEW`. It showed the same log a second time with its
-own copy of every rule, and the app now shows everything worth keeping from it,
-so it was deleted. `/stats` redirects to `/insights`.
+| The log | `src/data/log.ts` | Every review, brewery, place, logo and fact — the one store, typed, written by hand. |
+| The tools | `tools/` | Node scripts: validate, lockfile, invariants, tests, smoke, logo fetch and sheet. Zero-dependency, except the three that drive a browser (smoke, logo fetch, logo sheet). |
 
 There is **one store**, and it is a file:
 
-**`public/stats/data.js`** is the log. Every review, brewery, location, brand
-domain, Untappd average and want-to-try entry is written there, by hand, and
-what is committed is exactly what the app shows. `npm run snapshot` projects
-it into `src/data/snapshot.json`, which is the same data as flat rows — the
-shape the app wants, since the app is a Vite bundle and cannot read a file out
-of `public/`. Both are committed; `npm run check` fails if they disagree.
+**`src/data/log.ts`** is the log. Every review, brewery, location, brand
+domain, logo, beer fact, Untappd average and want-to-try entry is written
+there, by hand, and what is committed is exactly what the app shows: the app
+imports the file, and `src/lib/rows.ts` flattens it into the rows the screens
+read, at build time. There is no generated copy to keep in step and no
+database (see "History" at the end for why both matter). The file is typed
+against `src/data/log-types.ts`, so `npx tsc --noEmit` rejects a misspelt
+style or a missing field, and `npm run check` enforces everything a type
+cannot.
 
-There is no database (see "History" at the end for why that matters). One
+`/stats` redirects to `/insights`: the old static stats site is gone. One
 manual step remains between merging and being live, and it is Lovable's:
 **Publish** (see step 4 below).
 
@@ -37,9 +36,9 @@ loop is what makes it land on Lovable:
 3. **Validate before pushing** — Lovable deploys `main`, so `main` stays green:
 
    ```sh
-   npm run check          # data rules + round-trip + snapshot + bun.lock + tests (always)
+   npm run check          # data rules + bun.lock + invariants + tests (always)
    npm run test           # just the logic tests, when that is all you changed
-   npx tsc --noEmit       # if src/ changed
+   npx tsc --noEmit       # if src/ changed — the log included
    npx eslint <files>     # if src/ or tools/ changed; prettier --write first
    npx vite build         # if src/, vite.config.ts or package.json changed
    npm run smoke          # if src/ changed: every route in a real browser
@@ -85,7 +84,7 @@ Lovable in `AGENTS.md`:
 2. **One location format everywhere** — `placeLabel` in `src/lib/place.ts`
    ("Location Rule: City, Region, Country" below).
 3. **The app's data layer** — `src/lib/snapshot.ts` (which must export `BEERS`
-   and import `@/data/snapshot.json`) and `src/lib/beer-data.ts` importing from
+   and import `"../data/log.ts"`) and `src/lib/beer-data.ts` importing from
    it. This is the whole of how the app gets the log. Pointing any of it back
    at a network call reintroduces the gap between what is committed and what is
    shown — the gap that hid a beer for a week while every check stayed green.
@@ -126,23 +125,25 @@ Node. That is why the date helpers live in `when.ts` rather than in
 `predictRating()`'s `MIN_N` fallback is worth knowing about: a wrong one still
 returns a plausible number, so nothing on the page would look broken.
 
-`tools/roundtrip-snapshot.mjs` is the other half of the safety net: the app
-reads `src/data/snapshot.json` rather than `data.js`, so it sends the data
-through the projection and back and fails if anything comes back different —
-and fails if the committed snapshot is out of step with `data.js`. A stale
-snapshot is the one way the app can show the wrong thing, and it is silent, so
-`npm run check` refuses it.
+`tools/validate-data.mjs` is the other half of the safety net: every rule in
+this file that a type cannot express — a review's city with no `drunkLocs` row,
+a brewery's `beers`/`ratings` out of step with the reviews, a beer with no logo
+file, two breweries on one point, a flag with no country name. It imports the
+log the same way the app does (`tools/load-data.mjs`), so it checks exactly
+what will be built.
 
 `npm run smoke` (`tools/smoke-test.mjs`) starts `vite dev` and drives Chromium
 through every route at phone size: each heading renders with no uncaught
-error, the beers list and the insight panels fill in, a map pin's popup is
-still open after the click that opened it, and `/stats` lands on Insights. It
+error, the beers list and the insight panels fill in, a committed logo loads
+from `/logos/`, a map pin's popup is still open after the click that opened
+it, and `/stats` lands on Insights. It
 uses the dev server because the production build targets Cloudflare Workers.
 
 `check-invariants.mjs` asks whether a feature is still *there*; the tests ask
 whether it still *behaves*. Adding a tool to the `check` script also requires a
 step for it in `.github/workflows/checks.yml`; `check-invariants.mjs` compares
-the two and fails when they drift. `npx tsc --noEmit` type-checks `src/`.
+the two and fails when they drift. `npx tsc --noEmit` type-checks `src/`, the
+log included, and CI runs it as a job of its own.
 
 ### Git rules (Lovable)
 
@@ -169,18 +170,19 @@ only.
   outside their sandbox. Editing only the `scripts` block needs no
   `bun install` — the lockfile records dependencies, and the check only reads
   those.
-- **There is no database, and no migrations.** A change to what a column
-  means is a change to `data.js`, to `tools/snapshot-rows.mjs` (the projection)
-  and to the row types in `src/lib/snapshot.ts` — and `npm run check` proves
-  the three agree. The old `supabase/` directory, its generated client and
-  the `@supabase/supabase-js` dependency are deleted; do not reintroduce
-  any of them.
+- **There is no database, and no migrations.** A new field is a change to
+  `src/data/log-types.ts` (the authoring shape), to `src/lib/rows.ts` (the
+  projection) and to the row types in `src/lib/snapshot.ts` — and
+  `npx tsc --noEmit` proves the three agree. The old `supabase/` directory,
+  its generated client and the `@supabase/supabase-js` dependency are
+  deleted; do not reintroduce any of them.
 - **`src/lib/snapshot.ts` owns the app's row types.** They are hand-written
-  and describe exactly what `npm run snapshot` emits. Add a field to a row and
-  it is added in both places, or `npx tsc --noEmit` says so.
-- **`data.js` stays plain data.** No imports, no exports, no functions —
-  `tools/load-data.mjs` executes it in an empty context, so anything reaching
-  for `window`, `fetch` or `document` fails the check.
+  and describe exactly what `toRows()` returns.
+- **The log stays plain data.** `src/data/log.ts` holds values and nothing
+  else — no functions, no runtime imports (its one import is type-only).
+  `tools/` import it in plain Node, which strips types and nothing more, and
+  the chain `snapshot.ts → rows.ts → log.ts` uses relative imports with their
+  `.ts` extension rather than `@/` so Node can follow it too.
 - **Secrets stay out.** There is nothing to authenticate to, so there is no
   key in the tree at all. Keep it that way: a feature that needs a secret
   needs a conversation first.
@@ -189,18 +191,18 @@ only.
 
 **Every new beer entry follows the `/add-beer` skill**
 (`.claude/skills/add-beer/SKILL.md`): start from the latest `main`, the data
-steps below, `npm run check && npm run snapshot`, one commit with `data.js` and
-`snapshot.json` on a branch, opened as a pull request into `main` for the owner
-to merge (no rebase/squash/force-push), then remind the owner to Publish in
-Lovable once merged.
+steps below, `npm run check && npx tsc --noEmit`, one commit on a branch,
+opened as a pull request into `main` for the owner to merge (no
+rebase/squash/force-push), then remind the owner to Publish in Lovable once
+merged.
 
 This is the normal flow — the owner describes a beer they drank, and a Claude
-session makes these edits. Everything happens in `public/stats/data.js`, and
-one command generates everything downstream of it.
+session makes these edits. Everything happens in `src/data/log.ts`; the app
+reads it directly, so there is nothing to regenerate.
 
 ### How a beer arrives
 
-Two ways in, and they meet in the same place — an edit to `data.js`.
+Two ways in, and they meet in the same place — an edit to the log.
 
 1. **From a phone.** The app's Beers tab has a **+**, which opens `/add`: pick
    where you drank it, then tap through to a pre-filled GitHub issue and attach
@@ -221,10 +223,10 @@ places already in the log rather than a free-text box.
 ### The short version
 
 ```sh
-# 1. edit public/stats/data.js — the review, the brewery, the domain, the facts, the city
+# 1. edit src/data/log.ts — the review, the brewery, the domain, the facts, the city
 npm run fetch-logos        # 2. the logo (needs internet); then look at it:
 npm run logo-sheet
-npm run check && npm run snapshot   # 3. check, then write what the app reads
+npm run check && npx tsc --noEmit   # 3. every rule, and every type
 # 4. commit all of it, open a PR into main
 # 5. once merged, the owner clicks Publish → Publish changes in Lovable
 ```
@@ -235,8 +237,8 @@ bottle — and record a `nativeName` where one exists.
 
 If `npm run fetch-logos` can reach nothing (a sandbox with no egress answers
 `403` at `CONNECT` for every logo source, which looks identical to the brand
-having no logo), draw one into `public/stats/logos/` by hand and add it to
-`BRAND_LOGOS` — `public/stats/logos/README.md` is the guide, and a file you
+having no logo), draw one into `public/logos/` by hand and add it to
+`BRAND_LOGOS` — `public/logos/README.md` is the guide, and a file you
 place by hand has to be listed under `kept` in `logo-fetch-report.json` or the
 next fetch overwrites it.
 
@@ -334,8 +336,8 @@ answer, which is worse than no logo.
 
 ### Step 2.6: Fetch the logo (REQUIRED)
 
-Every beer's logo is a **file in this repo**, under `public/stats/logos/`, named
-in `BRAND_LOGOS` in data.js. `npm run check` fails on a beer that has none — so
+Every beer's logo is a **file in this repo**, under `public/logos/`, named
+in `BRAND_LOGOS` in the log. `npm run check` fails on a beer that has none — so
 this is a step, not an option:
 
 ```sh
@@ -359,13 +361,13 @@ npm run fetch-logos -- --force --only "Sol"
 ```
 
 For a brand that no source has, draw or save the logo into
-`public/stats/logos/` yourself and add the entry to `BRAND_LOGOS` by hand. The
+`public/logos/` yourself and add the entry to `BRAND_LOGOS` by hand. The
 fetcher leaves a file it did not write alone, `--force` included — but only
 because `logo-fetch-report.json` records which files are its own, so **a file
 you hand-place or hand-edit has to be added to `kept` there** or the next run
 overwrites it. Fifty-two logos are here that way; three of them are drawn
 approximations rather than the brand's own artwork, and
-`public/stats/logos/README.md` lists those three and says why each one had to be
+`public/logos/README.md` lists those three and says why each one had to be
 drawn. It also records where the rest came from, which matters when this
 environment's egress policy blocks every logo source: `npm run fetch-logos`
 resolves nothing here, but anonymous git reads of public GitHub repositories
@@ -410,7 +412,7 @@ none.
 A beer that cannot be identified at all gets `color:null, body:null` rather than
 a guess (`Ocean SJU` is one). The projection (`beer_facts` in
 `tools/snapshot-rows.mjs`), the row type (`BeerFactsRow` in `src/lib/snapshot.ts`)
-and the round trip all carry it, so `npm run snapshot` after editing.
+and `toRows()` all carry it.
 
 ### Step 3: Research checklist
 
@@ -432,18 +434,15 @@ and the round trip all carry it, so `npm run snapshot` after editing.
 Without it the maps drop the review, and `npm run check` fails.
 
 
-### Step 5: Check, write the snapshot, commit
+### Step 5: Check and commit
 
 ```sh
-npm run check       # every rule above, plus the projection round trip
-npm run snapshot    # writes src/data/snapshot.json — what the app reads
+npm run check       # every rule above
+npx tsc --noEmit    # every type: a misspelt style, a missing field
 ```
 
-`npm run check` fails when the snapshot is out of step with `data.js`, so a
-forgotten `npm run snapshot` is caught here rather than by the app quietly
-showing the log as it stood before your edit.
-
-Commit `data.js` and `src/data/snapshot.json` together, and open the PR.
+Commit `src/data/log.ts` (with any logo files and `logo-fetch-report.json`)
+and open the PR. There is nothing to regenerate: the app is built from the log.
 
 ### Step 6: Publish in Lovable
 
@@ -455,14 +454,13 @@ reason.
 
 ### Renaming a beer
 
-Rename it in `data.js` — in `beers[]`, the brewery's `beers` string and every
+Rename it in the log — in `beers[]`, the brewery's `beers` string and every
 keyed map (`BRAND_DOMAINS`, `BRAND_LOGOS`, `BEER_FACTS`, `UNTAPPD_GLOBAL_AVGS`)
-— run `npm run snapshot`, commit both. `npm run check` flags any key left
-pointing at the old name.
+— and commit. `npm run check` flags any key left pointing at the old name.
 
 ## Standard Operating Procedure: The Want-To-Try Shortlist
 
-`WANT_TO_TRY` in `public/stats/data.js` is the standing list of beers not yet
+`WANT_TO_TRY` in `src/data/log.ts` is the standing list of beers not yet
 drunk. The **Next** tab of Insights renders it, and `predictRating()` in
 `src/lib/insights.ts` scores each entry against my taste so far.
 
@@ -482,8 +480,8 @@ prediction, which is the only thing that makes the scorecard worth having.
 
 ### Adding an entry
 
-An entry is authored in `WANT_TO_TRY` in `public/stats/data.js`, like everything
-else, and `npm run snapshot` carries it into the rows the app reads:
+An entry is authored in `WANT_TO_TRY` in `src/data/log.ts`, like everything
+else:
 
 ```js
 {beer:'Tsingtao', style:'Lager', origin:'CN', abv:4.7, region:'Qingdao, Shandong', untappd:3.29, method:'Bottle'},
@@ -502,8 +500,8 @@ apostrophes and punctuation are flattened, and what's left has to match word for
 word. That is deliberately strict — a looser rule would let *Peroni Original*
 cross off *Peroni Nastro Azzurro*.
 
-When a beer really is logged under a different name, say so — `as` in data.js,
-which the projection carries into the rows as `aka`:
+When a beer really is logged under a different name, say so — `as` in the
+log, which the projection carries into the rows as `aka`:
 
 ```js
 {beer:'Paulaner Hefe', ..., as:['Paulaner Hefe-Weißbier']},
@@ -602,9 +600,9 @@ captions are generated from the constant, so do not hardcode "3" anywhere.
 
 ## Logos
 
-**Every beer's logo is a file in this repo.** `public/stats/logos/`, one per
-beer name, named in `BRAND_LOGOS` in data.js and in the `logo` column of
-`brand_domains` behind it. That is where a logo comes from: the same picture on
+**Every beer's logo is a file in this repo.** `public/logos/`, one per
+beer name, named in `BRAND_LOGOS` in the log and carried into the `logo`
+field of the `brand_domains` rows. That is where a logo comes from: the same picture on
 every render, working offline, and nobody else's to withdraw. (They used to be
 fetched at page load, until Brandfetch began refusing the public client ID and
 97 of 101 beers rendered Google's default grey globe for a month.)
@@ -630,7 +628,7 @@ leaving it in costs a failed request per logo and buys nothing.
 ```sh
 npm run fetch-logos                        # everything with no file yet
 npm run fetch-logos -- --force --only "Sol"
-npm run fetch-logos -- --data-only         # just re-point data.js at logos/
+npm run fetch-logos -- --data-only         # just re-point the log at logos/
 npm run logo-sheet                         # all of them on one sheet, to look at
 ```
 
@@ -743,15 +741,24 @@ They are stored as `native_name` on the brewery row:
 
 ## History
 
-**Why there is no database.** Carrying `data.js` into a Supabase database meant
-a generated migration, applying a migration was the host's step rather than
-this repo's, and it stopped happening — silently, from 2 September, across
+**Why there is no database.** Carrying the log (then `data.js`) into a
+Supabase database meant a generated migration, applying a migration was the
+host's step rather than this repo's, and it stopped happening — silently, from 2 September, across
 three merges, while every check stayed green. Every surface read the database
 and let it win, so a beer that had been added, checked, committed and merged
 appeared for one frame and then vanished, or never appeared at all. Every check
 was asking whether the file was right, and the file was right. The database,
 its 22 migrations, the migration generator, the live-sync verifier, the nightly
 sync and the client are all gone: what is committed is what is shown.
+
+**Why there is no generated snapshot.** The log used to be
+`public/stats/data.js`, a plain script the stats site loaded with a `<script>`
+tag; the app could not import a file out of `public/`, so `npm run snapshot`
+projected it into a committed `src/data/snapshot.json`, and a round-trip check
+failed when the two disagreed. A forgotten `npm run snapshot` was the one way
+left for the app to show the log as it stood before an edit. Once the stats
+site was gone the log could move into `src/` as a typed module, and the copy,
+the command and the check went with it.
 
 **Why there is no stats site.** `public/stats/` was a second, dependency-free
 rendering of the same log — charts, maps, a passport — with its own copy of the

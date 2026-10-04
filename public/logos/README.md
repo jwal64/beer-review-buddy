@@ -3,9 +3,9 @@
 Every beer's logo, one file per beer name. This directory is not an override
 mechanism any more — it is where logos live.
 
-A beer's file is named in `BRAND_LOGOS` in `../data.js`, and behind that in the
-`logo` column of the `brand_domains` table. `npm run check` fails on a beer that
-has neither.
+A beer's file is named in `BRAND_LOGOS` in `src/data/log.ts`, and behind
+that in the `logo` field of the `brand_domains` rows. `npm run check` fails on
+a beer that has neither.
 
 ## Why they are here rather than fetched
 
@@ -134,7 +134,7 @@ page draws. The real mark had been in the tree once already. On 2 September
 the fetcher took a 300×300 `Salzburger Stiegl` badge from `stiegl.at` (the
 red script and staircase on a white shield, transparent around it), and the
 next re-fetch replaced it with the fully transparent WebP recorded below.
-That file is still in the history (`public/stats/logos/stiegl-goldbrau.webp`
+That file is still in the history (`public/stats/logos/stiegl-goldbrau.webp`, the old path,
 at `6a32035`, blob `26d8ca4`), and `stiegl-goldbrau.webp` is it again, scaled
 to the fetcher's 256px cap. Untappd's brewery logo for Stiegl
 (`brewery_logos/brewery-1202_5af88.jpeg`) is the same badge at 100px.

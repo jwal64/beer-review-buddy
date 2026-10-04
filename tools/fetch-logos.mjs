@@ -27,7 +27,7 @@
 //     node tools/fetch-logos.mjs                 # everything with no file yet
 //     node tools/fetch-logos.mjs --force         # re-fetch even what we have
 //     node tools/fetch-logos.mjs --only "Grolsch,Duvel"
-//     node tools/fetch-logos.mjs --data-only     # just re-point data.js at logos/
+//     node tools/fetch-logos.mjs --data-only     # just re-point the log at logos/
 //
 // Needs open internet and Playwright's Chromium (which reads and re-encodes
 // what comes back). The Fetch logos workflow runs it on a runner and commits
@@ -37,8 +37,7 @@
 // that can tell a brand's mark from a picture of a bottle.
 import { mkdirSync, writeFileSync, readFileSync, readdirSync, unlinkSync } from 'node:fs';
 import { join } from 'node:path';
-import { ROOT, loadData } from './load-data.mjs';
-import { brandLogosBlock } from './render-data-js.mjs';
+import { REPO, PUBLIC, LOG_PATH, loadData } from './load-data.mjs';
 import { imageSize } from './probe-logo-sources.mjs';
 
 const args = process.argv.slice(2);
@@ -46,8 +45,8 @@ const FORCE = args.includes('--force');
 const onlyArg = args.indexOf('--only');
 const ONLY = onlyArg >= 0 ? new Set(args[onlyArg + 1].split(',').map(s => s.trim())) : null;
 
-const LOGO_DIR = join(ROOT, 'logos');
-const REPORT = join(ROOT, '..', '..', 'logo-fetch-report.json');
+const LOGO_DIR = join(PUBLIC, 'logos');
+const REPORT = join(REPO, 'logo-fetch-report.json');
 
 // A raster this small is a favicon, not a logo: the generic globe the services
 // answer with for a domain they don't know is 16px, and anything under this is
@@ -554,35 +553,47 @@ export async function findLogo(name, domains, page, lab = page) {
   return best ? { name, ...best, tried } : { name, buf: null, tried };
 }
 
-// ── data.js ───────────────────────────────────────────────────
-// The files are only half of it: data.js has to name them, or nothing reads
-// them. The block comes from tools/render-data-js.mjs — the same function
-// `npm run sync` renders it with — so the two commands cannot write it
-// differently.
-//
-// They used to. This file carried its own copy of the block, and its rule was
-// '// ' + 60 '═' where the renderer's was 62, so every fetch-logos run left
-// three lines in data.js six bytes short of every other rule in the file and
-// every sync put them back. Nothing failed; the two commands just quietly
-// undid each other. If this block ever needs to change shape, change it there.
-const DATA_JS = join(ROOT, 'data.js');
+// ── the log ───────────────────────────────────────────────────
+// The files are only half of it: the log has to name them, or nothing reads
+// them. The BRAND_LOGOS block is rewritten whole, one line per beer, keys
+// sorted, so a new logo is a one-line diff. Everything else in the file is
+// left byte for byte as it was.
+const RULE = '// ' + '═'.repeat(62);
+const q = s => JSON.stringify(String(s));
+
+export function brandLogosBlock(logos) {
+  return [
+    RULE,
+    "// BRAND LOGOS — the committed file each beer's logo is drawn from",
+    RULE,
+    '// A path under public/, one per beer name, fetched once by',
+    '// `npm run fetch-logos` and held in the repo. This is where a logo comes',
+    '// from: the same picture on every render, working offline, and nobody',
+    "// else's to withdraw. The domains above are the fallback for a beer that",
+    '// has no file yet.',
+    RULE,
+    'export const BRAND_LOGOS: Record<string, string> = {',
+    ...Object.keys(logos ?? {}).sort().map(k => `${q(k)}:${q(logos[k])},`),
+    '};',
+    '',
+  ];
+}
 
 export function writeBrandLogos(map) {
   // The block's last entry is '', so the join already ends in the newline that
-  // closes `};` — appending another one is what made every run of this command
-  // add a blank line to data.js that the next run added to again. The regex
-  // below stops at that same `};\n`, so the replacement has to end there too.
+  // closes `};` — and the regex below stops at that same `};\n`, so the
+  // replacement ends where the original did and no blank line accumulates.
   const block = brandLogosBlock(map).join('\n');
 
-  let src = readFileSync(DATA_JS, 'utf8');
-  const existing = src.match(/(?:^\/\/ ═+\n\/\/ BRAND LOGOS[\s\S]*?)^const BRAND_LOGOS = \{[\s\S]*?^\};\n/m);
+  let src = readFileSync(LOG_PATH, 'utf8');
+  const existing = src.match(/(?:^\/\/ ═+\n\/\/ BRAND LOGOS[\s\S]*?)^export const BRAND_LOGOS\b[^\n]*\{[\s\S]*?^\};\n/m);
   if (existing) src = src.replace(existing[0], block);
   else {
-    const anchor = src.match(/^const BRAND_DOMAINS = \{[\s\S]*?^\};\n\n/m);
-    if (!anchor) throw new Error('could not find the BRAND_DOMAINS block in data.js');
+    const anchor = src.match(/^export const BRAND_DOMAINS\b[^\n]*\{[\s\S]*?^\};\n\n/m);
+    if (!anchor) throw new Error('could not find the BRAND_DOMAINS block in src/data/log.ts');
     src = src.replace(anchor[0], anchor[0] + block + '\n');
   }
-  writeFileSync(DATA_JS, src);
+  writeFileSync(LOG_PATH, src);
   return Object.keys(map).length;
 }
 
@@ -603,13 +614,13 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   const { beers, WANT_TO_TRY, BRAND_DOMAINS } = loadData();
   const names = [...new Set([...beers.map(b => b.beer), ...WANT_TO_TRY.map(w => w.beer)])].sort();
 
-  // Just point data.js at whatever is already in logos/. No network, so it
+  // Just point the log at whatever is already in logos/. No network, so it
   // works in a sandbox that cannot reach a single logo service — which is
   // where the fetch itself never can.
   if (args.includes('--data-only')) {
     const map = logosOnDisk(names);
     const gaps = names.filter(n => !map[n]);
-    console.log(`${writeBrandLogos(map)} of ${names.length} beers named in data.js` +
+    console.log(`${writeBrandLogos(map)} of ${names.length} beers named in the log` +
       (gaps.length ? ` — ${gaps.join(', ')} still have no file` : ''));
     process.exit(0);
   }
@@ -710,7 +721,7 @@ if (import.meta.url === `file://${process.argv[1]}`) {
     for (const e of Object.values(EXT))
       if (e !== ext && onDisk.has(slug(r.name) + e)) unlinkSync(join(LOGO_DIR, slug(r.name) + e));
     r.file = `logos/${slug(r.name)}${ext}`;
-    writeFileSync(join(ROOT, r.file), r.buf);
+    writeFileSync(join(PUBLIC, r.file), r.buf);
   }
 
   // A beer re-fetched that came back with nothing loses the file it had. That

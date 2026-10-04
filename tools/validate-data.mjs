@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-// Checks every rule CLAUDE.md states about the data, so a missing country code
-// or an unlisted brewery fails here instead of rendering as a blank flag or a
-// 🍺 placeholder that nobody notices for a month.
+// Checks every rule CLAUDE.md states about the log (src/data/log.ts) that a
+// type cannot, so a missing country code or an unlisted brewery fails here
+// instead of rendering as a blank flag or a monogram nobody notices for a month.
 //
 // Zero dependencies, nothing to install: `node tools/validate-data.mjs`.
 // Errors fail the run; warnings are printed and tolerated.
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { loadData, ROOT } from './load-data.mjs';
+import { loadData, PUBLIC } from './load-data.mjs';
 // The app's own style palette and name normaliser, imported rather than copied
 // so the check and the app can never disagree. Node strips the types itself.
 import { STYLE_COLORS as sC } from '../src/lib/style-colors.ts';
@@ -30,10 +30,7 @@ const D = loadData();
 const { FLAGS, CNAMES, beers, drunkLocs, breweries, BRAND_DOMAINS,
         UNTAPPD_GLOBAL_AVGS, UNTAPPD_LAST_REFRESHED, UNTAPPD_REFRESH_INTERVAL_DAYS,
         WANT_TO_TRY } = D;
-// A data.js written before the logos moved into the repo has no map at all;
-// read it as empty so the check below reports every beer rather than throwing.
-const BRAND_LOGOS = D.BRAND_LOGOS ?? {};
-const BEER_FACTS = D.BEER_FACTS ?? {};
+const { BRAND_LOGOS, BEER_FACTS } = D;
 
 // A country code has to carry both a flag and a display name — one without the
 // other renders a blank or the literal code.
@@ -88,7 +85,7 @@ beers.forEach((b, i) => {
   if (b.logo !== undefined) {
     if (!isStr(b.logo)) err(where, 'logo override must be a path string');
     else if (/^https?:\/\//.test(b.logo)) warn(where, `logo override hotlinks ${new URL(b.logo).host} — save the file into logos/ instead to make it reliable`);
-    else if (!existsSync(join(ROOT, b.logo))) err(where, `logo override "${b.logo}" does not exist`);
+    else if (!existsSync(join(PUBLIC, b.logo))) err(where, `logo override "${b.logo}" does not exist`);
   }
 });
 
@@ -213,13 +210,13 @@ for (const [name, file] of Object.entries(BRAND_LOGOS)) {
   else if (/^https?:\/\//.test(file))
     err(where, `hotlinks ${new URL(file).host} — a logo held on someone else's server is exactly what this replaces`);
   else if (!file.startsWith('logos/')) err(where, `"${file}" is not under logos/`);
-  else if (!existsSync(join(ROOT, file))) err(where, `"${file}" does not exist`);
+  else if (!existsSync(join(PUBLIC, file))) err(where, `"${file}" does not exist`);
   if (!logoBeers.has(name)) warn(where, 'no beer or shortlist entry uses this logo');
 }
 for (const name of logoBeers)
   if (!BRAND_LOGOS[name])
     err('BRAND_LOGOS', `"${name}" has no committed logo file — run \`npm run fetch-logos\`, ` +
-      'or draw one into public/stats/logos/ and add it here');
+      'or draw one into public/logos/ and add it here');
 
 // ── LOGO FILES THAT ARE PRESENT AND STILL RENDER NOTHING ──────
 // The check above asks only whether a file is there. Three beers passed it for
@@ -241,7 +238,7 @@ const svgStub = (src) => {
 };
 for (const [name, file] of Object.entries(BRAND_LOGOS)) {
   if (!isStr(file) || !file.startsWith('logos/')) continue;
-  const path = join(ROOT, file);
+  const path = join(PUBLIC, file);
   if (!existsSync(path)) continue;
   const where = `BRAND_LOGOS["${name}"]`;
   const buf = readFileSync(path);

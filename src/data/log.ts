@@ -1,30 +1,39 @@
 // ══════════════════════════════════════════════════════════════
-// DATA — the store
+// THE LOG — the one store
 // ══════════════════════════════════════════════════════════════
-// GENERATED FILE — do not edit by hand.
+// Every review, brewery, location, brand domain, logo, beer fact, Untappd
+// average and want-to-try entry, written here by hand. What is committed is
+// exactly what the app shows: src/lib/snapshot.ts imports this file and
+// src/lib/rows.ts flattens it into the rows the screens read. There is no
+// database and no generated copy to keep in step.
 //
-// Every review, brewery, location, brand domain, Untappd average and
-// want-to-try entry is written from the Supabase database behind the
-// beer-review-buddy app, which is the source of truth. Add a beer there,
-// and `npm run sync` — or the Sync from Supabase workflow, which runs it
-// nightly — rewrites this file from what the database holds. An edit made
-// here is lost at the next sync.
+// Typed against src/data/log-types.ts, so `npx tsc --noEmit` rejects a
+// misspelt style or a missing field; `npm run check` (tools/validate-data.mjs)
+// enforces every rule a type cannot — a city with no drunkLocs row, a beer
+// with no logo file, two breweries on one point. CLAUDE.md, "Adding a Beer",
+// is the procedure.
 //
-// It is still plain browser JavaScript loaded by a <script> tag before
-// app.js — no imports, no build step. `beers`, `breweries` and `drunkLocs`
-// are `let` so a host that stores the data elsewhere can replace their
-// contents and call reloadData() (app.js) to repaint.
+// Plain data only: no functions and no imports beyond types. tools/ import
+// this file in plain Node, which strips the types and nothing more.
 //
-// Two brewery fields have no column behind them and are derived here from
-// the reviews: `beers` (the beers that brewery makes) and `ratings` (what
-// each scored). See tools/supabase-rows.mjs.
+// Two brewery fields are derived from the reviews and must agree with them:
+// `beers` (the beers that brewery makes) and `ratings` (what each scored).
 // ══════════════════════════════════════════════════════════════
 
-const FLAGS={AR:"🇦🇷",AT:"🇦🇹",AU:"🇦🇺",BE:"🇧🇪",BG:"🇧🇬",BR:"🇧🇷",CA:"🇨🇦",CN:"🇨🇳",CO:"🇨🇴",CU:"🇨🇺",CZ:"🇨🇿",DE:"🇩🇪",DK:"🇩🇰",DO:"🇩🇴",EE:"🇪🇪",ES:"🇪🇸",FI:"🇫🇮",FR:"🇫🇷",GB:"🇬🇧","GB-ENG":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","GB-NIR":"🇬🇧","GB-SCT":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","GB-WLS":"🏴󠁧󠁢󠁷󠁬󠁳󠁿",GR:"🇬🇷",HR:"🇭🇷",IE:"🇮🇪",IT:"🇮🇹",JM:"🇯🇲",JP:"🇯🇵",KR:"🇰🇷",LB:"🇱🇧",ME:"🇲🇪",MX:"🇲🇽",NL:"🇳🇱",NO:"🇳🇴",NZ:"🇳🇿",PE:"🇵🇪",PL:"🇵🇱",PR:"🇵🇷",PT:"🇵🇹",RO:"🇷🇴",SE:"🇸🇪",SG:"🇸🇬",SI:"🇸🇮",TH:"🇹🇭",TR:"🇹🇷",UA:"🇺🇦",US:"🇺🇸",ZA:"🇿🇦"};
-const CNAMES={AR:"Argentina",AT:"Austria",AU:"Australia",BE:"Belgium",BG:"Bulgaria",BR:"Brazil",CA:"Canada",CN:"China",CO:"Colombia",CU:"Cuba",CZ:"Czech Republic",DE:"Germany",DK:"Denmark",DO:"Dominican Republic",EE:"Estonia",ES:"Spain",FI:"Finland",FR:"France",GB:"Great Britain","GB-ENG":"England","GB-NIR":"Northern Ireland","GB-SCT":"Scotland","GB-WLS":"Wales",GR:"Greece",HR:"Croatia",IE:"Ireland",IT:"Italy",JM:"Jamaica",JP:"Japan",KR:"South Korea",LB:"Lebanon",ME:"Montenegro",MX:"Mexico",NL:"Netherlands",NO:"Norway",NZ:"New Zealand",PE:"Peru",PL:"Poland",PR:"Puerto Rico",PT:"Portugal",RO:"Romania",SE:"Sweden",SG:"Singapore",SI:"Slovenia",TH:"Thailand",TR:"Turkey",UA:"Ukraine",US:"USA",ZA:"South Africa"};
+import type {
+  BeerFacts,
+  BrandDomain,
+  Brewery,
+  DrunkLocation,
+  Review,
+  WantToTry,
+} from "./log-types.ts";
+
+export const FLAGS: Record<string, string> = {AR:"🇦🇷",AT:"🇦🇹",AU:"🇦🇺",BE:"🇧🇪",BG:"🇧🇬",BR:"🇧🇷",CA:"🇨🇦",CN:"🇨🇳",CO:"🇨🇴",CU:"🇨🇺",CZ:"🇨🇿",DE:"🇩🇪",DK:"🇩🇰",DO:"🇩🇴",EE:"🇪🇪",ES:"🇪🇸",FI:"🇫🇮",FR:"🇫🇷",GB:"🇬🇧","GB-ENG":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","GB-NIR":"🇬🇧","GB-SCT":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","GB-WLS":"🏴󠁧󠁢󠁷󠁬󠁳󠁿",GR:"🇬🇷",HR:"🇭🇷",IE:"🇮🇪",IT:"🇮🇹",JM:"🇯🇲",JP:"🇯🇵",KR:"🇰🇷",LB:"🇱🇧",ME:"🇲🇪",MX:"🇲🇽",NL:"🇳🇱",NO:"🇳🇴",NZ:"🇳🇿",PE:"🇵🇪",PL:"🇵🇱",PR:"🇵🇷",PT:"🇵🇹",RO:"🇷🇴",SE:"🇸🇪",SG:"🇸🇬",SI:"🇸🇮",TH:"🇹🇭",TR:"🇹🇷",UA:"🇺🇦",US:"🇺🇸",ZA:"🇿🇦"};
+export const CNAMES: Record<string, string> = {AR:"Argentina",AT:"Austria",AU:"Australia",BE:"Belgium",BG:"Bulgaria",BR:"Brazil",CA:"Canada",CN:"China",CO:"Colombia",CU:"Cuba",CZ:"Czech Republic",DE:"Germany",DK:"Denmark",DO:"Dominican Republic",EE:"Estonia",ES:"Spain",FI:"Finland",FR:"France",GB:"Great Britain","GB-ENG":"England","GB-NIR":"Northern Ireland","GB-SCT":"Scotland","GB-WLS":"Wales",GR:"Greece",HR:"Croatia",IE:"Ireland",IT:"Italy",JM:"Jamaica",JP:"Japan",KR:"South Korea",LB:"Lebanon",ME:"Montenegro",MX:"Mexico",NL:"Netherlands",NO:"Norway",NZ:"New Zealand",PE:"Peru",PL:"Poland",PR:"Puerto Rico",PT:"Portugal",RO:"Romania",SE:"Sweden",SG:"Singapore",SI:"Slovenia",TH:"Thailand",TR:"Turkey",UA:"Ukraine",US:"USA",ZA:"South Africa"};
 
 // ── REVIEWS — one entry per pour, in the order they were drunk
-let beers=[
+export const beers: Review[] = [
   // JAN 2026 (13 reviews)
   {beer:"Grolsch",                              style:"Pilsner",        origin:"NL",    abv:5.0,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.50,isNew:false,month:"Jan",monthN:1,year:2026},
   {beer:"Hertog Jan",                           style:"Pilsner",        origin:"NL",    abv:5.1,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:2.00,isNew:false,month:"Jan",monthN:1,year:2026},
@@ -127,7 +136,7 @@ let beers=[
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
-let drunkLocs=[
+export const drunkLocs: DrunkLocation[] = [
   {city:"New York",       region:"New York",            country:"USA",        cc:"US",lat:40.7128,lng:-74.0060},
   {city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",lat:40.9115,lng:-73.7826},
   {city:"White Plains",   region:"New York",            country:"USA",        cc:"US",lat:41.0340,lng:-73.7629},
@@ -160,7 +169,7 @@ let drunkLocs=[
 ];
 
 // ── BREWERIES — where each beer is actually made
-let breweries=[
+export const breweries: Brewery[] = [
   {name:"Weihenstephaner",                   location:"Freising, Bavaria",                       country:"Germany",           cc:"DE",    lang:"de",beers:"Weihenstephaner Hefeweissbier",                                                            lat:48.3953,lng:11.7291,  ratings:[4.50]},
   {name:"Hofbräu München",                   location:"Munich, Bavaria",                         country:"Germany",           cc:"DE",    lang:"de",beers:"Hofbräu Münchner Weiße · Hofbräu Dunkel · Hofbräu Oktoberfestbier",                         lat:48.1351,lng:11.5820,  ratings:[4.75,2.75,2.50]},
   {name:"Guinness (St. James's Gate)",       location:"Dublin, Leinster",                        country:"Ireland",           cc:"IE",    lang:"en",beers:"Guinness Draught",                                                                         lat:53.3418,lng:-6.2868,  ratings:[4.00]},
@@ -238,15 +247,12 @@ let breweries=[
 // ══════════════════════════════════════════════════════════════
 // BRAND DOMAINS — where each beer's logo is looked up
 // ══════════════════════════════════════════════════════════════
-// A beer with no entry here renders the 🍺 placeholder forever; there is no
-// name-based guess behind it. A value is one domain, or several tried in
-// order for a brand that lives at more than one address.
-//
-// A domain being present proves nothing about what sits behind it — run
-// `npm run logos` (or auditLogos() in the console) to see what each beer
-// actually resolves to.
+// The fallback for a beer whose logo file has not been fetched yet, and
+// where `npm run fetch-logos` looks. A value is one domain, or several tried
+// in order for a brand that lives at more than one address. Every domain
+// must belong to that brand — never a parent company's.
 // ══════════════════════════════════════════════════════════════
-const BRAND_DOMAINS = {
+export const BRAND_DOMAINS: Record<string, BrandDomain> = {
 "Affligem Tripel":["affligembeer.com","affligembeer.be"],
 "Almaza Pilsener":"almaza.com.lb",
 "Amstel Light":["amstellight.com","amstel.com"],
@@ -376,13 +382,13 @@ const BRAND_DOMAINS = {
 // ══════════════════════════════════════════════════════════════
 // BRAND LOGOS — the committed file each beer's logo is drawn from
 // ══════════════════════════════════════════════════════════════
-// A path under public/stats/, one per beer name, fetched once by
+// A path under public/, one per beer name, fetched once by
 // `npm run fetch-logos` and held in the repo. This is where a logo comes
 // from: the same picture on every render, working offline, and nobody
 // else's to withdraw. The domains above are the fallback for a beer that
 // has no file yet.
 // ══════════════════════════════════════════════════════════════
-const BRAND_LOGOS = {
+export const BRAND_LOGOS: Record<string, string> = {
 "Affligem Tripel":"logos/affligem-tripel.svg",
 "Almaza Pilsener":"logos/almaza-pilsener.webp",
 "Amstel Light":"logos/amstel-light.webp",
@@ -519,7 +525,7 @@ const BRAND_LOGOS = {
 // one, never an estimate — and `adjuncts` are documented non-barley-malt
 // ingredients. `npm run check` fails on a beer with no entry.
 // ══════════════════════════════════════════════════════════════
-const BEER_FACTS = {
+export const BEER_FACTS: Record<string, BeerFacts> = {
 "Affligem Tripel":{sub:"Belgian Tripel",color:"Gold",body:"Full",ibu:null,cal:263,adjuncts:[]},
 "Almaza Pilsener":{sub:"International Pilsner",color:"Pale",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Amstel Light":{sub:"Light Lager",color:"Pale",body:"Light",ibu:18,cal:95,adjuncts:[]},
@@ -616,12 +622,12 @@ const BEER_FACTS = {
 // ══════════════════════════════════════════════════════════════
 // The refresh-untappd-reminder GitHub Action opens an issue every 2 weeks
 // when this stamp gets stale. Re-verify the ratings in the app, not here.
-const UNTAPPD_LAST_REFRESHED="2026-05-05";
-const UNTAPPD_REFRESH_INTERVAL_DAYS=14;
+export const UNTAPPD_LAST_REFRESHED: string = "2026-05-05";
+export const UNTAPPD_REFRESH_INTERVAL_DAYS: number = 14;
 
 // Keys MUST match the exact beer names in beers[] (case + diacritics);
 // `npm run check` fails on a key that matches no beer.
-const UNTAPPD_GLOBAL_AVGS={
+export const UNTAPPD_GLOBAL_AVGS: Record<string, number> = {
   "Grolsch":3.52,"Hertog Jan":3.58,"Coors Light":2.84,
   "Sapporo Premium":3.51,"Kirin Ichiban":3.43,"Modelo Especial":3.55,
   "Stella Artois":3.30,"Duvel":3.70,"Carlsberg":3.09,
@@ -654,7 +660,7 @@ const UNTAPPD_GLOBAL_AVGS={
 // `as` lists the other names a beer is logged under in beers[], for when
 // the shelf name differs from the name here.
 // ══════════════════════════════════════════════════════════════
-const WANT_TO_TRY=[
+export const WANT_TO_TRY: WantToTry[] = [
   {beer:"Paulaner Hefe",         style:"Wheat Beer", origin:"DE",    abv:5.5,region:"Munich, Bavaria",             untappd:3.87,method:"Bottle",as:["Paulaner Hefe-Weißbier"]},
   {beer:"Augustiner Helles",     style:"Lager",      origin:"DE",    abv:5.2,region:"Munich, Bavaria",             untappd:4.10,method:"Draft" },
   {beer:"Birra Moretti",         style:"Lager",      origin:"IT",    abv:4.6,region:"Udine, Friuli-Venezia Giulia",untappd:3.58,method:"Bottle"},

@@ -44,16 +44,16 @@ A place is written "New Rochelle, New York, United States" on every surface.
 ### 3. The app reads the committed log, not a network
 
 `src/lib/snapshot.ts` (which must export `BEERS` and import
-`@/data/snapshot.json`) and `src/lib/beer-data.ts` importing from it. Do not
+`"../data/log.ts"`) and `src/lib/beer-data.ts` importing from it. Do not
 point either back at a database, a fetch, or an API route.
 
-There is no backend. `public/stats/data.js` is the log; `src/data/snapshot.json`
-is that file projected into rows by `npm run snapshot`, because the app is a
-Vite bundle and cannot read a file out of `public/`. Both are committed, and
-`npm run check` fails when they disagree.
+There is no backend. `src/data/log.ts` is the log — typed, written by hand —
+and the app imports it directly; `src/lib/rows.ts` flattens it into the rows
+the screens read. Keep the chain `snapshot.ts → rows.ts → log.ts` on relative
+`.ts` imports with no runtime dependencies: `tools/` load it in plain Node.
 
 This is not a limitation to route around — it is the fix for the most expensive
-bug this project has had. There was a Supabase database; carrying `data.js`
+bug this project has had. There was a Supabase database; carrying the log
 into it meant a generated migration; applying a migration was the host's step
 and it silently stopped happening for days at a time across three merges. Both
 surfaces read the database and let it win, so a beer that had been added,
@@ -73,9 +73,9 @@ language, native name and logo are research rather than form fields. Do not
 
 The repo's tests — `tools/app-logic-test.mjs` (the rules inside `src/lib/`:
 the location format, the crossing-off rule, `MIN_N`, the prediction, the date
-labels) and `tools/roundtrip-snapshot.mjs` (that the projection loses nothing
-and the committed snapshot is in step) — are plain Node, need nothing
-installed and run in milliseconds. The modules they import must keep
+labels) and `tools/validate-data.mjs` (every rule about the log that a type
+cannot express) — are plain Node, need nothing installed and run in
+milliseconds. The modules they import must keep
 importing nothing at runtime (type-only imports are fine), or Node cannot
 load them. Each is named in the `check` script
 **and** has a step in `.github/workflows/checks.yml`, and
@@ -85,6 +85,7 @@ load them. Each is named in the `check` script
 pass", "Map Rule: The Pop-out Stays Open", "Location Rule: City, Region,
 Country" and "History".
 
-There is no static stats site any more. `public/stats/` holds only the log
-(`data.js`) and the committed logos; `/stats` redirects to `/insights`. Do not
-recreate a second rendering of the log — build it into the app.
+There is no static stats site any more, and no `public/stats/`: the log is
+`src/data/log.ts`, the logos are `public/logos/`, and `/stats` redirects to
+`/insights`. Do not recreate a second rendering of the log, or a generated
+copy of it — build on the app.

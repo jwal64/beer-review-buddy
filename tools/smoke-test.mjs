@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Opens the real app in a real browser and checks it still works: every route
 // renders its heading with no uncaught errors, the beers list and the insight
-// panels fill in, a map pin's popup stays open after the click that opened it,
+// panels fill in, a committed logo loads from /logos/, a map pin's popup stays open after the click that opened it,
 // and the old /stats address lands on Insights.
 //
 // It starts `vite dev` itself — the production build targets Cloudflare
@@ -107,6 +107,22 @@ await check("beers list", async () => {
   await page.locator("main ul > li").first().waitFor({ timeout: 15000 });
   const rows = await page.locator("main ul > li").count();
   return rows > 0 && `${rows} reviews`;
+});
+
+// Every logo is a committed file served from /logos/. A move that left the
+// URLs pointing somewhere else would fall through to favicons silently.
+await check("logos load from /logos/", async () => {
+  const img = page.locator('main img[src^="/logos/"]').first();
+  await img.waitFor({ timeout: 15000 });
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector('main img[src^="/logos/"]');
+      return el && el.complete && el.naturalWidth > 0;
+    },
+    null,
+    { timeout: 10000 },
+  );
+  return await img.getAttribute("src");
 });
 
 await check("insights", async () => {
