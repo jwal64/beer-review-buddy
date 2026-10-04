@@ -1,23 +1,19 @@
 // The beer log. This is the whole data layer.
 //
-// `public/stats/data.js` is the source of truth — a beer is added by editing
-// it — and `src/data/snapshot.json` is that file projected into flat rows by
-// `npm run snapshot`. The app reads the projection because it cannot read
-// data.js itself: this is a Vite bundle, and `public/` is served as static
-// assets rather than offered as source.
+// `src/data/log.ts` is the source of truth — a beer is added by editing it —
+// and this file is what the app reads from it: the log, flattened into rows by
+// `toRows` in ./rows, sorted and given stable ids, once, at module load.
 //
-// There is no database behind any of this. There was, and it is worth knowing
-// why there isn't: carrying data.js into Supabase meant a migration, applying
-// a migration was the host's step rather than this repo's, and it stopped
-// happening — silently, for days at a time, while every check stayed green. A
-// beer that had been added, checked, committed and merged simply was not on
-// the site. The log lives in one file now, and what is committed is what is
-// shown.
+// There is no database behind any of this, and no generated copy. There used
+// to be both, and each was a way for what was committed to differ from what
+// was shown, silently, while every check stayed green (CLAUDE.md, "History").
+// Now the bundle is built from the log itself, so the only way for the app to
+// show a beer is for it to be in the committed file.
 //
-// tools/roundtrip-snapshot.mjs proves the projection loses nothing, and
-// `npm run check` fails when snapshot.json is out of step with data.js — the
-// one way this file can now be wrong is by being stale.
-import snapshot from "@/data/snapshot.json";
+// Relative imports with their extension, not `@/`: the chain from here down
+// imports nothing at runtime but the log, so tools/ can load it in plain Node.
+import * as LOG from "../data/log.ts";
+import { toRows } from "./rows.ts";
 
 /** A review — one pour, on one day, in one place. */
 export interface Beer {
@@ -35,7 +31,7 @@ export interface Beer {
   cc: string;
   rating: number;
   is_new: boolean;
-  /** data.js records a month, not a day, so this is the first of that month. */
+  /** The log records a month, not a day, so this is the first of that month. */
   drank_on: string;
   /**
    * Graded from memory, for a beer drunk before the log began. It has no real
@@ -109,23 +105,20 @@ export interface WantToTryRow {
   aka: string[] | null;
 }
 
+/** A year's targets; a target nobody set is null. */
+export interface GoalRow {
+  year: number;
+  reviews: number | null;
+  new_beers: number | null;
+  countries: number | null;
+}
+
 export interface UntappdAverageRow {
   beer_name: string;
   avg: number;
 }
 
-interface RawSnapshot {
-  countries: CountryRow[];
-  locations: Omit<LocationRow, "id">[];
-  breweries: BreweryRow[];
-  beers: Omit<Beer, "id">[];
-  brand_domains: BrandDomainRow[];
-  beer_facts: BeerFactsRow[];
-  want_to_try: WantToTryRow[];
-  untappd_averages: UntappdAverageRow[];
-}
-
-const raw = snapshot as unknown as RawSnapshot;
+const raw = toRows(LOG);
 
 // Rows are identified by what makes them unique in the log, so a React key is
 // stable across reloads and a row can be pointed at without a database id.
@@ -165,3 +158,5 @@ export const WANT_TO_TRY: WantToTryRow[] = [...raw.want_to_try].sort(
 );
 
 export const UNTAPPD_AVERAGES: UntappdAverageRow[] = raw.untappd_averages;
+
+export const GOALS: GoalRow[] = [...raw.goals].sort((a, b) => a.year - b.year);

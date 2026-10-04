@@ -1,20 +1,21 @@
 #!/usr/bin/env node
-// Checks every rule CLAUDE.md states about the data, so a missing country code
-// or an unlisted brewery fails here instead of rendering as a blank flag or a
-// 🍺 placeholder that nobody notices for a month.
+// Checks every rule CLAUDE.md states about the log (src/data/log.ts) that a
+// type cannot, so a missing country code or an unlisted brewery fails here
+// instead of rendering as a blank flag or a monogram nobody notices for a month.
 //
 // Zero dependencies, nothing to install: `node tools/validate-data.mjs`.
 // Errors fail the run; warnings are printed and tolerated.
-import { existsSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
-import { loadData, ROOT } from './load-data.mjs';
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { loadData, PUBLIC } from "./load-data.mjs";
 // The app's own style palette and name normaliser, imported rather than copied
 // so the check and the app can never disagree. Node strips the types itself.
-import { STYLE_COLORS as sC } from '../src/lib/style-colors.ts';
-import { wtNorm } from '../src/lib/insights.ts';
+import { STYLE_COLORS as sC } from "../src/lib/style-colors.ts";
+import { wtNorm } from "../src/lib/insights.ts";
+import { CONTINENTS } from "../src/data/continents.ts";
 
-const METHODS = ['Bottle', 'Can', 'Draft', 'Nitro'];
-const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const METHODS = ["Bottle", "Can", "Draft", "Nitro"];
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const DOMAIN_RE = /^[a-z0-9-]+(\.[a-z0-9-]+)+$/i;
 
 const errors = [];
@@ -22,18 +23,24 @@ const warnings = [];
 const err = (where, msg) => errors.push(`${where}: ${msg}`);
 const warn = (where, msg) => warnings.push(`${where}: ${msg}`);
 
-const isStr = v => typeof v === 'string' && v.trim() !== '';
-const isNum = v => typeof v === 'number' && Number.isFinite(v);
-const isQuarter = v => isNum(v) && v >= 0 && v <= 5 && Math.round(v * 4) === v * 4;
+const isStr = (v) => typeof v === "string" && v.trim() !== "";
+const isNum = (v) => typeof v === "number" && Number.isFinite(v);
+const isQuarter = (v) => isNum(v) && v >= 0 && v <= 5 && Math.round(v * 4) === v * 4;
 
 const D = loadData();
-const { FLAGS, CNAMES, beers, drunkLocs, breweries, BRAND_DOMAINS,
-        UNTAPPD_GLOBAL_AVGS, UNTAPPD_LAST_REFRESHED, UNTAPPD_REFRESH_INTERVAL_DAYS,
-        WANT_TO_TRY } = D;
-// A data.js written before the logos moved into the repo has no map at all;
-// read it as empty so the check below reports every beer rather than throwing.
-const BRAND_LOGOS = D.BRAND_LOGOS ?? {};
-const BEER_FACTS = D.BEER_FACTS ?? {};
+const {
+  FLAGS,
+  CNAMES,
+  beers,
+  drunkLocs,
+  breweries,
+  BRAND_DOMAINS,
+  UNTAPPD_GLOBAL_AVGS,
+  UNTAPPD_LAST_REFRESHED,
+  UNTAPPD_REFRESH_INTERVAL_DAYS,
+  WANT_TO_TRY,
+} = D;
+const { BRAND_LOGOS, BEER_FACTS, GOALS } = D;
 
 // A country code has to carry both a flag and a display name — one without the
 // other renders a blank or the literal code.
@@ -44,51 +51,66 @@ function checkCC(where, field, cc) {
 }
 
 // ── BEERS ─────────────────────────────────────────────────────
-const beerNames = new Set(beers.map(b => b.beer));
+const beerNames = new Set(beers.map((b) => b.beer));
 const locKey = (city, cc) => `${city}|${cc}`;
-const knownLocs = new Set(drunkLocs.map(l => locKey(l.city, l.cc)));
-const brewedBeers = new Map();   // beer name → brewery that claims it
+const knownLocs = new Set(drunkLocs.map((l) => locKey(l.city, l.cc)));
+const brewedBeers = new Map(); // beer name → brewery that claims it
 for (const br of breweries)
-  for (const n of String(br.beers || '').split('·').map(s => s.trim()).filter(Boolean))
+  for (const n of String(br.beers || "")
+    .split("·")
+    .map((s) => s.trim())
+    .filter(Boolean))
     brewedBeers.set(n, br.name);
 
 beers.forEach((b, i) => {
-  const where = `beers[${i}] ${b.beer || '(unnamed)'}`;
-  if (!isStr(b.beer)) err(where, 'beer name is missing');
-  if (!isStr(b.style)) err(where, 'style is missing');
-  else if (!sC[b.style]) err(where, `style "${b.style}" has no colour in STYLE_COLORS in src/lib/style-colors.ts`);
-  checkCC(where, 'origin', b.origin);
-  if (!isNum(b.abv) || b.abv <= 0 || b.abv > 20) err(where, `abv ${b.abv} is not a plausible number`);
-  if (!METHODS.includes(b.method)) err(where, `method "${b.method}" is not one of ${METHODS.join(', ')}`);
+  const where = `beers[${i}] ${b.beer || "(unnamed)"}`;
+  if (!isStr(b.beer)) err(where, "beer name is missing");
+  if (!isStr(b.style)) err(where, "style is missing");
+  else if (!sC[b.style])
+    err(where, `style "${b.style}" has no colour in STYLE_COLORS in src/lib/style-colors.ts`);
+  checkCC(where, "origin", b.origin);
+  if (!isNum(b.abv) || b.abv <= 0 || b.abv > 20)
+    err(where, `abv ${b.abv} is not a plausible number`);
+  if (!METHODS.includes(b.method))
+    err(where, `method "${b.method}" is not one of ${METHODS.join(", ")}`);
   if (!isQuarter(b.rating)) err(where, `rating ${b.rating} is not 0–5 in quarter steps`);
-  if (typeof b.isNew !== 'boolean') err(where, 'isNew must be true or false');
-  if ('retro' in b && b.retro !== true) err(where, 'retro is either true or left out');
+  if (typeof b.isNew !== "boolean") err(where, "isNew must be true or false");
+  if ("retro" in b && b.retro !== true) err(where, "retro is either true or left out");
   const mi = MONTHS.indexOf(b.month);
   if (mi === -1) err(where, `month "${b.month}" is not a 3-letter abbreviation`);
   else if (b.monthN !== mi + 1) err(where, `monthN ${b.monthN} does not match month "${b.month}"`);
-  if (!Number.isInteger(b.year) || b.year < 2000 || b.year > 2100) err(where, `year ${b.year} is out of range`);
+  if (!Number.isInteger(b.year) || b.year < 2000 || b.year > 2100)
+    err(where, `year ${b.year} is out of range`);
 
   // Consumption location
-  checkCC(where, 'cc', b.cc);
-  if (!isStr(b.city)) err(where, 'city is missing');
-  if (!isStr(b.region)) err(where, 'region is missing');
+  checkCC(where, "cc", b.cc);
+  if (!isStr(b.city)) err(where, "city is missing");
+  if (!isStr(b.region)) err(where, "region is missing");
   if (CNAMES[b.cc] && b.country !== CNAMES[b.cc])
     err(where, `country "${b.country}" does not match CNAMES.${b.cc} ("${CNAMES[b.cc]}")`);
   if (isStr(b.city) && isStr(b.cc) && !knownLocs.has(locKey(b.city, b.cc)))
-    err(where, `consumption city "${b.city}" (${b.cc}) is not in drunkLocs[] — the maps would drop it`);
+    err(
+      where,
+      `consumption city "${b.city}" (${b.cc}) is not in drunkLocs[] — the maps would drop it`,
+    );
 
   // Provenance and rendering
   if (!brewedBeers.has(b.beer))
-    err(where, 'no brewery in breweries[] lists this beer, so it has no origin story or map pin');
+    err(where, "no brewery in breweries[] lists this beer, so it has no origin story or map pin");
   if (!BRAND_DOMAINS[b.beer])
-    err(where, 'no BRAND_DOMAINS entry, so it renders the 🍺 placeholder');
+    err(where, "no BRAND_DOMAINS entry, so it renders the 🍺 placeholder");
   // A logo override is normally a file in logos/. A remote URL works too, but
   // it is a hotlink to someone else's server: it can 404 or change without
   // notice, so it is called out rather than trusted.
   if (b.logo !== undefined) {
-    if (!isStr(b.logo)) err(where, 'logo override must be a path string');
-    else if (/^https?:\/\//.test(b.logo)) warn(where, `logo override hotlinks ${new URL(b.logo).host} — save the file into logos/ instead to make it reliable`);
-    else if (!existsSync(join(ROOT, b.logo))) err(where, `logo override "${b.logo}" does not exist`);
+    if (!isStr(b.logo)) err(where, "logo override must be a path string");
+    else if (/^https?:\/\//.test(b.logo))
+      warn(
+        where,
+        `logo override hotlinks ${new URL(b.logo).host} — save the file into logos/ instead to make it reliable`,
+      );
+    else if (!existsSync(join(PUBLIC, b.logo)))
+      err(where, `logo override "${b.logo}" does not exist`);
   }
 });
 
@@ -103,12 +125,12 @@ beers.forEach((b, i) => {
 const pinnedAt = new Map();
 const seenBrewery = new Set();
 breweries.forEach((br, i) => {
-  const where = `breweries[${i}] ${br.name || '(unnamed)'}`;
-  if (!isStr(br.name)) err(where, 'name is missing');
-  else if (seenBrewery.has(br.name)) err(where, 'duplicate brewery entry');
+  const where = `breweries[${i}] ${br.name || "(unnamed)"}`;
+  if (!isStr(br.name)) err(where, "name is missing");
+  else if (seenBrewery.has(br.name)) err(where, "duplicate brewery entry");
   else seenBrewery.add(br.name);
-  if (!isStr(br.location)) err(where, 'location is missing');
-  checkCC(where, 'cc', br.cc);
+  if (!isStr(br.location)) err(where, "location is missing");
+  checkCC(where, "cc", br.cc);
   if (CNAMES[br.cc] && br.country !== CNAMES[br.cc])
     err(where, `country "${br.country}" does not match CNAMES.${br.cc} ("${CNAMES[br.cc]}")`);
   if (!isStr(br.lang) || !/^[a-z]{2}$/.test(br.lang))
@@ -118,56 +140,68 @@ breweries.forEach((br, i) => {
   if (isNum(br.lat) && isNum(br.lng)) {
     const pin = `${br.lat},${br.lng}`;
     if (pinnedAt.has(pin))
-      err(where, `sits on the exact same point as "${pinnedAt.get(pin)}" — ` +
-                 'one pin hides the other, so give this brewery its own site');
+      err(
+        where,
+        `sits on the exact same point as "${pinnedAt.get(pin)}" — ` +
+          "one pin hides the other, so give this brewery its own site",
+      );
     else pinnedAt.set(pin, br.name);
   }
 
-  const listed = String(br.beers || '').split('·').map(s => s.trim()).filter(Boolean);
-  if (!listed.length) err(where, 'beers field is empty');
+  const listed = String(br.beers || "")
+    .split("·")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  if (!listed.length) err(where, "beers field is empty");
   if (!Array.isArray(br.ratings) || !br.ratings.every(isQuarter))
-    err(where, 'ratings must be an array of 0–5 values in quarter steps');
+    err(where, "ratings must be an array of 0–5 values in quarter steps");
   else if (br.ratings.length !== listed.length)
-    err(where, `${listed.length} beer(s) listed but ${br.ratings.length} rating(s) — they are read as a pair`);
+    err(
+      where,
+      `${listed.length} beer(s) listed but ${br.ratings.length} rating(s) — they are read as a pair`,
+    );
   listed.forEach((n, j) => {
     if (!beerNames.has(n)) return warn(where, `lists "${n}", which has no review in beers[] yet`);
     // The brewery's ratings mirror the reviews; a drift means one was edited alone.
-    const reviews = beers.filter(b => b.beer === n).map(b => b.rating);
+    const reviews = beers.filter((b) => b.beer === n).map((b) => b.rating);
     const claimed = br.ratings[j];
     if (claimed !== undefined && !reviews.includes(claimed))
-      err(where, `rating ${claimed} for "${n}" matches no review of it (${reviews.join(', ') || 'none'})`);
+      err(
+        where,
+        `rating ${claimed} for "${n}" matches no review of it (${reviews.join(", ") || "none"})`,
+      );
   });
 });
 
 // ── LOCATIONS ─────────────────────────────────────────────────
-const usedLocs = new Set(beers.map(b => locKey(b.city, b.cc)));
+const usedLocs = new Set(beers.map((b) => locKey(b.city, b.cc)));
 const seenLoc = new Set();
 drunkLocs.forEach((l, i) => {
-  const where = `drunkLocs[${i}] ${l.city || '(unnamed)'}`;
-  if (!isStr(l.city)) err(where, 'city is missing');
-  if (!isStr(l.region)) err(where, 'region is missing');
-  checkCC(where, 'cc', l.cc);
+  const where = `drunkLocs[${i}] ${l.city || "(unnamed)"}`;
+  if (!isStr(l.city)) err(where, "city is missing");
+  if (!isStr(l.region)) err(where, "region is missing");
+  checkCC(where, "cc", l.cc);
   if (CNAMES[l.cc] && l.country !== CNAMES[l.cc])
     err(where, `country "${l.country}" does not match CNAMES.${l.cc} ("${CNAMES[l.cc]}")`);
   if (!isNum(l.lat) || l.lat < -90 || l.lat > 90) err(where, `lat ${l.lat} is out of range`);
   if (!isNum(l.lng) || l.lng < -180 || l.lng > 180) err(where, `lng ${l.lng} is out of range`);
   const k = locKey(l.city, l.cc);
-  if (seenLoc.has(k)) err(where, 'duplicate location entry');
+  if (seenLoc.has(k)) err(where, "duplicate location entry");
   seenLoc.add(k);
-  if (!usedLocs.has(k)) warn(where, 'no review was logged here');
+  if (!usedLocs.has(k)) warn(where, "no review was logged here");
 });
 
 // ── BRAND DOMAINS ─────────────────────────────────────────────
-const logoBeers = new Set([...beerNames, ...WANT_TO_TRY.map(e => e.beer)]);
+const logoBeers = new Set([...beerNames, ...WANT_TO_TRY.map((e) => e.beer)]);
 for (const [name, value] of Object.entries(BRAND_DOMAINS)) {
   const where = `BRAND_DOMAINS["${name}"]`;
   const list = Array.isArray(value) ? value : [value];
-  if (!list.length) err(where, 'has no domain');
+  if (!list.length) err(where, "has no domain");
   for (const d of list) {
-    if (!isStr(d)) err(where, 'domain must be a non-empty string');
+    if (!isStr(d)) err(where, "domain must be a non-empty string");
     else if (!DOMAIN_RE.test(d)) err(where, `"${d}" is not a bare domain (no scheme or path)`);
   }
-  if (!logoBeers.has(name)) warn(where, 'no beer or shortlist entry uses this domain');
+  if (!logoBeers.has(name)) warn(where, "no beer or shortlist entry uses this domain");
 }
 for (const name of logoBeers)
   if (!BRAND_DOMAINS[name]) err(`BRAND_DOMAINS`, `"${name}" renders a logo but has no entry`);
@@ -178,23 +212,24 @@ for (const name of logoBeers)
 // by these never silently drop one; a figure nobody publishes is null, and
 // null is fine — for a beer nobody could identify, colour and body too. What
 // is not fine is a guess written as a number.
-const FACT_COLORS = ['Pale', 'Gold', 'Amber', 'Dark'];
-const FACT_BODIES = ['Light', 'Medium', 'Full'];
+const FACT_COLORS = ["Pale", "Gold", "Amber", "Dark"];
+const FACT_BODIES = ["Light", "Medium", "Full"];
 for (const [name, f] of Object.entries(BEER_FACTS ?? {})) {
   const where = `BEER_FACTS["${name}"]`;
-  if (!beerNames.has(name)) warn(where, 'no logged beer has this name');
-  if (!isStr(f.sub)) err(where, 'sub (the specific style) is missing');
-  if (f.color !== null && !FACT_COLORS.includes(f.color)) err(where, `color "${f.color}" is not one of ${FACT_COLORS.join(' / ')}`);
-  if (f.body !== null && !FACT_BODIES.includes(f.body)) err(where, `body "${f.body}" is not one of ${FACT_BODIES.join(' / ')}`);
+  if (!beerNames.has(name)) warn(where, "no logged beer has this name");
+  if (!isStr(f.sub)) err(where, "sub (the specific style) is missing");
+  if (f.color !== null && !FACT_COLORS.includes(f.color))
+    err(where, `color "${f.color}" is not one of ${FACT_COLORS.join(" / ")}`);
+  if (f.body !== null && !FACT_BODIES.includes(f.body))
+    err(where, `body "${f.body}" is not one of ${FACT_BODIES.join(" / ")}`);
   if (f.ibu !== null && (!isNum(f.ibu) || f.ibu < 0 || f.ibu > 120))
     err(where, `ibu ${f.ibu} must be a number from 0 to 120, or null`);
   if (f.cal !== null && (!isNum(f.cal) || f.cal < 30 || f.cal > 400))
     err(where, `cal ${f.cal} must be a number from 30 to 400 per 12 fl oz, or null`);
-  if (!Array.isArray(f.adjuncts) || f.adjuncts.some(a => !isStr(a)))
-    err(where, 'adjuncts must be an array of strings');
+  if (!Array.isArray(f.adjuncts) || f.adjuncts.some((a) => !isStr(a)))
+    err(where, "adjuncts must be an array of strings");
 }
-for (const name of beerNames)
-  if (!BEER_FACTS[name]) err('BEER_FACTS', `"${name}" has no entry`);
+for (const name of beerNames) if (!BEER_FACTS[name]) err("BEER_FACTS", `"${name}" has no entry`);
 
 // ── BRAND LOGOS ───────────────────────────────────────────────
 // The committed file for each brand. This is the check that makes "every beer
@@ -209,17 +244,23 @@ for (const name of beerNames)
 // alone by the fetcher.
 for (const [name, file] of Object.entries(BRAND_LOGOS)) {
   const where = `BRAND_LOGOS["${name}"]`;
-  if (!isStr(file)) err(where, 'must be a path string');
+  if (!isStr(file)) err(where, "must be a path string");
   else if (/^https?:\/\//.test(file))
-    err(where, `hotlinks ${new URL(file).host} — a logo held on someone else's server is exactly what this replaces`);
-  else if (!file.startsWith('logos/')) err(where, `"${file}" is not under logos/`);
-  else if (!existsSync(join(ROOT, file))) err(where, `"${file}" does not exist`);
-  if (!logoBeers.has(name)) warn(where, 'no beer or shortlist entry uses this logo');
+    err(
+      where,
+      `hotlinks ${new URL(file).host} — a logo held on someone else's server is exactly what this replaces`,
+    );
+  else if (!file.startsWith("logos/")) err(where, `"${file}" is not under logos/`);
+  else if (!existsSync(join(PUBLIC, file))) err(where, `"${file}" does not exist`);
+  if (!logoBeers.has(name)) warn(where, "no beer or shortlist entry uses this logo");
 }
 for (const name of logoBeers)
   if (!BRAND_LOGOS[name])
-    err('BRAND_LOGOS', `"${name}" has no committed logo file — run \`npm run fetch-logos\`, ` +
-      'or draw one into public/stats/logos/ and add it here');
+    err(
+      "BRAND_LOGOS",
+      `"${name}" has no committed logo file — run \`npm run fetch-logos\`, ` +
+        "or draw one into public/logos/ and add it here",
+    );
 
 // ── LOGO FILES THAT ARE PRESENT AND STILL RENDER NOTHING ──────
 // The check above asks only whether a file is there. Three beers passed it for
@@ -232,32 +273,46 @@ const svgStub = (src) => {
   // An SVG fetched out of a page often keeps a <use> pointing at a sprite
   // symbol that stayed behind on the site. It is a valid document and it
   // paints nothing.
-  const refs = [...src.matchAll(/<use\b[^>]*?\b(?:xlink:)?href\s*=\s*["']#([^"']+)["']/g)].map(m => m[1]);
+  const refs = [...src.matchAll(/<use\b[^>]*?\b(?:xlink:)?href\s*=\s*["']#([^"']+)["']/g)].map(
+    (m) => m[1],
+  );
   if (!refs.length) return null;
-  const missing = refs.filter(id => !new RegExp(`\\bid\\s*=\\s*["']${id.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`).test(src));
+  const missing = refs.filter(
+    (id) =>
+      !new RegExp(`\\bid\\s*=\\s*["']${id.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}["']`).test(src),
+  );
   if (missing.length !== refs.length) return null;
-  return `every <use> points at a symbol the file does not carry (#${missing.join(', #')}) — ` +
-    'the artwork stayed on the brand\'s page; re-fetch it or draw one';
+  return (
+    `every <use> points at a symbol the file does not carry (#${missing.join(", #")}) — ` +
+    "the artwork stayed on the brand's page; re-fetch it or draw one"
+  );
 };
 for (const [name, file] of Object.entries(BRAND_LOGOS)) {
-  if (!isStr(file) || !file.startsWith('logos/')) continue;
-  const path = join(ROOT, file);
+  if (!isStr(file) || !file.startsWith("logos/")) continue;
+  const path = join(PUBLIC, file);
   if (!existsSync(path)) continue;
   const where = `BRAND_LOGOS["${name}"]`;
   const buf = readFileSync(path);
-  if (!buf.length) { err(where, `"${file}" is empty`); continue; }
-  if (!file.endsWith('.svg')) {
-    // A raster this small is a stub, not a logo — the smallest real one here
-    // is well over a kilobyte.
-    if (buf.length < 512) err(where, `"${file}" is only ${buf.length} bytes — too small to be a logo`);
+  if (!buf.length) {
+    err(where, `"${file}" is empty`);
     continue;
   }
-  const src = buf.toString('utf8');
+  if (!file.endsWith(".svg")) {
+    // A raster this small is a stub, not a logo — the smallest real one here
+    // is well over a kilobyte.
+    if (buf.length < 512)
+      err(where, `"${file}" is only ${buf.length} bytes — too small to be a logo`);
+    continue;
+  }
+  const src = buf.toString("utf8");
   // xlink: without its namespace is fatal when an SVG is loaded as an <img>
   // source, which is how both surfaces load these. Inlined it would be fine,
   // which is why it survives a casual look.
   if (/\bxlink:[a-z]+\s*=/.test(src) && !/\bxmlns:xlink\s*=/.test(src))
-    err(where, `"${file}" uses xlink: without declaring xmlns:xlink — the browser refuses it as malformed XML`);
+    err(
+      where,
+      `"${file}" uses xlink: without declaring xmlns:xlink — the browser refuses it as malformed XML`,
+    );
   const stub = svgStub(src);
   if (stub) err(where, `"${file}" ${stub}`);
 }
@@ -266,58 +321,96 @@ for (const [name, file] of Object.entries(BRAND_LOGOS)) {
 for (const [name, v] of Object.entries(UNTAPPD_GLOBAL_AVGS)) {
   const where = `UNTAPPD_GLOBAL_AVGS["${name}"]`;
   if (!isNum(v) || v < 0 || v > 5) err(where, `${v} is not a 0–5 rating`);
-  if (!beerNames.has(name)) err(where, 'matches no beer in beers[] — the contrarian chart silently drops it');
+  if (!beerNames.has(name))
+    err(where, "matches no beer in beers[] — the contrarian chart silently drops it");
 }
 if (!/^\d{4}-\d{2}-\d{2}$/.test(String(UNTAPPD_LAST_REFRESHED)))
-  err('UNTAPPD_LAST_REFRESHED', `"${UNTAPPD_LAST_REFRESHED}" is not YYYY-MM-DD`);
+  err("UNTAPPD_LAST_REFRESHED", `"${UNTAPPD_LAST_REFRESHED}" is not YYYY-MM-DD`);
 if (!Number.isInteger(UNTAPPD_REFRESH_INTERVAL_DAYS) || UNTAPPD_REFRESH_INTERVAL_DAYS < 1)
-  err('UNTAPPD_REFRESH_INTERVAL_DAYS', 'must be a positive whole number of days');
+  err("UNTAPPD_REFRESH_INTERVAL_DAYS", "must be a positive whole number of days");
 
 // ── WANT TO TRY ───────────────────────────────────────────────
 // Crossing an entry off is done by name: a review whose beer matches the
 // entry's name (or one of its `as` names) retires it from the shortlist. So a
 // name that agrees with nothing is not a cosmetic problem — it leaves a beer
 // sitting on the "still to drink" list that was drunk months ago.
-const normBeerNames = new Map([...beerNames].map(n => [wtNorm(n), n]));
-const tokens = k => new Set(k.split(' ').filter(Boolean));
-const subset = (a, b) => [...a].every(t => b.has(t));
+const normBeerNames = new Map([...beerNames].map((n) => [wtNorm(n), n]));
+const tokens = (k) => new Set(k.split(" ").filter(Boolean));
+const subset = (a, b) => [...a].every((t) => b.has(t));
 const seenWant = new Set();
 WANT_TO_TRY.forEach((e, i) => {
-  const where = `WANT_TO_TRY[${i}] ${e.beer || '(unnamed)'}`;
-  if (!isStr(e.beer)) return err(where, 'beer name is missing');
-  if (!sC[e.style]) err(where, `style "${e.style}" has no colour in STYLE_COLORS in src/lib/style-colors.ts`);
-  checkCC(where, 'origin', e.origin);
-  if (!isStr(e.region)) err(where, 'region is missing');
-  if (!isNum(e.abv) || e.abv <= 0 || e.abv > 20) err(where, `abv ${e.abv} is not a plausible number`);
-  if (!isNum(e.untappd) || e.untappd < 0 || e.untappd > 5) err(where, `untappd ${e.untappd} is not a 0–5 rating`);
-  if (!METHODS.includes(e.method)) err(where, `method "${e.method}" is not one of ${METHODS.join(', ')}`);
+  const where = `WANT_TO_TRY[${i}] ${e.beer || "(unnamed)"}`;
+  if (!isStr(e.beer)) return err(where, "beer name is missing");
+  if (!sC[e.style])
+    err(where, `style "${e.style}" has no colour in STYLE_COLORS in src/lib/style-colors.ts`);
+  checkCC(where, "origin", e.origin);
+  if (!isStr(e.region)) err(where, "region is missing");
+  if (!isNum(e.abv) || e.abv <= 0 || e.abv > 20)
+    err(where, `abv ${e.abv} is not a plausible number`);
+  if (!isNum(e.untappd) || e.untappd < 0 || e.untappd > 5)
+    err(where, `untappd ${e.untappd} is not a 0–5 rating`);
+  if (!METHODS.includes(e.method))
+    err(where, `method "${e.method}" is not one of ${METHODS.join(", ")}`);
 
   const names = [e.beer, ...(e.as || [])];
   if (e.as !== undefined && (!Array.isArray(e.as) || !e.as.length || !e.as.every(isStr)))
-    err(where, 'as must be a non-empty array of other names this beer is logged under');
+    err(where, "as must be a non-empty array of other names this beer is logged under");
   for (const n of e.as || [])
     if (wtNorm(n) === wtNorm(e.beer)) err(where, `as lists "${n}", which is the entry's own name`);
 
   const key = wtNorm(e.beer);
-  if (seenWant.has(key)) err(where, 'is on the shortlist twice');
+  if (seenWant.has(key)) err(where, "is on the shortlist twice");
   seenWant.add(key);
 
   // Already drunk? Then nothing more to check — the entry has crossed itself
   // off and now scores its own prediction.
-  if (names.some(n => normBeerNames.has(wtNorm(n)))) return;
+  if (names.some((n) => normBeerNames.has(wtNorm(n)))) return;
   // Not drunk, as far as the names say. Warn on the near-misses, which are
   // where a shelf name and a logged name have quietly drifted apart.
-  const near = [...normBeerNames].filter(([k]) => {
-    const a = tokens(key), b = tokens(k);
-    return k !== key && (subset(a, b) || subset(b, a));
-  }).map(([, n]) => `"${n}"`);
+  const near = [...normBeerNames]
+    .filter(([k]) => {
+      const a = tokens(key),
+        b = tokens(k);
+      return k !== key && (subset(a, b) || subset(b, a));
+    })
+    .map(([, n]) => `"${n}"`);
   if (near.length)
-    warn(where, `still on the shortlist, but ${near.join(' / ')} is already reviewed — add as:[…] if it is the same beer`);
+    warn(
+      where,
+      `still on the shortlist, but ${near.join(" / ")} is already reviewed — add as:[…] if it is the same beer`,
+    );
+});
+
+// ── CONTINENTS ────────────────────────────────────────────────
+// The passport sorts every stamp onto a continent; a code with none would
+// stamp nowhere and quietly stall the Six continents badge.
+for (const cc of Object.keys(FLAGS))
+  if (!CONTINENTS[cc])
+    err(`FLAGS.${cc}`, `has no continent — add it to CONTINENTS in src/data/continents.ts`);
+
+// ── GOALS ─────────────────────────────────────────────────────
+const GOAL_TARGETS = ["reviews", "newBeers", "countries"];
+const goalYears = new Set();
+(GOALS ?? []).forEach((g, i) => {
+  const where = `GOALS[${i}] ${g.year ?? "(no year)"}`;
+  if (!Number.isInteger(g.year) || g.year < 2000 || g.year > 2100)
+    err(where, `year ${g.year} is not a plausible year`);
+  if (goalYears.has(g.year)) err(where, "a second entry for the same year — merge them");
+  goalYears.add(g.year);
+  for (const k of Object.keys(g))
+    if (k !== "year" && !GOAL_TARGETS.includes(k))
+      err(where, `"${k}" is not a goal (${GOAL_TARGETS.join(", ")})`);
+  for (const k of GOAL_TARGETS)
+    if (g[k] != null && !(Number.isInteger(g[k]) && g[k] > 0))
+      err(where, `${k} ${g[k]} must be a positive whole number`);
+  if (!GOAL_TARGETS.some((k) => g[k] != null))
+    warn(where, "sets no target, so the Passport tab has nothing to show for it");
 });
 
 // ── REPORT ────────────────────────────────────────────────────
-const wantPending = WANT_TO_TRY.filter(e =>
-  ![e.beer, ...(e.as || [])].some(n => normBeerNames.has(wtNorm(n)))).length;
+const wantPending = WANT_TO_TRY.filter(
+  (e) => ![e.beer, ...(e.as || [])].some((n) => normBeerNames.has(wtNorm(n))),
+).length;
 const counts = `${beers.length} reviews · ${breweries.length} breweries · ${drunkLocs.length} locations · ${Object.keys(BRAND_DOMAINS).length} brand domains · ${wantPending}/${WANT_TO_TRY.length} still to try`;
 if (warnings.length) {
   console.log(`\n${warnings.length} warning(s):`);

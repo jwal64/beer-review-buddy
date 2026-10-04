@@ -64,7 +64,7 @@ jobs:
 
       # The data has to name the files or nothing reads them, and the check
       # that every beer has one is the point of the whole exercise. A run that
-      # leaves data.js failing its own rules should not be committed.
+      # leaves the log failing its own rules should not be committed.
       - name: Check the data still passes
         run: npm run check
 
@@ -72,7 +72,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add public/stats/logos public/stats/data.js logo-fetch-report.json
+          git add public/logos src/data/log.ts logo-fetch-report.json
           git diff --cached --quiet && { echo "Nothing to commit — every beer already had a logo."; exit 0; }
           git commit -m "Fetch logos for beers that had none"
           git push origin HEAD:${{ github.ref_name }}

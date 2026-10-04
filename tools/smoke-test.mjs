@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // Opens the real app in a real browser and checks it still works: every route
-// renders its heading with no uncaught errors, the beers list and the insight
-// panels fill in, a map pin's popup stays open after the click that opened it,
+// renders its heading with no uncaught errors, the beers list, the insight
+// panels and the passport's badges, stamps and bingo card fill in, a committed
+// logo loads from /logos/, a map pin's popup stays open after the click that opened it,
 // and the old /stats address lands on Insights.
 //
 // It starts `vite dev` itself — the production build targets Cloudflare
@@ -109,6 +110,22 @@ await check("beers list", async () => {
   return rows > 0 && `${rows} reviews`;
 });
 
+// Every logo is a committed file served from /logos/. A move that left the
+// URLs pointing somewhere else would fall through to favicons silently.
+await check("logos load from /logos/", async () => {
+  const img = page.locator('main img[src^="/logos/"]').first();
+  await img.waitFor({ timeout: 15000 });
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector('main img[src^="/logos/"]');
+      return el && el.complete && el.naturalWidth > 0;
+    },
+    null,
+    { timeout: 10000 },
+  );
+  return await img.getAttribute("src");
+});
+
 await check("insights", async () => {
   await visit("/insights", "Insights");
   await page.locator("main section h2").first().waitFor({ timeout: 15000 });
@@ -122,6 +139,37 @@ await check("insights tabs", async () => {
     await page.waitForTimeout(150);
   }
   return "taste · places · next";
+});
+
+// The Passport: badges computed from the log, stamps per brewing country,
+// and the twelve-square bingo card. Each tab has to render real content, not
+// just its heading.
+await check("passport badges", async () => {
+  await visit("/passport", "Passport");
+  const panel = page.locator("main section", { hasText: "Badges" }).last();
+  await panel.locator("li").first().waitFor({ timeout: 15000 });
+  const cards = await panel.locator("li").count();
+  const earned = await panel.getByText(/^Earned/).count();
+  return cards >= 10 && earned > 0 && `${earned} of ${cards} earned`;
+});
+
+await check("passport stamps and bingo", async () => {
+  await page.getByRole("tab", { name: "Stamps" }).click();
+  const stamps = page.locator("main section", { hasText: "Brewed in" }).locator("li");
+  await stamps.first().waitFor({ timeout: 5000 });
+  const n = await stamps.count();
+  await page.getByRole("tab", { name: "Bingo" }).click();
+  const cells = page.locator("main table tbody td");
+  await cells.first().waitFor({ timeout: 5000 });
+  const c = await cells.count();
+  return n > 0 && c === 12 && `${n} stamps · ${c} bingo squares`;
+});
+
+await check("home links to the passport", async () => {
+  await visit("/", "JWAL BREW REVIEW");
+  const strip = page.locator('main a[href="/passport"]');
+  await strip.waitFor({ timeout: 15000 });
+  return /streak/.test(await strip.innerText()) && "streak strip";
 });
 
 await check("add a beer", async () => {

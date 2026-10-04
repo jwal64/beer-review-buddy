@@ -20,7 +20,7 @@ be read or researched — e.g. `isNew` when unsure.)
 git fetch origin main && git checkout -B main origin/main   # or: git pull origin main
 ```
 
-## 2. The data steps, all in `public/stats/data.js`
+## 2. The data steps, all in `src/data/log.ts`
 
 1. **`beers[]`** — append under the current month's comment header; rating in
    0.25 steps.
@@ -30,32 +30,34 @@ git fetch origin main && git checkout -B main origin/main   # or: git pull origi
    Keep `beers` and `ratings` paired, same order.
 3. **`BRAND_DOMAINS`** — the brand's own domain(s), never a parent company's.
 4. **Logo** — `npm run fetch-logos`, then `npm run logo-sheet` and look at it.
-   If nothing is reachable, place the file under `public/stats/logos/` by hand,
+   If nothing is reachable, place the file under `public/logos/` by hand,
    add it to `BRAND_LOGOS`, **and list it under `kept` in
    `logo-fetch-report.json`**.
 5. **`BEER_FACTS`** — published IBU / calories or `null`. Never guess or borrow.
 6. **`drunkLocs[]`** — make sure the consumption city exists, exactly matching
    the review's city/region/country/cc.
+7. **A new country** (brewing or drinking) needs `FLAGS`, `CNAMES` and a row
+   in `CONTINENTS` in `src/data/continents.ts`.
 
-## 3. Validate and project
+## 3. Validate
 
 ```sh
-npm run check && npm run snapshot
+npm run check && npx tsc --noEmit
 ```
 
-Both must pass (re-run `npm run check` after the snapshot).
+Both must pass. There is nothing to regenerate: the app imports the log.
 
 ## 4. Keep the invariants intact
 
-Do not touch `src/lib/place.ts`, `src/lib/snapshot.ts`, or the module-scope
+Do not touch `src/lib/place.ts`, `src/lib/snapshot.ts`, `src/lib/rows.ts`, or the module-scope
 `selectBrandDomains` / `selectBrandLogos` in `src/lib/beer-data.ts`.
 
 ## 5. Commit, push a branch, open a pull request
 
 - Work on a branch cut from the latest `main` (e.g. `claude/add-<beer-slug>`),
   never directly on `main`.
-- Commit `public/stats/data.js` and `src/data/snapshot.json` (plus any logo
-  files and `logo-fetch-report.json`) **together, in one commit**. If the beer
+- Commit `src/data/log.ts` (plus any logo files under `public/logos/` and
+  `logo-fetch-report.json`) **together, in one commit**. If the beer
   came from an issue, add `Closes #N`.
 - Push with `git push -u origin <branch>` and **open a pull request into
   `main`** (check for a PR template first). Do not merge it: the owner reviews

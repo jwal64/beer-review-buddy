@@ -6,6 +6,7 @@ import { Rating } from "@/components/Rating";
 import { QueryError } from "@/components/QueryError";
 import { flagEmoji, whenLabel, useBeers, useCountries, type Beer } from "@/lib/beer-data";
 import { placeLabel } from "@/lib/place";
+import { useProgress } from "@/hooks/use-progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
 
@@ -49,6 +50,59 @@ function StatCard({
         size={14}
         aria-hidden="true"
         className="mt-2 text-muted-foreground transition-transform group-hover:translate-x-0.5"
+      />
+    </Link>
+  );
+}
+
+/**
+ * The Passport tab in one line: the streak, the latest badge and the year's
+ * headline goal. Tapping it opens the tab.
+ */
+function ProgressStrip() {
+  const { data: p } = useProgress();
+  const goal = p.goals.find((g) => g.year === p.thisYear);
+  const headline = goal?.metrics[0];
+  const items = [
+    {
+      icon: "🔥",
+      value: `${p.streak.current} mo`,
+      label: p.streak.loggedThisMonth || !p.streak.current ? "streak" : "streak · log one",
+    },
+    {
+      icon: p.latestBadge?.def.emoji ?? "🏅",
+      value: `${p.earned}/${p.badges.length}`,
+      label: p.latestBadge ? `latest: ${p.latestBadge.def.title}` : "badges",
+    },
+    ...(headline
+      ? [
+          {
+            icon: "🎯",
+            value: `${headline.current}/${headline.target}`,
+            label: `${headline.label.toLowerCase()} ${goal?.year}`,
+          },
+        ]
+      : []),
+  ];
+  return (
+    <Link
+      to="/passport"
+      aria-label="Open the passport: streak, badges and goals"
+      className="group flex items-stretch gap-2 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+    >
+      {items.map((it) => (
+        <div key={it.label} className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5">
+            <span aria-hidden="true">{it.icon}</span>
+            <span className="font-display text-base font-semibold text-primary">{it.value}</span>
+          </div>
+          <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{it.label}</div>
+        </div>
+      ))}
+      <ChevronRight
+        size={14}
+        aria-hidden="true"
+        className="shrink-0 self-center text-muted-foreground transition-transform group-hover:translate-x-0.5"
       />
     </Link>
   );
@@ -108,6 +162,8 @@ function HomePage() {
             <StatCard label="Avg rating" value={stats.avg.toFixed(2)} to="/insights" />
             <StatCard label="Origin countries" value={String(stats.countries)} to="/map" />
           </section>
+
+          <ProgressStrip />
 
           <section>
             <div className="mb-3 flex items-center justify-between">

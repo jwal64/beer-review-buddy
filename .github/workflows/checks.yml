@@ -35,14 +35,10 @@ jobs:
         with:
           node-version: "22"
 
-      # No dependencies to install — the tools are plain Node.
+      # No dependencies to install — the tools are plain Node, and they import
+      # src/data/log.ts directly, so a syntax error in the log fails here too.
       - name: Validate the data
         run: node tools/validate-data.mjs
-
-      # data.js goes out through the database columns and back; a value that
-      # does not survive is what a migration would quietly write wrong.
-      - name: Check the Supabase projection round-trips
-        run: node tools/roundtrip-snapshot.mjs
 
       # npm never reads bun.lock, so a forgotten `bun install` used to pass
       # everything here and fail Lovable's build after the merge instead.
@@ -62,5 +58,17 @@ jobs:
       - name: Test the app logic
         run: node tools/app-logic-test.mjs
 
-      - name: Syntax-check the log
-        run: node --check public/stats/data.js
+  # The log is typed (src/data/log.ts against src/data/log-types.ts), so a
+  # misspelt style or a rating written as a string is a type error before it
+  # is anything else. This is the one job that needs node_modules.
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Type-check the app and the log
+        run: npx tsc --noEmit

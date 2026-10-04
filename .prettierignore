@@ -6,3 +6,6 @@ pnpm-lock.yaml
 package-lock.json
 bun.lock
 routeTree.gen.ts
+# The log is written by hand, one entry per line with padded columns, so a
+# new beer is a one-line diff. Reformatting it would make every entry a block.
+src/data/log.ts

@@ -18,16 +18,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # 22: the log is src/data/log.ts, and Node 22 strips the types itself.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
       - name: Check Untappd data freshness
         id: check
         run: |
-          # Read the values by loading data.js, not by grepping it.
+          # Read the values by loading the log, not by grepping it.
           STAMP=$(node -e "import('./tools/load-data.mjs').then(m=>console.log(m.loadData().UNTAPPD_LAST_REFRESHED))")
           INTERVAL=$(node -e "import('./tools/load-data.mjs').then(m=>console.log(m.loadData().UNTAPPD_REFRESH_INTERVAL_DAYS))")
           INTERVAL=${INTERVAL:-14}
 
           if [ -z "$STAMP" ]; then
-            echo "Could not read UNTAPPD_LAST_REFRESHED from data.js" >&2
+            echo "Could not read UNTAPPD_LAST_REFRESHED from src/data/log.ts" >&2
             exit 1
           fi
 
@@ -77,13 +82,13 @@ jobs:
               ``,
               `## How to refresh`,
               `1. For each beer below, look up its current global average on untappd.com.`,
-              `2. Update its value in \`UNTAPPD_GLOBAL_AVGS\` in \`public/stats/data.js\`.`,
+              `2. Update its value in \`UNTAPPD_GLOBAL_AVGS\` in \`src/data/log.ts\`.`,
               `3. Also re-check the \`untappd:\` field on each entry of \`WANT_TO_TRY\`.`,
               `4. Bump \`UNTAPPD_LAST_REFRESHED\` to today's date.`,
-              `5. Run \`npm run check && npm run migration\`, commit both files, and merge — this issue auto-closes on the next scheduled run.`,
+              `5. Run \`npm run check\`, commit, and merge (then Publish in Lovable) — this issue auto-closes on the next scheduled run.`,
               ``,
               `## Beers to verify`,
-              process.env.BEER_LIST || '_(extraction failed — check `public/stats/data.js` manually)_',
+              process.env.BEER_LIST || '_(extraction failed — check `src/data/log.ts` manually)_',
             ].join('\n');
 
             const { data: existing } = await github.rest.issues.listForRepo({
