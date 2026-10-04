@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-02T19:14:02.000Z",
-  "total": 123,
+  "at": "2026-10-04T12:41:29.078Z",
+  "total": 125,
   "fetched": [
     {
       "beer": "Affligem Tripel",
@@ -767,6 +767,10 @@
     {
       "beer": "Daura",
       "file": "logos/daura.svg"
+    },
+    {
+      "beer": "Duckstein Weizen",
+      "file": "logos/duckstein-weizen.webp"
     },
     {
       "beer": "Efes Pilsener",

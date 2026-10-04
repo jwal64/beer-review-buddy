@@ -111,6 +111,15 @@ never draws a logo taller than 64px, so that is enough.
 | Big Wave Golden Ale | `beer_logos/beer-9657_f1704_sm.jpeg` | the current can: the hibiscus over `KONA BIG WAVE`, `Liquid Aloha` and the wave, on ocean blue |
 | Toasted Lager | `beer_logos/beer-5907_7f523_sm.jpeg` | Blue Point's round `TOASTED LAGER` badge: the red buoy on blue waves; white flooded out from the corners, the cream badge reads on charcoal as it is |
 
+**Duckstein Weizen is Untappd's label, taken from the owner's check-in
+screenshot** rather than the bucket: `duckstein.de`, every favicon service and
+Untappd's pages all answer `403` here, and the label's key for beer `335879`
+was not findable. The screenshot draws that label at about 148px, which is
+more than the bucket's `_sm` size would give: the orange roundel with the red
+`Duckstein` banner, `WEIZEN` and `alc. 5,3% vol`, cut out along the circle.
+It is the real artwork, at screenshot quality; replace it if a sharper copy
+turns up.
+
 **Killsner is the one with a caveat.** Several searches named a label key for
 it, `beer-4183963_1e922`, and the bucket answers `403` to every extension and
 size of it — no label is stored under that key, and none was found under any
