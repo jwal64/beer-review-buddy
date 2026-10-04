@@ -185,9 +185,9 @@ only.
 - **There is no database, and no migrations.** A change to what a column
   means is a change to `data.js`, to `tools/snapshot-rows.mjs` (the projection)
   and to the row types in `src/lib/snapshot.ts` — and `npm run check` proves
-  the three agree. Anything under `supabase/` is the remains of the old store
-  and is not wired to anything; do not add to it, and do not reintroduce a
-  client for it.
+  the three agree. The old `supabase/` directory, its generated client and
+  the `@supabase/supabase-js` dependency are deleted; do not reintroduce
+  any of them.
 - **`src/lib/snapshot.ts` owns the app's row types.** They are hand-written
   and describe exactly what `npm run snapshot` emits. Add a field to a row and
   it is added in both places, or `npx tsc --noEmit` says so.
