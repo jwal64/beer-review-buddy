@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-04T12:41:29.078Z",
-  "total": 125,
+  "at": "2026-10-05T15:32:34.543Z",
+  "total": 126,
   "fetched": [
     {
       "beer": "Affligem Tripel",
@@ -875,6 +875,10 @@
     {
       "beer": "Pacífico Clara",
       "file": "logos/pacifico-clara.svg"
+    },
+    {
+      "beer": "Paulaner Münchner Hell",
+      "file": "logos/paulaner-munchner-hell.webp"
     },
     {
       "beer": "Pilsner Urquell",

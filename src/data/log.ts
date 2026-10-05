@@ -131,10 +131,11 @@ export const beers: Review[] = [
   {beer:"Hofbräu Oktoberfestbier",              style:"Lager",          origin:"DE",    abv:6.3,method:"Draft", city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",rating:3.00,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Busch Light",                          style:"Lager",          origin:"US",    abv:4.1,method:"Can",   city:"Clemson",        region:"South Carolina",      country:"USA",        cc:"US",rating:2.25,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
   {beer:"Natural Light",                        style:"Lager",          origin:"US",    abv:4.2,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
-  // OCT 2026 (3 reviews)
+  // OCT 2026 (4 reviews)
   {beer:"Toasted Lager",                        style:"Lager",          origin:"US",    abv:5.5,method:"Draft", city:"Queens",         region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Othmar Blond",                         style:"Belgian Ale",    origin:"NL",    abv:6.5,method:"Bottle",city:"Lonneker",       region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Duckstein Weizen",                     style:"Wheat Beer",     origin:"DE",    abv:5.3,method:"Draft", city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",rating:4.75,isNew:true, month:"Oct",monthN:10,year:2026},
+  {beer:"Paulaner Münchner Hell",               style:"Lager",          origin:"DE",    abv:4.9,method:"Draft", city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -220,7 +221,7 @@ export const breweries: Brewery[] = [
   {name:"Blue Moon Brewing Company",         location:"Denver, Colorado",                        country:"USA",               cc:"US",    lang:"en",beers:"Blue Moon",                                                                                lat:39.7392,lng:-104.9903,ratings:[3.50]},
   {name:"Smithwick's (St. Francis Abbey)",   location:"Kilkenny, Leinster",                      country:"Ireland",           cc:"IE",    lang:"en",beers:"Smithwick's",                                                                              lat:52.6541,lng:-7.2448,  ratings:[2.75]},
   {name:"Captain Lawrence Brewing Company",  location:"Elmsford, New York",                      country:"USA",               cc:"US",    lang:"en",beers:"Hop Commander",                                                                            lat:41.0540,lng:-73.8201, ratings:[3.00]},
-  {name:"Paulaner Brauerei",                 location:"Munich, Bavaria",                         country:"Germany",           cc:"DE",    lang:"de",beers:"Paulaner Hefe-Weißbier",                                                                   lat:48.1234,lng:11.5808,  ratings:[4.00]},
+  {name:"Paulaner Brauerei",                 location:"Munich, Bavaria",                         country:"Germany",           cc:"DE",    lang:"de",beers:"Paulaner Hefe-Weißbier · Paulaner Münchner Hell",                                                                   lat:48.1234,lng:11.5808,  ratings:[4.00,3.00]},
   {name:"Compañía Cervecera de Puerto Rico", location:"Mayagüez, Puerto Rico",                   country:"Puerto Rico",       cc:"PR",    lang:"es",beers:"Medalla Light · Magna",                                                                    lat:18.2011,lng:-67.1397, ratings:[4.00,3.00]},
   {name:"Ocean Lab Brewing Co.",             location:"Carolina (Isla Verde), Puerto Rico",      country:"Puerto Rico",       cc:"PR",    lang:"es",beers:"Ocean SJU",                                                                                lat:18.4486,lng:-66.0203, ratings:[2.50]},
   {name:"Flying Dog Brewery",                location:"Frederick, Maryland",                     country:"USA",               cc:"US",    lang:"en",beers:"Bloodline Blood Orange IPA",                                                               lat:39.4143,lng:-77.4105, ratings:[2.50]},
@@ -338,6 +339,7 @@ export const BRAND_DOMAINS: Record<string, BrandDomain> = {
 "Pacífico Clara":"drinkpacifico.com",
 "Paulaner Hefe":"paulaner.com",
 "Paulaner Hefe-Weißbier":"paulaner.com",
+"Paulaner Münchner Hell":"paulaner.com",
 "Pilsner Urquell":["pilsnerurquell.com","prazdroj.cz"],
 "Pub Ale":["boddingtons.co.uk","boddingtons.com"],
 "Presidente":["presidente.com.do","cnd.com.do"],
@@ -426,6 +428,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Daura":"logos/daura.svg",
 "De Koninck":"logos/de-koninck.svg",
 "Dos Equis Lager Especial":"logos/dos-equis-lager-especial.webp",
+"Duckstein Weizen":"logos/duckstein-weizen.webp",
 "Duvel":"logos/duvel.svg",
 "Efes Pilsener":"logos/efes-pilsener.webp",
 "Erdinger Weißbier":"logos/erdinger-weissbier.svg",
@@ -478,11 +481,11 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Ocean SJU":"logos/ocean-sju.webp",
 "Orion":"logos/orion.webp",
 "Othmar Blond":"logos/othmar-blond.svg",
-"Duckstein Weizen":"logos/duckstein-weizen.webp",
 "Pabst Blue Ribbon":"logos/pabst-blue-ribbon.webp",
 "Pacífico Clara":"logos/pacifico-clara.svg",
 "Paulaner Hefe":"logos/paulaner-hefe.webp",
 "Paulaner Hefe-Weißbier":"logos/paulaner-hefe-weissbier.webp",
+"Paulaner Münchner Hell":"logos/paulaner-munchner-hell.webp",
 "Peroni Nastro Azzurro":"logos/peroni-nastro-azzurro.webp",
 "Peroni Original":"logos/peroni-original.webp",
 "Pilsner Urquell":"logos/pilsner-urquell.webp",
@@ -601,6 +604,7 @@ export const BEER_FACTS: Record<string, BeerFacts> = {
 "Pabst Blue Ribbon":{sub:"American Adjunct Lager",color:"Gold",body:"Light",ibu:null,cal:144,adjuncts:["corn syrup"]},
 "Pacífico Clara":{sub:"Mexican Lager",color:"Gold",body:"Light",ibu:18,cal:143,adjuncts:[]},
 "Paulaner Hefe-Weißbier":{sub:"Hefeweizen",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:["wheat"]},
+"Paulaner Münchner Hell":{sub:"Munich Helles",color:"Pale",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Peroni Nastro Azzurro":{sub:"International Pale Lager",color:"Pale",body:"Light",ibu:24,cal:146,adjuncts:[]},
 "Peroni Original":{sub:"International Pale Lager",color:"Gold",body:"Light",ibu:20,cal:139,adjuncts:[]},
 "Pilsner Urquell":{sub:"Czech Pilsner",color:"Gold",body:"Medium",ibu:null,cal:156,adjuncts:[]},

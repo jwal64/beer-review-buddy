@@ -120,6 +120,13 @@ more than the bucket's `_sm` size would give: the orange roundel with the red
 It is the real artwork, at screenshot quality; replace it if a sharper copy
 turns up.
 
+**Paulaner Münchner Hell is cut from the owner's check-in screenshot the same
+way** (5 October 2026): `paulaner.com` and every favicon service answer `403`
+here. It is Untappd's label for the beer — the monk roundel over the Munich
+skyline, `PAULANER` and `MÜNCHNER HELL` on gold — cut out along the circle at
+about 150px. Paulaner's header mark (`paulaner-hefe-weissbier.webp`) would
+have been the fallback; the beer's own label is the better answer.
+
 **Killsner is the one with a caveat.** Several searches named a label key for
 it, `beer-4183963_1e922`, and the bucket answers `403` to every extension and
 size of it — no label is stored under that key, and none was found under any
