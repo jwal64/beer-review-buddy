@@ -1,6 +1,6 @@
 {
   "at": "2026-10-05T15:32:34.543Z",
-  "total": 126,
+  "total": 127,
   "fetched": [
     {
       "beer": "Affligem Tripel",
@@ -724,6 +724,10 @@
     }
   ],
   "kept": [
+    {
+      "beer": "Blondt",
+      "file": "logos/blondt.webp"
+    },
     {
       "beer": "Amstel Light",
       "file": "logos/amstel-light.webp"
