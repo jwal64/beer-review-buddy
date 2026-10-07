@@ -136,6 +136,7 @@ export const beers: Review[] = [
   {beer:"Othmar Blond",                         style:"Belgian Ale",    origin:"NL",    abv:6.5,method:"Bottle",city:"Lonneker",       region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Duckstein Weizen",                     style:"Wheat Beer",     origin:"DE",    abv:5.3,method:"Draft", city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",rating:4.75,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Paulaner Münchner Hell",               style:"Lager",          origin:"DE",    abv:4.9,method:"Draft", city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
+  {beer:"Blondt",                                style:"Belgian Ale",    origin:"NL",    abv:6.0,method:"Draft", city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -245,6 +246,7 @@ export const breweries: Brewery[] = [
   {name:"Kills Boro Brewing Co.",            location:"Staten Island, New York",                 country:"USA",               cc:"US",    lang:"en",beers:"Killsner",                                                                                 lat:40.6444,lng:-74.0989, ratings:[2.25]},
   {name:"Blue Point Brewing Company", location:"Patchogue, New York", country:"USA", cc:"US", lang:"en", beers:"Toasted Lager", lat:40.7609, lng:-73.0225, ratings:[2.00]},
   {name:"Othmar Bierbrouwerij", location:"Ootmarsum, Overijssel", country:"Netherlands", cc:"NL", lang:"nl", beers:"Othmar Blond", lat:52.4081, lng:6.9001, ratings:[3.00]},
+  {name:"Brouwerij Noordt", location:"Rotterdam, South Holland", country:"Netherlands", cc:"NL", lang:"nl", beers:"Blondt", lat:51.9313, lng:4.4713, ratings:[3.00]},
   {name:"Kiuchi Brewery",                    location:"Naka, Ibaraki",                           country:"Japan",             cc:"JP",    lang:"ja",beers:"Hitachino Nest White Ale",                                  nativeName:"常陸野ネスト ホワイトエール", lat:36.4686,lng:140.4681, ratings:[5.00]},
   {name:"Holsten-Brauerei", location:"Hamburg, Hamburg", country:"Germany", cc:"DE", lang:"de", beers:"Duckstein Weizen", lat:53.4790, lng:9.9110, ratings:[4.75]},
 ];
@@ -307,6 +309,7 @@ export const BRAND_DOMAINS: Record<string, BrandDomain> = {
 "Killsner":"killsboro.com",
 "Toasted Lager":"bluepointbrewing.com",
 "Othmar Blond":"othmar.eu",
+"Blondt":"brouwerijnoordt.nl",
 "Duckstein Weizen":"duckstein.de",
 "Kirin Ichiban":"kirin.co.jp",
 "Kronenbourg 1664":["1664.com","kronenbourg1664.com"],
@@ -481,6 +484,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Ocean SJU":"logos/ocean-sju.webp",
 "Orion":"logos/orion.webp",
 "Othmar Blond":"logos/othmar-blond.svg",
+"Blondt":"logos/blondt.webp",
 "Pabst Blue Ribbon":"logos/pabst-blue-ribbon.webp",
 "Pacífico Clara":"logos/pacifico-clara.svg",
 "Paulaner Hefe":"logos/paulaner-hefe.webp",
@@ -582,6 +586,7 @@ export const BEER_FACTS: Record<string, BeerFacts> = {
 "Ichnusa Anima Sarda":{sub:"International Pale Lager",color:"Gold",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Toasted Lager":{sub:"American Amber Lager",color:"Amber",body:"Medium",ibu:28,cal:null,adjuncts:[]},
 "Othmar Blond":{sub:"Belgian Blonde",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
+"Blondt":{sub:"Belgian Blonde",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
 "Duckstein Weizen":{sub:"Hefeweizen",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:["wheat"]},
 "Killsner":{sub:"German Pilsner",color:"Pale",body:"Light",ibu:36,cal:null,adjuncts:[]},
 "Kirin Ichiban":{sub:"Japanese Lager",color:"Gold",body:"Light",ibu:21,cal:145,adjuncts:[]},
