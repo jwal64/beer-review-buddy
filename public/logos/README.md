@@ -537,3 +537,9 @@ wordmark, Saku's ribbon, Ciuc's red shield, and a black `PIVOVARNA LAŠKO`
 wordmark that named the brewery, not the beer. All five were the brand's
 artwork, but none of them is what is on the can now. That is the difference
 to look for when a vector file looks right.
+
+**Grimbergen Blonde is Untappd's label, cut from the owner's check-in
+screenshot** (8 October 2026): `grimbergen.com` and every favicon service
+answer `403` here. It is the beer's own label — the abbey's phoenix crest over
+the `GRIMBERGEN` banner and `BLONDE` — at about 140px, doubled to 272px. It is
+screenshot quality; replace it if a sharper copy turns up.
