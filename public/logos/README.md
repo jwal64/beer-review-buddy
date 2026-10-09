@@ -447,9 +447,10 @@ perfectly well, and a tile behind them would be noise.
 
 ## Two beers wearing their parent brand's mark
 
-`grolsch-puur-weizen`, `frisse-lentebok` and `gerijpte-herfstbok` all had grolsch.com's 144×144
+`grolsch-puur-weizen`, `frisse-lentebok`, `gerijpte-herfstbok` and
+`grolsch-dunkel-weizenbock` all had grolsch.com's 144×144
 apple-touch-icon, which is the Grolsch wordmark **cropped to "Gro"** — and in
-dark green, so unreadable on the ground as well as truncated. All three are now
+dark green, so unreadable on the ground as well as truncated. All four are now
 byte-identical copies of `grolsch.webp`, the full wordmark with the red seal.
 
 Same trade as the two Modelos, and the same reason they are separate files

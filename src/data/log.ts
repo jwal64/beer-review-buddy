@@ -139,6 +139,7 @@ export const beers: Review[] = [
   {beer:"Blondt",                                style:"Belgian Ale",    origin:"NL",    abv:6.0,method:"Draft", city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Grimbergen Blonde",                      style:"Belgian Ale",    origin:"BE",    abv:6.7,method:"Draft", city:"Enschede",       region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.75,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Gerijpte Herfstbok",                   style:"Lager",          origin:"NL",    abv:6.6,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
+  {beer:"Grolsch Dunkel Weizenbock",            style:"Wheat Beer",     origin:"NL",    abv:7.3,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.50,isNew:true, month:"Oct",monthN:10,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -185,7 +186,7 @@ export const breweries: Brewery[] = [
   {name:"Duvel Moortgat",                    location:"Puurs-Sint-Amands, Antwerp",              country:"Belgium",           cc:"BE",    lang:"nl",beers:"Duvel",                                                                                    lat:51.0727,lng:4.2897,   ratings:[4.25]},
   {name:"AB InBev (Stella)",                 location:"Leuven, Flemish Brabant",                 country:"Belgium",           cc:"BE",    lang:"nl",beers:"Stella Artois",                                                                            lat:50.8798,lng:4.7005,   ratings:[2.75]},
   {name:"Heineken",                          location:"Amsterdam, Noord-Holland",                country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Heineken · Heineken Silver",                                                               lat:52.3578,lng:4.8918,   ratings:[3.25,3.00]},
-  {name:"Grolsch",                           location:"Enschede, Overijssel",                    country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Grolsch · Grolsch Puur Weizen · Frisse Lentebok · Gerijpte Herfstbok",                     lat:52.2215,lng:6.8937,   ratings:[3.50,5.00,3.25,3.00]},
+  {name:"Grolsch",                           location:"Enschede, Overijssel",                    country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Grolsch · Grolsch Puur Weizen · Frisse Lentebok · Gerijpte Herfstbok · Grolsch Dunkel Weizenbock",lat:52.2215,lng:6.8937,   ratings:[3.50,5.00,3.25,3.00,4.50]},
   {name:"Bavaria NV (Hertog Jan)",           location:"Arcen, Limburg",                          country:"Netherlands",       cc:"NL",    lang:"nl",beers:"Hertog Jan",                                                                               lat:51.4862,lng:6.1741,   ratings:[2.00]},
   {name:"Anheuser-Busch",                    location:"St. Louis, Missouri",                     country:"USA",               cc:"US",    lang:"en",beers:"Michelob Ultra · Bud Light · Budweiser · Busch Light · Natural Light",                     lat:38.6072,lng:-90.2124, ratings:[2.50,3.00,3.00,2.25,2.00]},
   {name:"Molson Coors",                      location:"Golden, Colorado",                        country:"USA",               cc:"US",    lang:"en",beers:"Coors Light",                                                                              lat:39.7555,lng:-105.2211,ratings:[3.00]},
@@ -302,6 +303,7 @@ export const BRAND_DOMAINS: Record<string, BrandDomain> = {
 "Grolsch Puur Weizen":"grolsch.com",
 "Frisse Lentebok":"grolsch.com",
 "Gerijpte Herfstbok":"grolsch.com",
+"Grolsch Dunkel Weizenbock":"grolsch.com",
 "Guinness Draught":"guinness.com",
 "Harp Lager":["harplager.com","harp.ie"],
 "Hatuey Lager":["hatuey.com","hatueybeer.com"],
@@ -447,6 +449,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Estrella Jalisco":"logos/estrella-jalisco.svg",
 "Frisse Lentebok":"logos/frisse-lentebok.webp",
 "Gerijpte Herfstbok":"logos/gerijpte-herfstbok.webp",
+"Grolsch Dunkel Weizenbock":"logos/grolsch-dunkel-weizenbock.webp",
 "Goose IPA":"logos/goose-ipa.webp",
 "Grimbergen Blonde":"logos/grimbergen-blonde.webp",
 "Grolsch":"logos/grolsch.webp",
@@ -577,6 +580,7 @@ export const BEER_FACTS: Record<string, BeerFacts> = {
 "Estrella Jalisco":{sub:"Mexican Lager",color:"Pale",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Frisse Lentebok":{sub:"Bock / Strong Lager",color:"Amber",body:"Medium",ibu:null,cal:null,adjuncts:[]},
 "Gerijpte Herfstbok":{sub:"Bock / Strong Lager",color:"Amber",body:"Full",ibu:null,cal:null,adjuncts:["sugar"]},
+"Grolsch Dunkel Weizenbock":{sub:"Dunkelweizen",color:"Dark",body:"Full",ibu:null,cal:null,adjuncts:["wheat"]},
 "Goose IPA":{sub:"American IPA",color:"Gold",body:"Medium",ibu:55,cal:162,adjuncts:[]},
 "Grolsch":{sub:"Dutch Pilsner",color:"Gold",body:"Medium",ibu:12,cal:null,adjuncts:[]},
 "Grolsch Puur Weizen":{sub:"Hefeweizen",color:"Gold",body:"Medium",ibu:11,cal:153,adjuncts:["wheat"]},
