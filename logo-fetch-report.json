@@ -1,6 +1,6 @@
 {
-  "at": "2026-10-05T15:32:34.543Z",
-  "total": 127,
+  "at": "2026-10-17T20:28:56.426Z",
+  "total": 132,
   "fetched": [
     {
       "beer": "Affligem Tripel",
@@ -725,10 +725,6 @@
   ],
   "kept": [
     {
-      "beer": "Blondt",
-      "file": "logos/blondt.webp"
-    },
-    {
       "beer": "Amstel Light",
       "file": "logos/amstel-light.webp"
     },
@@ -739,6 +735,10 @@
     {
       "beer": "Big Wave Golden Ale",
       "file": "logos/big-wave-golden-ale.webp"
+    },
+    {
+      "beer": "Blondt",
+      "file": "logos/blondt.webp"
     },
     {
       "beer": "Bloodline Blood Orange IPA",
@@ -793,20 +793,20 @@
       "file": "logos/gerijpte-herfstbok.webp"
     },
     {
+      "beer": "Grimbergen Blonde",
+      "file": "logos/grimbergen-blonde.webp"
+    },
+    {
+      "beer": "Palm Spéciale",
+      "file": "logos/palm-speciale.webp"
+    },
+    {
       "beer": "Grolsch Dunkel Weizenbock",
       "file": "logos/grolsch-dunkel-weizenbock.webp"
     },
     {
-      "beer": "Kruidige Winterbok",
-      "file": "logos/kruidige-winterbok.webp"
-    },
-    {
       "beer": "Grolsch Puur Weizen",
       "file": "logos/grolsch-puur-weizen.webp"
-    },
-    {
-      "beer": "Grimbergen Blonde",
-      "file": "logos/grimbergen-blonde.webp"
     },
     {
       "beer": "Guinness Draught",
@@ -835,6 +835,10 @@
     {
       "beer": "Killsner",
       "file": "logos/killsner.webp"
+    },
+    {
+      "beer": "Kruidige Winterbok",
+      "file": "logos/kruidige-winterbok.webp"
     },
     {
       "beer": "La Fin Du Monde",
@@ -961,5 +965,20 @@
       "file": "logos/zywiec.webp"
     }
   ],
-  "missing": []
+  "missing": [
+    {
+      "beer": "Palm Spéciale",
+      "tried": [
+        "wikidata P154 · the Wikipedia API did not answer",
+        "site /apple-touch-icon.png · palm.be · no",
+        "site /apple-touch-icon-precomposed.png · palm.be · no",
+        "site /favicon.svg · palm.be · no",
+        "site header logo · palm.be · no",
+        "brand page image · palm.be · no",
+        "google faviconV2 · palm.be · no",
+        "icon.horse · palm.be · no",
+        "duckduckgo · palm.be · no"
+      ]
+    }
+  ]
 }
