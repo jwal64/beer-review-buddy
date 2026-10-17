@@ -544,3 +544,9 @@ screenshot** (8 October 2026): `grimbergen.com` and every favicon service
 answer `403` here. It is the beer's own label — the abbey's phoenix crest over
 the `GRIMBERGEN` banner and `BLONDE` — at about 140px, doubled to 272px. It is
 screenshot quality; replace it if a sharper copy turns up.
+
+**Palm Spéciale is Untappd's label, cut from the owner's check-in screenshot**
+(17 October 2026): `palm.be` and every favicon service answer `403` here. It is
+the brand's green diamond — the Brabant draught horse over `PALM` inside the
+laurel wreath — at about 170px, scaled to 256px. Screenshot quality; replace it
+if a sharper copy turns up.
