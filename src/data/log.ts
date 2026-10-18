@@ -141,7 +141,7 @@ export const beers: Review[] = [
   {beer:"Gerijpte Herfstbok",                   style:"Lager",          origin:"NL",    abv:6.6,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Grolsch Dunkel Weizenbock",            style:"Wheat Beer",     origin:"NL",    abv:7.3,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.50,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Kruidige Winterbok",                   style:"Lager",          origin:"NL",    abv:7.5,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.00,isNew:true, month:"Oct",monthN:10,year:2026},
-  {beer:"Palm Spéciale",                        style:"Pale Ale",       origin:"BE",    abv:5.2,method:"Draft", city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
+  {beer:"Palm Spéciale",                        style:"Pale Ale",       origin:"BE",    abv:5.2,method:"Draft", city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:2.75,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Labatt Blue",                         style:"Pilsner",        origin:"CA",    abv:5.0,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.50,isNew:true, month:"Oct",monthN:10,year:2026},
 ];
 
@@ -255,7 +255,7 @@ export const breweries: Brewery[] = [
   {name:"Blue Point Brewing Company", location:"Patchogue, New York", country:"USA", cc:"US", lang:"en", beers:"Toasted Lager", lat:40.7609, lng:-73.0225, ratings:[2.00]},
   {name:"Othmar Bierbrouwerij", location:"Ootmarsum, Overijssel", country:"Netherlands", cc:"NL", lang:"nl", beers:"Othmar Blond", lat:52.4081, lng:6.9001, ratings:[3.00]},
   {name:"Brouwerij Noordt", location:"Rotterdam, South Holland", country:"Netherlands", cc:"NL", lang:"nl", beers:"Blondt", lat:51.9313, lng:4.4713, ratings:[3.00]},
-  {name:"Brouwerij Palm", location:"Steenhuffel, Flemish Brabant", country:"Belgium", cc:"BE", lang:"nl", beers:"Palm Spéciale", lat:50.9978, lng:4.2797, ratings:[3.00]},
+  {name:"Brouwerij Palm", location:"Steenhuffel, Flemish Brabant", country:"Belgium", cc:"BE", lang:"nl", beers:"Palm Spéciale", lat:50.9978, lng:4.2797, ratings:[2.75]},
   {name:"Labatt Brewing Company", location:"London, Ontario", country:"Canada", cc:"CA", lang:"en", beers:"Labatt Blue", lat:42.9811, lng:-81.2420, ratings:[3.50]},
   {name:"Kiuchi Brewery",                    location:"Naka, Ibaraki",                           country:"Japan",             cc:"JP",    lang:"ja",beers:"Hitachino Nest White Ale",                                  nativeName:"常陸野ネスト ホワイトエール", lat:36.4686,lng:140.4681, ratings:[5.00]},
   {name:"Holsten-Brauerei", location:"Hamburg, Hamburg", country:"Germany", cc:"DE", lang:"de", beers:"Duckstein Weizen", lat:53.4790, lng:9.9110, ratings:[4.75]},
