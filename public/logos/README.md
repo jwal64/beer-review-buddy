@@ -545,15 +545,17 @@ answer `403` here. It is the beer's own label — the abbey's phoenix crest over
 the `GRIMBERGEN` banner and `BLONDE` — at about 140px, doubled to 272px. It is
 screenshot quality; replace it if a sharper copy turns up.
 
-**Palm Spéciale is Untappd's label, cut from the owner's check-in screenshot**
-(17 October 2026): `palm.be` and every favicon service answer `403` here. It is
-the brand's green diamond — the Brabant draught horse over `PALM` inside the
-laurel wreath — at about 170px, scaled to 256px. Screenshot quality; replace it
-if a sharper copy turns up.
+**Palm Spéciale is the brand's own label artwork, from an image the owner
+supplied** (18 October 2026; it replaced a 170px cut from the Untappd check-in
+screenshot): `palm.be` and every favicon service answer `403` here. It is the
+330 ml bottle label — the Brabant draught horse, `ANNO 1747`, red `PALM` and
+`SPECIALE BELGE ALE` in the gold-rimmed green diamond — on white, about 860px
+across at source, scaled to 256px.
 
-**Labatt Blue is Untappd's label, cut from the owner's check-in screenshot**
-(18 October 2026): `labatt.com` and every favicon service answer `403` here. It
-is the brand's own mark — the red maple leaf over `Labatt Blue` — on the white
-tile Untappd shows it on, kept as a white square because the mark is drawn for a
-light ground and would not read on this site's charcoal. About 150px, scaled to
-256px. Screenshot quality; replace it if a sharper copy turns up.
+**Labatt Blue is Labatt's own mark, cut from the owner's screenshot of
+labattusa.com** (18 October 2026; it replaced a 150px cut of the older
+`Labatt Blue` wordmark from the Untappd check-in): `labatt.com` and every
+favicon service answer `403` here. It is the current brand mark — the red maple
+leaf over the white `Labatt` script — on the site's own navy, which reads on
+this site's charcoal without a white tile. About 540px across at source, scaled
+to 256px.
