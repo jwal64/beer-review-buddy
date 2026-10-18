@@ -131,7 +131,7 @@ export const beers: Review[] = [
   {beer:"Hofbräu Oktoberfestbier",              style:"Lager",          origin:"DE",    abv:6.3,method:"Draft", city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",rating:3.00,isNew:true, month:"Sep",monthN:9,year:2026},
   {beer:"Busch Light",                          style:"Lager",          origin:"US",    abv:4.1,method:"Can",   city:"Clemson",        region:"South Carolina",      country:"USA",        cc:"US",rating:2.25,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
   {beer:"Natural Light",                        style:"Lager",          origin:"US",    abv:4.2,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:false,month:"Sep",monthN:9,year:2026,retro:true},
-  // OCT 2026 (6 reviews)
+  // OCT 2026 (7 reviews)
   {beer:"Toasted Lager",                        style:"Lager",          origin:"US",    abv:5.5,method:"Draft", city:"Queens",         region:"New York",            country:"USA",        cc:"US",rating:2.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Othmar Blond",                         style:"Belgian Ale",    origin:"NL",    abv:6.5,method:"Bottle",city:"Lonneker",       region:"Overijssel",          country:"Netherlands",cc:"NL",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Duckstein Weizen",                     style:"Wheat Beer",     origin:"DE",    abv:5.3,method:"Draft", city:"Berlin",         region:"Berlin",              country:"Germany",    cc:"DE",rating:4.75,isNew:true, month:"Oct",monthN:10,year:2026},
@@ -142,6 +142,7 @@ export const beers: Review[] = [
   {beer:"Grolsch Dunkel Weizenbock",            style:"Wheat Beer",     origin:"NL",    abv:7.3,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.50,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Kruidige Winterbok",                   style:"Lager",          origin:"NL",    abv:7.5,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Palm Spéciale",                        style:"Pale Ale",       origin:"BE",    abv:5.2,method:"Draft", city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
+  {beer:"Labatt Blue",                         style:"Pilsner",        origin:"CA",    abv:5.0,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.50,isNew:true, month:"Oct",monthN:10,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -255,6 +256,7 @@ export const breweries: Brewery[] = [
   {name:"Othmar Bierbrouwerij", location:"Ootmarsum, Overijssel", country:"Netherlands", cc:"NL", lang:"nl", beers:"Othmar Blond", lat:52.4081, lng:6.9001, ratings:[3.00]},
   {name:"Brouwerij Noordt", location:"Rotterdam, South Holland", country:"Netherlands", cc:"NL", lang:"nl", beers:"Blondt", lat:51.9313, lng:4.4713, ratings:[3.00]},
   {name:"Brouwerij Palm", location:"Steenhuffel, Flemish Brabant", country:"Belgium", cc:"BE", lang:"nl", beers:"Palm Spéciale", lat:50.9978, lng:4.2797, ratings:[3.00]},
+  {name:"Labatt Brewing Company", location:"London, Ontario", country:"Canada", cc:"CA", lang:"en", beers:"Labatt Blue", lat:42.9811, lng:-81.2420, ratings:[3.50]},
   {name:"Kiuchi Brewery",                    location:"Naka, Ibaraki",                           country:"Japan",             cc:"JP",    lang:"ja",beers:"Hitachino Nest White Ale",                                  nativeName:"常陸野ネスト ホワイトエール", lat:36.4686,lng:140.4681, ratings:[5.00]},
   {name:"Holsten-Brauerei", location:"Hamburg, Hamburg", country:"Germany", cc:"DE", lang:"de", beers:"Duckstein Weizen", lat:53.4790, lng:9.9110, ratings:[4.75]},
 ];
@@ -322,6 +324,7 @@ export const BRAND_DOMAINS: Record<string, BrandDomain> = {
 "Othmar Blond":"othmar.eu",
 "Blondt":"brouwerijnoordt.nl",
 "Palm Spéciale":"palm.be",
+"Labatt Blue":"labatt.com",
 "Duckstein Weizen":"duckstein.de",
 "Kirin Ichiban":"kirin.co.jp",
 "Kronenbourg 1664":["1664.com","kronenbourg1664.com"],
@@ -424,6 +427,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Bitburger Radler":"logos/bitburger-radler.webp",
 "Blondt":"logos/blondt.webp",
 "Palm Spéciale":"logos/palm-speciale.webp",
+"Labatt Blue":"logos/labatt-blue.webp",
 "Bloodline Blood Orange IPA":"logos/bloodline-blood-orange-ipa.webp",
 "Blue Moon":"logos/blue-moon.webp",
 "Brahma":"logos/brahma.webp",
@@ -607,6 +611,7 @@ export const BEER_FACTS: Record<string, BeerFacts> = {
 "Ichnusa Anima Sarda":{sub:"International Pale Lager",color:"Gold",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Toasted Lager":{sub:"American Amber Lager",color:"Amber",body:"Medium",ibu:28,cal:null,adjuncts:[]},
 "Othmar Blond":{sub:"Belgian Blonde",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
+"Labatt Blue":{sub:"International Pilsner",color:"Pale",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Palm Spéciale":{sub:"Belgian Pale Ale",color:"Amber",body:"Medium",ibu:null,cal:null,adjuncts:[]},
 "Blondt":{sub:"Belgian Blonde",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
 "Grimbergen Blonde":{sub:"Belgian Blonde",color:"Gold",body:"Medium",ibu:null,cal:null,adjuncts:[]},
