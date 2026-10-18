@@ -797,6 +797,10 @@
       "file": "logos/grimbergen-blonde.webp"
     },
     {
+      "beer": "Labatt Blue",
+      "file": "logos/labatt-blue.webp"
+    },
+    {
       "beer": "Palm Spéciale",
       "file": "logos/palm-speciale.webp"
     },
@@ -965,20 +969,5 @@
       "file": "logos/zywiec.webp"
     }
   ],
-  "missing": [
-    {
-      "beer": "Palm Spéciale",
-      "tried": [
-        "wikidata P154 · the Wikipedia API did not answer",
-        "site /apple-touch-icon.png · palm.be · no",
-        "site /apple-touch-icon-precomposed.png · palm.be · no",
-        "site /favicon.svg · palm.be · no",
-        "site header logo · palm.be · no",
-        "brand page image · palm.be · no",
-        "google faviconV2 · palm.be · no",
-        "icon.horse · palm.be · no",
-        "duckduckgo · palm.be · no"
-      ]
-    }
-  ]
+  "missing": []
 }

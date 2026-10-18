@@ -550,3 +550,10 @@ screenshot quality; replace it if a sharper copy turns up.
 the brand's green diamond — the Brabant draught horse over `PALM` inside the
 laurel wreath — at about 170px, scaled to 256px. Screenshot quality; replace it
 if a sharper copy turns up.
+
+**Labatt Blue is Untappd's label, cut from the owner's check-in screenshot**
+(18 October 2026): `labatt.com` and every favicon service answer `403` here. It
+is the brand's own mark — the red maple leaf over `Labatt Blue` — on the white
+tile Untappd shows it on, kept as a white square because the mark is drawn for a
+light ground and would not read on this site's charcoal. About 150px, scaled to
+256px. Screenshot quality; replace it if a sharper copy turns up.
