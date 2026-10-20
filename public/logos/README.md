@@ -561,3 +561,9 @@ favicon service answer `403` here. It is the current brand mark — the red mapl
 leaf over the white `Labatt` script — on the site's own navy, which reads on
 this site's charcoal without a white tile. About 540px across at source, scaled
 to 256px. Saved as `labatt-maple-leaf.webp` for the same cache reason.
+
+**Both of those are now SVG files carrying the same WebP inline** (20 October
+2026). Lovable synced the reviews that point at them but never the two WebP
+files, renamed in the same pass, so its copy rendered the monogram for both.
+An SVG is text, and text is what Lovable's sync carries reliably; the picture
+inside is byte-for-byte the WebP it replaced.
