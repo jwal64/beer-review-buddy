@@ -798,11 +798,11 @@
     },
     {
       "beer": "Labatt Blue",
-      "file": "logos/labatt-maple-leaf.webp"
+      "file": "logos/labatt-maple-leaf.svg"
     },
     {
       "beer": "Palm Spéciale",
-      "file": "logos/palm-speciale-label.webp"
+      "file": "logos/palm-speciale-label.svg"
     },
     {
       "beer": "Grolsch Dunkel Weizenbock",
