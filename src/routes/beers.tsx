@@ -19,9 +19,14 @@ import {
   whenLabel,
   isDisplayNew,
   useBeers,
+  useBeerFacts,
+  useBreweries,
   useCountries,
+  useLocations,
+  useUntappdAverages,
   type Beer,
 } from "@/lib/beer-data";
+import { funFacts } from "@/lib/fun-facts";
 import { Search, Plus, ArrowUpDown } from "lucide-react";
 import { placeLabel } from "@/lib/place";
 import { Button } from "@/components/ui/button";
@@ -69,6 +74,10 @@ const selectClass =
 function BeersPage() {
   const { data: beers, isLoading, isError, refetch } = useBeers();
   const { data: countries } = useCountries();
+  const { data: breweries } = useBreweries();
+  const { data: locations } = useLocations();
+  const { data: facts } = useBeerFacts();
+  const { data: world } = useUntappdAverages();
   const [query, setQuery] = useState("");
   const [style, setStyle] = useState("All");
   const [origin, setOrigin] = useState("All");
@@ -102,6 +111,21 @@ function BeersPage() {
       .map(([cc, n]) => ({ cc, n, name: countryName(cc) }))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [beers, countryName]);
+
+  // The open card's facts, worked out from the whole log. See src/lib/fun-facts.ts.
+  const selectedFacts = useMemo(
+    () =>
+      selected
+        ? funFacts(selected, {
+            beers: beers ?? [],
+            brewery: breweries?.find((br) => br.name === selected.brewery),
+            facts: facts?.get(selected.name),
+            location: locations?.find((l) => l.city === selected.city && l.cc === selected.cc),
+            world: world?.get(selected.name),
+          })
+        : [],
+    [selected, beers, breweries, facts, locations, world],
+  );
 
   const cmp = useMemo(() => SORTS[sort](countryName), [sort, countryName]);
 
@@ -276,28 +300,29 @@ function BeersPage() {
               </SheetHeader>
               <div className="mt-4 space-y-3 pb-6">
                 <Rating value={Number(selected.rating)} size={20} />
-                <dl className="grid grid-cols-2 gap-3 text-sm">
-                  {[
-                    ["Style", selected.style],
-                    ["ABV", selected.abv ? `${selected.abv}%` : "—"],
-                    ["Served", selected.method ?? "—"],
-                    [
-                      "Origin",
-                      `${flagEmoji(selected.origin_cc, countries)} ${
-                        countries?.find((c) => c.cc === selected.origin_cc)?.name ??
-                        selected.origin_cc ??
-                        "—"
-                      }`,
-                    ],
-                    ["Drunk in", placeLabel(selected) || "—"],
-                    ["When", whenLabel(selected)],
-                  ].map(([k, v]) => (
-                    <div key={k} className="rounded-xl border border-border bg-card p-3">
-                      <dt className="text-[11px] text-muted-foreground">{k}</dt>
-                      <dd className="mt-0.5 font-medium">{v}</dd>
-                    </div>
-                  ))}
-                </dl>
+                <p className="text-sm text-muted-foreground">
+                  {flagEmoji(selected.origin_cc, countries)} {countryName(selected.origin_cc)} ·{" "}
+                  {selected.style}
+                  {selected.abv != null && ` · ${selected.abv}%`} · {selected.method}
+                  <br />
+                  {placeLabel(selected) || "Unknown place"} · {whenLabel(selected)}
+                </p>
+                {selectedFacts.length > 0 && (
+                  <section aria-label="Fun facts">
+                    <h3 className="mb-2 font-display text-sm font-semibold">Fun facts</h3>
+                    <ul className="max-h-[45vh] space-y-2 overflow-y-auto">
+                      {selectedFacts.map((f) => (
+                        <li
+                          key={f.text}
+                          className="flex gap-2.5 rounded-xl border border-border bg-card p-3 text-sm"
+                        >
+                          <span aria-hidden="true">{f.emoji}</span>
+                          <span>{f.text}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </section>
+                )}
               </div>
             </>
           )}
