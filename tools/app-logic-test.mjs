@@ -42,7 +42,8 @@ const when = await load("../src/lib/when.ts");
 const progress = await load("../src/lib/progress.ts");
 const continents = await load("../src/data/continents.ts");
 const snapshot = await load("../src/lib/snapshot.ts");
-if (!place || !insights || !when || !progress || !continents || !snapshot) {
+const funFactsMod = await load("../src/lib/fun-facts.ts");
+if (!place || !insights || !when || !progress || !continents || !snapshot || !funFactsMod) {
   console.error(`\n  ${failures} module(s) failed to load.\n`);
   process.exit(1);
 }
@@ -530,6 +531,45 @@ check("style bingo fills a cell from the facts and counts finished lines", () =>
     "a suggestion for an empty cell",
   );
   eq(bingoLines(cells), 1, "the Pale row is complete");
+});
+
+// ══════════════════════════════════════════════════════════════
+console.log("\n  funFacts() — a beer card's facts");
+check("facts are worked out from the data, and only when it is there", () => {
+  const { funFacts, distanceKm } = funFactsMod;
+  const pour = (o) => ({ name: "X", brewery: "B", style: "Lager", abv: 5, rating: 3, ...o });
+  const beers = [
+    pour({ name: "Strong", abv: 9, rating: 4 }),
+    pour({ name: "Mid", abv: 5, rating: 3 }),
+    pour({ name: "Mild", abv: 3, rating: 3, style: "Stout", brewery: "Other" }),
+  ];
+  const bare = funFacts(beers[2], { beers }).map((f) => f.text);
+  eq(
+    bare.some((t) => /IBU|calories|Untappd|Travelled|Known at home/.test(t)),
+    false,
+    "no data, no fact",
+  );
+  eq(bare.includes("The only Stout in the log."), true, "the only one of its style");
+  eq(bare.includes("The lightest beer in the log, at 3%."), true, "lightest");
+  const full = funFacts(beers[0], {
+    beers,
+    world: 3.5,
+    brewery: { name: "B", location: "Here", native_name: "Xx", lat: 0, lng: 0 },
+    location: { city: "There", lat: 0, lng: 10 },
+    facts: { sub: "India Pale Lager", color: "Gold", body: null, ibu: 30, cal: null, adjuncts: [] },
+  }).map((f) => f.text);
+  eq(full.includes("An India Pale Lager — gold in colour."), true, full[0]);
+  eq(full.includes("Rated 0.50 above the world's Untappd average of 3.50."), true, "vs world");
+  eq(full.includes("1st of 3 reviews by rating."), true, "rank");
+  eq(full.includes("The strongest beer in the log, at 9%."), true, "strongest");
+  eq(full.includes("B also makes Mid in the log."), true, "siblings");
+  eq(
+    full.some((t) => t.startsWith("Travelled about 1,112 km")),
+    true,
+    "distance",
+  );
+  eq(!full.some((t) => /calories/.test(t)), true, "a null figure is no fact");
+  eq(Math.round(distanceKm({ lat: 0, lng: 0 }, { lat: 0, lng: 1 })), 111, "a degree of longitude");
 });
 
 // ══════════════════════════════════════════════════════════════
