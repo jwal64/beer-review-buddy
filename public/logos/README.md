@@ -550,7 +550,9 @@ supplied** (18 October 2026; it replaced a 170px cut from the Untappd check-in
 screenshot): `palm.be` and every favicon service answer `403` here. It is the
 330 ml bottle label — the Brabant draught horse, `ANNO 1747`, red `PALM` and
 `SPECIALE BELGE ALE` in the gold-rimmed green diamond — on white, about 860px
-across at source, scaled to 256px.
+across at source, scaled to 256px. Saved as `palm-speciale-label.webp` rather than over the old
+`palm-speciale.webp`: a replaced file at the same URL kept showing the old logo
+from browser and CDN caches.
 
 **Labatt Blue is Labatt's own mark, cut from the owner's screenshot of
 labattusa.com** (18 October 2026; it replaced a 150px cut of the older
@@ -558,4 +560,4 @@ labattusa.com** (18 October 2026; it replaced a 150px cut of the older
 favicon service answer `403` here. It is the current brand mark — the red maple
 leaf over the white `Labatt` script — on the site's own navy, which reads on
 this site's charcoal without a white tile. About 540px across at source, scaled
-to 256px.
+to 256px. Saved as `labatt-maple-leaf.webp` for the same cache reason.
