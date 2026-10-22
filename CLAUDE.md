@@ -700,6 +700,18 @@ Rasters are re-encoded to WebP at the image's own longest edge, capped at
 256px. SVG is written through untouched. A file the tool did not write is never
 replaced, `--force` included — so a logo drawn by hand stays.
 
+### Never rename, overwrite or delete a logo file once it is on `main`
+
+Add a new file under a new name and point `BRAND_LOGOS` at it; leave the old
+file where it is. Lovable syncs a file *added* on GitHub, but it did not carry
+the binary overwrite in #60 (the old picture stayed), and it stalled on the
+renames in #61: its copy took the log's new filenames without the files, and
+from then on nothing reached it, with no warning in its GitHub panel and
+Publish greyed out. The Palm Spéciale and Labatt Blue WebPs that #61 renamed and
+#63 deleted are back under all four names for that reason
+(`public/logos/README.md` has the story). A changed logo is a new filename,
+and that also defeats any cache.
+
 ### Looking at them
 
 `npm run logo-sheet` renders every file onto one page, each on a half-light,

@@ -567,3 +567,18 @@ to 256px. Saved as `labatt-maple-leaf.webp` for the same cache reason.
 files, renamed in the same pass, so its copy rendered the monogram for both.
 An SVG is text, and text is what Lovable's sync carries reliably; the picture
 inside is byte-for-byte the WebP it replaced.
+
+**That did not reach Lovable either, and neither did anything after it** (22
+October 2026). Lovable's preview had no fun facts (#62), Publish was greyed out
+with nothing new to publish, and its GitHub panel showed no warning. Its copy
+stopped partway through #61: the log there names the renamed WebPs, the files
+never arrived, and the logo fell through to a favicon. Every push since asked
+it to catch up across a range that renamed or deleted those four WebPs, files
+it either had under the old name or never had at all. A file *added* from
+GitHub syncs fine (Grimbergen's did); a renamed one, or a delete of a file
+Lovable lacks, is what it stalls on. So all four are back, with the exact bytes
+of #60 and #61: `labatt-blue.webp` and `labatt-maple-leaf.webp` are the same
+Labatt image, `palm-speciale.webp` and `palm-speciale-label.webp` the same Palm
+image. Nothing points at them; the log names the SVGs. They are here so that
+no range Lovable has to sync contains a rename or a delete of them. **Leave all
+four in place**, and see "Logos" in `CLAUDE.md` for the rule.
