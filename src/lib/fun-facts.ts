@@ -1,10 +1,12 @@
 // A beer's fun facts — what its card in the beers list says about it.
 //
-// Every fact is worked out from the log: the beer's own BEER_FACTS entry, its
-// brewery row, where it was drunk, the world's Untappd average, and how it sits
-// among every other review. Nothing is written by hand and nothing is guessed,
-// so a fact appears only when the data behind it does — a beer with no
-// published IBU simply has no IBU fact.
+// Two kinds. `trivia` is the real thing: researched, hand-written facts about
+// the beer and its brewery (BEER_TRIVIA and BREWERY_TRIVIA in the log), the
+// beer's own first. `stat` is worked out from the log — its style, where it
+// was drunk, the world's Untappd average, how it sits among every other
+// review — and appears only when the data behind it does: a beer with no
+// published IBU simply has no IBU fact. The card shows trivia as "Fun facts"
+// and the stats under "In the log".
 //
 // Imports nothing at runtime (the types are erased), so
 // tools/app-logic-test.mjs can load it in plain Node.
@@ -22,6 +24,7 @@ export interface FunFactContext {
 }
 
 export interface FunFact {
+  kind: "trivia" | "stat";
   emoji: string;
   text: string;
 }
@@ -58,8 +61,12 @@ function shareBelow(value: number, values: number[]) {
 }
 
 export function funFacts(beer: Beer, ctx: FunFactContext): FunFact[] {
-  const out: FunFact[] = [];
   const { beers, brewery, facts, location, world } = ctx;
+  const trivia: FunFact[] = [
+    ...(facts?.trivia ?? []).map((text) => ({ kind: "trivia" as const, emoji: "💡", text })),
+    ...(brewery?.trivia ?? []).map((text) => ({ kind: "trivia" as const, emoji: "🏭", text })),
+  ];
+  const out: Omit<FunFact, "kind">[] = [];
   const rating = Number(beer.rating);
 
   // What it is.
@@ -169,5 +176,5 @@ export function funFacts(beer: Beer, ctx: FunFactContext): FunFact[] {
     }
   }
 
-  return out;
+  return [...trivia, ...out.map((f) => ({ kind: "stat" as const, ...f }))];
 }

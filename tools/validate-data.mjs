@@ -40,7 +40,7 @@ const {
   UNTAPPD_REFRESH_INTERVAL_DAYS,
   WANT_TO_TRY,
 } = D;
-const { BRAND_LOGOS, BEER_FACTS, GOALS } = D;
+const { BRAND_LOGOS, BEER_FACTS, GOALS, BEER_TRIVIA, BREWERY_TRIVIA } = D;
 
 // A country code has to carry both a flag and a display name — one without the
 // other renders a blank or the literal code.
@@ -230,6 +230,34 @@ for (const [name, f] of Object.entries(BEER_FACTS ?? {})) {
     err(where, "adjuncts must be an array of strings");
 }
 for (const name of beerNames) if (!BEER_FACTS[name]) err("BEER_FACTS", `"${name}" has no entry`);
+
+// ── TRIVIA ────────────────────────────────────────────────────
+// The card's fun facts, keyed by beer and by brewery. A key that names nothing
+// is a fact that silently never shows — usually a rename that missed it.
+const breweryNames = new Set(breweries.map((br) => br.name));
+for (const [map, keys, what] of [
+  ["BEER_TRIVIA", beerNames, "logged beer"],
+  ["BREWERY_TRIVIA", breweryNames, "brewery"],
+]) {
+  for (const [name, facts] of Object.entries(D[map] ?? {})) {
+    const where = `${map}["${name}"]`;
+    if (!keys.has(name)) err(where, `no ${what} has this name`);
+    if (!Array.isArray(facts) || !facts.length)
+      err(where, "must be a non-empty array of sentences");
+    else
+      for (const f of facts)
+        if (!isStr(f) || !/[.!?"”]$/.test(f.trim()))
+          err(where, `"${String(f).slice(0, 40)}…" must be a full sentence, ending in punctuation`);
+  }
+}
+for (const name of beerNames) {
+  const br = brewedBeers.get(name);
+  if (!BEER_TRIVIA?.[name] && !(br && BREWERY_TRIVIA?.[br]))
+    warn(
+      "BEER_TRIVIA",
+      `"${name}" has no trivia of its own or its brewery's — its card has no fun facts`,
+    );
+}
 
 // ── BRAND LOGOS ───────────────────────────────────────────────
 // The committed file for each brand. This is the check that makes "every beer

@@ -76,6 +76,7 @@ export function toRows(log: LogModule): Rows {
       cc: br.cc,
       lang: br.lang,
       native_name: br.nativeName ?? null,
+      trivia: log.BREWERY_TRIVIA[br.name] ?? [],
       lat: br.lat,
       lng: br.lng,
     })),
@@ -122,6 +123,7 @@ export function toRows(log: LogModule): Rows {
       ibu: f.ibu ?? null,
       cal: f.cal ?? null,
       adjuncts: f.adjuncts ?? [],
+      trivia: log.BEER_TRIVIA[beer_name] ?? [],
     })),
 
     want_to_try: log.WANT_TO_TRY.map((e, i) => ({

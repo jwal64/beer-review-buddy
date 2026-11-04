@@ -51,6 +51,8 @@ export interface BreweryRow {
   cc: string;
   lang: string;
   native_name: string | null;
+  /** Researched facts about the brewery, from BREWERY_TRIVIA. */
+  trivia: string[];
   lat: number;
   lng: number;
 }
@@ -90,6 +92,8 @@ export interface BeerFactsRow {
   ibu: number | null;
   cal: number | null;
   adjuncts: string[];
+  /** Researched facts about the beer, from BEER_TRIVIA. */
+  trivia: string[];
 }
 
 export interface WantToTryRow {
