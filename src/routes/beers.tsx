@@ -308,20 +308,37 @@ function BeersPage() {
                   {placeLabel(selected) || "Unknown place"} · {whenLabel(selected)}
                 </p>
                 {selectedFacts.length > 0 && (
-                  <section aria-label="Fun facts">
-                    <h3 className="mb-2 font-display text-sm font-semibold">Fun facts</h3>
-                    <ul className="max-h-[45vh] space-y-2 overflow-y-auto">
-                      {selectedFacts.map((f) => (
-                        <li
-                          key={f.text}
-                          className="flex gap-2.5 rounded-xl border border-border bg-card p-3 text-sm"
-                        >
-                          <span aria-hidden="true">{f.emoji}</span>
-                          <span>{f.text}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </section>
+                  <div className="max-h-[50vh] space-y-4 overflow-y-auto">
+                    {(
+                      [
+                        ["trivia", "Fun facts"],
+                        ["stat", "In the log"],
+                      ] as const
+                    ).map(([kind, title]) => {
+                      const items = selectedFacts.filter((f) => f.kind === kind);
+                      if (!items.length) return null;
+                      return (
+                        <section key={kind} aria-label={title}>
+                          <h3 className="mb-2 font-display text-sm font-semibold">{title}</h3>
+                          <ul className="space-y-2">
+                            {items.map((f) => (
+                              <li
+                                key={f.text}
+                                className={
+                                  kind === "trivia"
+                                    ? "flex gap-2.5 rounded-xl border border-border bg-card p-3 text-sm"
+                                    : "flex gap-2.5 px-1 text-xs text-muted-foreground"
+                                }
+                              >
+                                <span aria-hidden="true">{f.emoji}</span>
+                                <span>{f.text}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </section>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </>

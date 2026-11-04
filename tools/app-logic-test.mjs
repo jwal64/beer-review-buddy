@@ -571,6 +571,58 @@ check("facts are worked out from the data, and only when it is there", () => {
   eq(!full.some((t) => /calories/.test(t)), true, "a null figure is no fact");
   eq(Math.round(distanceKm({ lat: 0, lng: 0 }, { lat: 0, lng: 1 })), 111, "a degree of longitude");
 });
+check("researched trivia leads the card, the beer's before its brewery's", () => {
+  const { funFacts } = funFactsMod;
+  const beer = { name: "X", brewery: "B", style: "Lager", abv: 5, rating: 3 };
+  const facts = funFacts(beer, {
+    beers: [beer],
+    brewery: {
+      name: "B",
+      location: "Here",
+      native_name: null,
+      lat: 0,
+      lng: 0,
+      trivia: ["Brewery fact."],
+    },
+    facts: {
+      sub: null,
+      color: null,
+      body: null,
+      ibu: null,
+      cal: null,
+      adjuncts: [],
+      trivia: ["Beer fact."],
+    },
+  });
+  eq(facts[0].text, "Beer fact.", "the beer's own first");
+  eq(facts[1].text, "Brewery fact.", "then its brewery's");
+  eq(
+    facts.slice(0, 2).every((f) => f.kind === "trivia"),
+    true,
+    "both are trivia",
+  );
+  eq(
+    facts.slice(2).every((f) => f.kind === "stat"),
+    true,
+    "everything after is a stat",
+  );
+  eq(
+    funFacts(beer, { beers: [beer] }).some((f) => f.kind === "trivia"),
+    false,
+    "no trivia, none shown",
+  );
+});
+// Every card in the real log has at least one researched fact.
+check("every logged beer has trivia of its own or its brewery's", () => {
+  const brewery = new Map(snapshot.BREWERIES.map((b) => [b.name, b]));
+  const facts = new Map(snapshot.BEER_FACTS.map((f) => [f.beer_name, f]));
+  const bare = [...new Set(snapshot.BEERS.map((b) => b.name))].filter(
+    (n) =>
+      !facts.get(n)?.trivia.length &&
+      !brewery.get(snapshot.BEERS.find((b) => b.name === n).brewery)?.trivia.length,
+  );
+  eq(bare.join(", "), "", "beers with no fun facts");
+});
 
 // ══════════════════════════════════════════════════════════════
 console.log("");
