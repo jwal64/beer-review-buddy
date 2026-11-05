@@ -582,3 +582,10 @@ Labatt image, `palm-speciale.webp` and `palm-speciale-label.webp` the same Palm
 image. Nothing points at them; the log names the SVGs. They are here so that
 no range Lovable has to sync contains a rename or a delete of them. **Leave all
 four in place**, and see "Logos" in `CLAUDE.md` for the rule.
+
+## Shock Top Belgian White and Yuengling Traditional Lager
+
+Both are the labels as shown on the owner's Untappd check-in screenshots,
+cropped to the 164px tile. The session that added them had no egress to any
+brand site or favicon service (`npm run fetch-logos` answered nothing), so they
+are hand-placed and listed under `kept` in `logo-fetch-report.json`.
