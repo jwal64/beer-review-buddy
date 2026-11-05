@@ -967,6 +967,14 @@
     {
       "beer": "Żywiec",
       "file": "logos/zywiec.webp"
+    },
+    {
+      "beer": "Shock Top Belgian White",
+      "file": "logos/shock-top-belgian-white.webp"
+    },
+    {
+      "beer": "Yuengling Traditional Lager",
+      "file": "logos/yuengling-traditional-lager.webp"
     }
   ],
   "missing": []
