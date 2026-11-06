@@ -80,6 +80,8 @@ export interface Brewery {
   ratings: number[];
   /** Only when the native name differs from the marketed one. */
   nativeName?: string;
+  /** One true thing about this brewery that is not in any other column: its history, a first, an oddity. */
+  trivia: string;
 }
 
 export interface BeerFacts {
@@ -91,6 +93,8 @@ export interface BeerFacts {
   /** Per 12 fl oz; the brewery's published figure, or null. */
   cal: number | null;
   adjuncts: string[];
+  /** One true thing about this beer that is not in any other column: where the name comes from, a first, an oddity. */
+  story: string;
 }
 
 export interface WantToTry {

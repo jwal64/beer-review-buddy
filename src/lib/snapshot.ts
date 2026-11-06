@@ -53,6 +53,7 @@ export interface BreweryRow {
   native_name: string | null;
   lat: number;
   lng: number;
+  trivia: string;
 }
 
 export interface LocationRow {
@@ -90,6 +91,7 @@ export interface BeerFactsRow {
   ibu: number | null;
   cal: number | null;
   adjuncts: string[];
+  story: string;
 }
 
 export interface WantToTryRow {

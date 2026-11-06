@@ -78,6 +78,7 @@ export function toRows(log: LogModule): Rows {
       native_name: br.nativeName ?? null,
       lat: br.lat,
       lng: br.lng,
+      trivia: br.trivia,
     })),
 
     // `seq` preserves the order reviews were logged in within a month: they
@@ -122,6 +123,7 @@ export function toRows(log: LogModule): Rows {
       ibu: f.ibu ?? null,
       cal: f.cal ?? null,
       adjuncts: f.adjuncts ?? [],
+      story: f.story,
     })),
 
     want_to_try: log.WANT_TO_TRY.map((e, i) => ({

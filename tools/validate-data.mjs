@@ -130,6 +130,8 @@ breweries.forEach((br, i) => {
   else if (seenBrewery.has(br.name)) err(where, "duplicate brewery entry");
   else seenBrewery.add(br.name);
   if (!isStr(br.location)) err(where, "location is missing");
+  if (!isStr(br.trivia) || br.trivia.trim().length < 30)
+    err(where, "trivia (one true fact about this brewery, in a sentence) is missing");
   checkCC(where, "cc", br.cc);
   if (CNAMES[br.cc] && br.country !== CNAMES[br.cc])
     err(where, `country "${br.country}" does not match CNAMES.${br.cc} ("${CNAMES[br.cc]}")`);
@@ -228,6 +230,8 @@ for (const [name, f] of Object.entries(BEER_FACTS ?? {})) {
     err(where, `cal ${f.cal} must be a number from 30 to 400 per 12 fl oz, or null`);
   if (!Array.isArray(f.adjuncts) || f.adjuncts.some((a) => !isStr(a)))
     err(where, "adjuncts must be an array of strings");
+  if (!isStr(f.story) || f.story.trim().length < 30)
+    err(where, "story (one true fact about this beer, in a sentence) is missing");
 }
 for (const name of beerNames) if (!BEER_FACTS[name]) err("BEER_FACTS", `"${name}" has no entry`);
 

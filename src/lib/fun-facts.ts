@@ -73,6 +73,10 @@ export function funFacts(beer: Beer, ctx: FunFactContext): FunFact[] {
       text: `${article(facts.sub)} ${facts.sub}${look.length ? ` — ${list(look)}` : ""}.`,
     });
   }
+  // The two hand-written facts come first: they are the only ones nothing
+  // else in the log could have told you.
+  if (facts?.story) out.unshift({ emoji: "📖", text: facts.story });
+  if (brewery?.trivia) out.splice(facts?.story ? 1 : 0, 0, { emoji: "🏭", text: brewery.trivia });
   if (brewery?.native_name && brewery.native_name !== beer.name) {
     out.push({ emoji: "🗣️", text: `Known at home as ${brewery.native_name}.` });
   }

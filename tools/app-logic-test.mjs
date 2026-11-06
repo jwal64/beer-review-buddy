@@ -572,6 +572,42 @@ check("facts are worked out from the data, and only when it is there", () => {
   eq(Math.round(distanceKm({ lat: 0, lng: 0 }, { lat: 0, lng: 1 })), 111, "a degree of longitude");
 });
 
+check("the hand-written beer and brewery facts lead the card, in that order", () => {
+  const { funFacts } = funFactsMod;
+  const beers = [{ name: "X", brewery: "B", style: "Lager", abv: 5, rating: 3 }];
+  const out = funFacts(beers[0], {
+    beers,
+    brewery: {
+      name: "B",
+      location: "Here",
+      native_name: null,
+      lat: 0,
+      lng: 0,
+      trivia: "Brewery tale.",
+    },
+    facts: {
+      sub: "Lager",
+      color: null,
+      body: null,
+      ibu: null,
+      cal: null,
+      adjuncts: [],
+      story: "Beer tale.",
+    },
+  });
+  eq(out[0].text, "Beer tale.", "beer story first");
+  eq(out[1].text, "Brewery tale.", "brewery trivia second");
+  const none = funFacts(beers[0], {
+    beers,
+    brewery: { name: "B", location: "Here", native_name: null, lat: 0, lng: 0, trivia: "" },
+  });
+  eq(
+    none.some((f) => f.emoji === "🏭"),
+    false,
+    "an empty trivia is no fact",
+  );
+});
+
 // ══════════════════════════════════════════════════════════════
 console.log("");
 if (failures) {
