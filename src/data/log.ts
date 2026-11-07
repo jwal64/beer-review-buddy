@@ -500,7 +500,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Medalla Light":"logos/medalla-light.webp",
 "Menabrea":"logos/menabrea.webp",
 "Michelob Ultra":"logos/michelob-ultra.webp",
-"High Life":"logos/miller-high-life.svg",
+"High Life":"logos/miller-high-life-label.webp",
 "Miller Lite":"logos/miller-lite.webp",
 "Modelo Especial":"logos/modelo-especial.webp",
 "Modelo Oro":"logos/modelo-oro.webp",
