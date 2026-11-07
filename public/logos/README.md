@@ -589,3 +589,11 @@ Both are the labels as shown on the owner's Untappd check-in screenshots,
 cropped to the 164px tile. The session that added them had no egress to any
 brand site or favicon service (`npm run fetch-logos` answered nothing), so they
 are hand-placed and listed under `kept` in `logo-fetch-report.json`.
+
+## High Life
+
+No source reaches a High Life mark from here, so `miller-high-life-label.webp`
+is the label cropped from the owner's own Untappd screenshot of the check-in
+(the red-and-gold `Miller HIGH LIFE` label on white), upscaled to 256px. It is
+the brand's real artwork, just soft; it is listed under `kept`. Replace it
+under a new filename if a sharper original can be fetched.

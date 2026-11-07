@@ -143,9 +143,10 @@ export const beers: Review[] = [
   {beer:"Kruidige Winterbok",                   style:"Lager",          origin:"NL",    abv:7.5,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Palm Spéciale",                        style:"Pale Ale",       origin:"BE",    abv:5.2,method:"Draft", city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Labatt Blue",                         style:"Pilsner",        origin:"CA",    abv:5.0,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.50,isNew:true, month:"Oct",monthN:10,year:2026},
-  // NOV 2026 (2 reviews)
+  // NOV 2026 (3 reviews)
   {beer:"Shock Top Belgian White",               style:"Wheat Beer",     origin:"US",    abv:5.2,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Nov",monthN:11,year:2026},
   {beer:"Yuengling Traditional Lager",          style:"Lager",          origin:"US",    abv:4.4,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.25,isNew:true, month:"Nov",monthN:11,year:2026},
+  {beer:"High Life",                            style:"Lager",          origin:"US",    abv:4.6,method:"Bottle",city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.25,isNew:true, month:"Nov",monthN:11,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -224,7 +225,7 @@ export const breweries: Brewery[] = [
   {name:"Super Bock Group",                  location:"Leça do Balio, Porto",                    country:"Portugal",          cc:"PT",    lang:"pt",beers:"Super Bock",                                                                               lat:41.2142,lng:-8.6254,  ratings:[3.00]},
   {name:"Latrobe Brewing Company",           location:"Latrobe, Pennsylvania",                   country:"USA",               cc:"US",    lang:"en",beers:"Rolling Rock Extra Pale",                                                                  lat:40.3215,lng:-79.3795, ratings:[3.25]},
   {name:"Cervecería Cuauhtémoc Moctezuma",   location:"Monterrey, Nuevo León",                   country:"Mexico",            cc:"MX",    lang:"es",beers:"Dos Equis Lager Especial",                                                                 lat:25.6866,lng:-100.3161,ratings:[1.00]},
-  {name:"Miller Brewing Company",            location:"Milwaukee, Wisconsin",                    country:"USA",               cc:"US",    lang:"en",beers:"Miller Lite",                                                                              lat:43.0419,lng:-87.9665, ratings:[2.25]},
+  {name:"Miller Brewing Company",            location:"Milwaukee, Wisconsin",                    country:"USA",               cc:"US",    lang:"en",beers:"Miller Lite · High Life",                                                                 lat:43.0419,lng:-87.9665, ratings:[2.25,2.25]},
   {name:"Belhaven Brewery",                  location:"Dunbar, East Lothian",                    country:"Scotland",          cc:"GB-SCT",lang:"en",beers:"Belhaven Scottish Stout",                                                                  lat:56.0006,lng:-2.5176,  ratings:[3.00]},
   {name:"Boston Beer Company (Samuel Adams)",location:"Boston, Massachusetts",                   country:"USA",               cc:"US",    lang:"en",beers:"Samuel Adams Summer Ale",                                                                  lat:42.3601,lng:-71.0589, ratings:[3.00]},
   {name:"Cervecería del Pacífico",           location:"Mazatlán, Sinaloa",                       country:"Mexico",            cc:"MX",    lang:"es",beers:"Pacífico Clara",                                                                           lat:23.2494,lng:-106.4111,ratings:[3.75]},
@@ -344,6 +345,7 @@ export const BRAND_DOMAINS: Record<string, BrandDomain> = {
 "Menabrea":"birramenabrea.com",
 "Michelob Ultra":"michelobultra.com",
 "Miller Lite":"millerlite.com",
+"High Life":"millerhighlife.com",
 "Modelo Especial":"modelousa.com",
 "Negra Modelo":"modelousa.com",
 "Modelo Oro":"modelousa.com",
@@ -498,6 +500,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Medalla Light":"logos/medalla-light.webp",
 "Menabrea":"logos/menabrea.webp",
 "Michelob Ultra":"logos/michelob-ultra.webp",
+"High Life":"logos/miller-high-life-label.webp",
 "Miller Lite":"logos/miller-lite.webp",
 "Modelo Especial":"logos/modelo-especial.webp",
 "Modelo Oro":"logos/modelo-oro.webp",
@@ -533,6 +536,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Sam Adams Boston Lager":"logos/sam-adams-boston-lager.svg",
 "Samuel Adams Summer Ale":"logos/samuel-adams-summer-ale.svg",
 "Sapporo Premium":"logos/sapporo-premium.webp",
+"Shock Top Belgian White":"logos/shock-top-belgian-white.webp",
 "Singha":"logos/singha.svg",
 "Smithwick's":"logos/smithwicks.svg",
 "Sol":"logos/sol.svg",
@@ -546,14 +550,13 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Texels Skuumkoppe":"logos/texels-skuumkoppe.svg",
 "Tiger Beer":"logos/tiger-beer.svg",
 "Toasted Lager":"logos/toasted-lager.webp",
-"Shock Top Belgian White":"logos/shock-top-belgian-white.webp",
-"Yuengling Traditional Lager":"logos/yuengling-traditional-lager.webp",
 "Tsingtao":"logos/tsingtao.webp",
 "Tuborg":"logos/tuborg.svg",
 "Tyskie":"logos/tyskie.svg",
 "Victoria Bitter":"logos/victoria-bitter.svg",
 "Weihenstephaner Hefeweissbier":"logos/weihenstephaner-hefeweissbier.webp",
 "Wrench":"logos/wrench.webp",
+"Yuengling Traditional Lager":"logos/yuengling-traditional-lager.webp",
 "Zagorka":"logos/zagorka.webp",
 "Żywiec":"logos/zywiec.webp",
 };
@@ -636,6 +639,7 @@ export const BEER_FACTS: Record<string, BeerFacts> = {
 "Mahou Cinco Estrellas":{sub:"International Pale Lager",color:"Gold",body:"Light",ibu:27,cal:174,adjuncts:["corn"]},
 "Medalla Light":{sub:"Light Lager",color:"Pale",body:"Light",ibu:null,cal:98,adjuncts:[]},
 "Michelob Ultra":{sub:"Light Lager",color:"Pale",body:"Light",ibu:null,cal:95,adjuncts:["rice"]},
+"High Life":{sub:"American Adjunct Lager",color:"Pale",body:"Light",ibu:null,cal:141,adjuncts:["corn syrup"]},
 "Miller Lite":{sub:"Light Lager",color:"Pale",body:"Light",ibu:null,cal:96,adjuncts:["corn syrup"]},
 "Modelo Especial":{sub:"Mexican Lager",color:"Gold",body:"Light",ibu:18,cal:null,adjuncts:[]},
 "Modelo Oro":{sub:"Light Lager",color:"Pale",body:"Light",ibu:null,cal:90,adjuncts:[]},
