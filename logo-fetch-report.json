@@ -975,6 +975,10 @@
     {
       "beer": "Yuengling Traditional Lager",
       "file": "logos/yuengling-traditional-lager.webp"
+    },
+    {
+      "beer": "High Life",
+      "file": "logos/miller-high-life.svg"
     }
   ],
   "missing": []

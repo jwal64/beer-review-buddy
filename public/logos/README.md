@@ -589,3 +589,14 @@ Both are the labels as shown on the owner's Untappd check-in screenshots,
 cropped to the 164px tile. The session that added them had no egress to any
 brand site or favicon service (`npm run fetch-logos` answered nothing), so they
 are hand-placed and listed under `kept` in `logo-fetch-report.json`.
+
+## High Life
+
+No source reaches a High Life mark from here: the brand site, the favicon
+services and Wikimedia answer `403`, `detain/svg-logos` has Miller Lite and
+Miller Genuine Draft but no High Life, and Untappd's label bucket needs a hash
+only the beer's page gives. `miller-high-life.svg` is therefore **drawn**: the
+red label with its gold border, the `Miller` script and `HIGH LIFE`, on white,
+after the bottle label. It is an approximation, not the brand's artwork, and
+is listed under `kept`. Replace it under a new filename when the real mark can
+be fetched.
