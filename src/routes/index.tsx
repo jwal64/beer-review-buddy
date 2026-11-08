@@ -6,7 +6,7 @@ import { Rating } from "@/components/Rating";
 import { QueryError } from "@/components/QueryError";
 import { flagEmoji, whenLabel, useBeers, useCountries, type Beer } from "@/lib/beer-data";
 import { placeLabel } from "@/lib/place";
-import { useProgress } from "@/hooks/use-progress";
+import { MethodBadge } from "@/components/MethodBadge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ChevronRight } from "lucide-react";
 
@@ -42,7 +42,7 @@ function StatCard({
     <Link
       to={to}
       aria-label={`${label}: ${value}. Open ${to.slice(1)}`}
-      className="group rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className="surface group rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
     >
       <div className="font-display text-2xl font-semibold text-primary">{value}</div>
       <div className="mt-0.5 text-xs text-muted-foreground">{label}</div>
@@ -50,59 +50,6 @@ function StatCard({
         size={14}
         aria-hidden="true"
         className="mt-2 text-muted-foreground transition-transform group-hover:translate-x-0.5"
-      />
-    </Link>
-  );
-}
-
-/**
- * The Passport tab in one line: the streak, the latest badge and the year's
- * headline goal. Tapping it opens the tab.
- */
-function ProgressStrip() {
-  const { data: p } = useProgress();
-  const goal = p.goals.find((g) => g.year === p.thisYear);
-  const headline = goal?.metrics[0];
-  const items = [
-    {
-      icon: "🔥",
-      value: `${p.streak.current} mo`,
-      label: p.streak.loggedThisMonth || !p.streak.current ? "streak" : "streak · log one",
-    },
-    {
-      icon: p.latestBadge?.def.emoji ?? "🏅",
-      value: `${p.earned}/${p.badges.length}`,
-      label: p.latestBadge ? `latest: ${p.latestBadge.def.title}` : "badges",
-    },
-    ...(headline
-      ? [
-          {
-            icon: "🎯",
-            value: `${headline.current}/${headline.target}`,
-            label: `${headline.label.toLowerCase()} ${goal?.year}`,
-          },
-        ]
-      : []),
-  ];
-  return (
-    <Link
-      to="/passport"
-      aria-label="Open the passport: streak, badges and goals"
-      className="group flex items-stretch gap-2 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-    >
-      {items.map((it) => (
-        <div key={it.label} className="min-w-0 flex-1">
-          <div className="flex items-center gap-1.5">
-            <span aria-hidden="true">{it.icon}</span>
-            <span className="font-display text-base font-semibold text-primary">{it.value}</span>
-          </div>
-          <div className="mt-0.5 truncate text-[11px] text-muted-foreground">{it.label}</div>
-        </div>
-      ))}
-      <ChevronRight
-        size={14}
-        aria-hidden="true"
-        className="shrink-0 self-center text-muted-foreground transition-transform group-hover:translate-x-0.5"
       />
     </Link>
   );
@@ -139,7 +86,7 @@ function HomePage() {
       unique: names.size,
       avg: list.length ? ratingSum / list.length : 0,
       countries: originCountries.size,
-      recent: list.slice(0, 5),
+      recent: list.slice(0, 6),
       top,
     };
   }, [beers]);
@@ -156,14 +103,51 @@ function HomePage() {
         <QueryError what="reviews" onRetry={() => void refetch()} />
       ) : (
         <div className="space-y-7">
+          {stats.recent[0] && (
+            <section aria-label="Latest pour">
+              <p className="mb-2 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Latest pour
+              </p>
+              <Link
+                to="/beers"
+                search={{ beer: stats.recent[0].id }}
+                aria-label={`Open ${stats.recent[0].name}`}
+                className={`surface flex items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${Number(stats.recent[0].rating) >= 4 ? "hall-of-fame" : ""}`}
+              >
+                <BeerLogo
+                  name={stats.recent[0].name}
+                  logo={stats.recent[0].logo}
+                  style={stats.recent[0].style}
+                  className="h-16 w-16"
+                />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-display text-lg font-semibold">
+                    {stats.recent[0].name}
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">
+                    {flagEmoji(stats.recent[0].origin_cc, countries)} {stats.recent[0].style}
+                    {stats.recent[0].abv != null && ` · ${stats.recent[0].abv}%`}
+                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <MethodBadge method={stats.recent[0].method} />
+                    <span className="truncate text-[11px] text-muted-foreground">
+                      {placeLabel(stats.recent[0])}
+                    </span>
+                  </div>
+                </div>
+                <span className="font-display text-2xl font-semibold text-primary">
+                  {Number(stats.recent[0].rating).toFixed(2)}
+                </span>
+              </Link>
+            </section>
+          )}
+
           <section className="grid grid-cols-2 gap-3" aria-label="Review summary">
             <StatCard label="Reviews" value={String(stats.total)} to="/beers" />
             <StatCard label="Unique beers" value={String(stats.unique)} to="/beers" />
             <StatCard label="Avg rating" value={stats.avg.toFixed(2)} to="/insights" />
             <StatCard label="Origin countries" value={String(stats.countries)} to="/map" />
           </section>
-
-          <ProgressStrip />
 
           <section>
             <div className="mb-3 flex items-center justify-between">
@@ -178,18 +162,22 @@ function HomePage() {
             {stats.top.length ? (
               <ul className="space-y-2">
                 {stats.top.map((b) => (
-                  <li
-                    key={b.id}
-                    className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3"
-                  >
-                    <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-semibold">{b.name}</p>
-                      <p className="truncate text-xs text-muted-foreground">
-                        {flagEmoji(b.origin_cc, countries)} {b.style}
-                      </p>
-                    </div>
-                    <Rating value={Number(b.rating)} />
+                  <li key={b.id}>
+                    <Link
+                      to="/beers"
+                      search={{ beer: b.id }}
+                      aria-label={`Open ${b.name}`}
+                      className="surface flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-semibold">{b.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">
+                          {flagEmoji(b.origin_cc, countries)} {b.style}
+                        </p>
+                      </div>
+                      <Rating value={Number(b.rating)} />
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -218,19 +206,23 @@ function HomePage() {
               </Link>
             </div>
             <ul className="space-y-2">
-              {stats.recent.map((b) => (
-                <li
-                  key={b.id}
-                  className="flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3"
-                >
-                  <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-semibold">{b.name}</p>
-                    <p className="truncate text-xs text-muted-foreground">
-                      {placeLabel(b)} · {whenLabel(b)}
-                    </p>
-                  </div>
-                  <Rating value={Number(b.rating)} showValue={false} />
+              {stats.recent.slice(1).map((b) => (
+                <li key={b.id}>
+                  <Link
+                    to="/beers"
+                    search={{ beer: b.id }}
+                    aria-label={`Open ${b.name}`}
+                    className="surface flex min-h-20 items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:border-primary/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-11 w-11" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-semibold">{b.name}</p>
+                      <p className="truncate text-xs text-muted-foreground">
+                        {placeLabel(b)} · {whenLabel(b)}
+                      </p>
+                    </div>
+                    <Rating value={Number(b.rating)} showValue={false} />
+                  </Link>
                 </li>
               ))}
             </ul>

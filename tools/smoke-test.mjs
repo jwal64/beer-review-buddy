@@ -165,11 +165,11 @@ await check("passport stamps and bingo", async () => {
   return n > 0 && c === 12 && `${n} stamps · ${c} bingo squares`;
 });
 
-await check("home links to the passport", async () => {
+await check("home shows the latest pour", async () => {
   await visit("/", "JWAL BREW REVIEW");
-  const strip = page.locator('main a[href="/passport"]');
-  await strip.waitFor({ timeout: 15000 });
-  return /streak/.test(await strip.innerText()) && "streak strip";
+  const card = page.locator('section[aria-label="Latest pour"] a');
+  await card.waitFor({ timeout: 15000 });
+  return (await page.locator('main a[href="/passport"]').count()) === 0 && "latest pour";
 });
 
 await check("add a beer", async () => {

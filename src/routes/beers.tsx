@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useDeferredValue, useMemo, useState } from "react";
+import { BREWERY_TRIVIA } from "@/data/log";
 import { Shell } from "@/components/Shell";
 import { BeerLogo } from "@/components/BeerLogo";
 import { Rating } from "@/components/Rating";
+import { MethodBadge } from "@/components/MethodBadge";
 import { QueryError } from "@/components/QueryError";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,6 +34,8 @@ import { placeLabel } from "@/lib/place";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/beers")({
+  validateSearch: (search: Record<string, unknown>): { beer?: string } =>
+    typeof search["beer"] === "string" ? { beer: search["beer"] } : {},
   head: () => ({
     meta: [
       { title: "All beers — JWAL BREW REVIEW" },
@@ -83,7 +87,15 @@ function BeersPage() {
   const [origin, setOrigin] = useState("All");
   const [sort, setSort] = useState<SortKey>("Recent");
   const [reversed, setReversed] = useState(false);
-  const [selected, setSelected] = useState<Beer | null>(null);
+  const { beer: openId } = Route.useSearch();
+  const navigate = Route.useNavigate();
+  const [picked, setPicked] = useState<Beer | null>(null);
+  const linked = openId ? (beers?.find((b) => b.id === openId) ?? null) : null;
+  const selected = picked ?? linked;
+  const setSelected = (b: Beer | null) => {
+    setPicked(b);
+    if (!b && openId) void navigate({ search: {}, replace: true });
+  };
 
   const styles = useMemo(
     () => ["All", ...Array.from(new Set((beers ?? []).map((b) => b.style))).sort()],
@@ -122,6 +134,7 @@ function BeersPage() {
             facts: facts?.get(selected.name),
             location: locations?.find((l) => l.city === selected.city && l.cc === selected.cc),
             world: world?.get(selected.name),
+            trivia: selected.brewery ? BREWERY_TRIVIA[selected.brewery] : undefined,
           })
         : [],
     [selected, beers, breweries, facts, locations, world],
@@ -249,7 +262,7 @@ function BeersPage() {
                 <button
                   type="button"
                   onClick={() => setSelected(b)}
-                  className="flex min-h-20 w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className={`surface flex min-h-20 w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:bg-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring ${Number(b.rating) >= 4 ? "hall-of-fame" : ""}`}
                 >
                   <BeerLogo name={b.name} logo={b.logo} style={b.style} className="h-12 w-12" />
                   <div className="min-w-0 flex-1">
@@ -261,12 +274,22 @@ function BeersPage() {
                     </div>
                     <p className="truncate text-xs text-muted-foreground">
                       {flagEmoji(b.origin_cc, countries)} {b.style}
-                      {b.abv != null && ` · ${b.abv}%`} · {b.method}
+                      {b.abv != null && ` · ${b.abv}%`}
                     </p>
-                    <div className="mt-1 flex items-center gap-2">
-                      <Rating value={Number(b.rating)} />
-                      <span className="text-[11px] text-muted-foreground">{whenLabel(b)}</span>
+                    <div className="mt-1.5 flex items-center gap-2">
+                      <MethodBadge method={b.method} />
+                      <span className="truncate text-[11px] text-muted-foreground">
+                        {whenLabel(b)}
+                      </span>
                     </div>
+                  </div>
+                  <div className="flex shrink-0 flex-col items-end gap-1">
+                    <span
+                      className={`font-display text-lg font-semibold leading-none ${Number(b.rating) >= 4 ? "text-gold" : "text-foreground"}`}
+                    >
+                      {Number(b.rating).toFixed(2)}
+                    </span>
+                    <Rating value={Number(b.rating)} size={10} showValue={false} />
                   </div>
                 </button>
               </li>

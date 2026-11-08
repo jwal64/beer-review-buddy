@@ -1,12 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import { Home, Beer, Map, BarChart3, Stamp } from "lucide-react";
+import { Home, Beer, Map, BarChart3 } from "lucide-react";
 
 const items = [
   { to: "/", label: "Home", icon: Home },
   { to: "/beers", label: "Beers", icon: Beer },
   { to: "/map", label: "Map", icon: Map },
   { to: "/insights", label: "Insights", icon: BarChart3 },
-  { to: "/passport", label: "Passport", icon: Stamp },
 ] as const;
 
 export function BottomNav() {
@@ -18,11 +17,13 @@ export function BottomNav() {
             <Link
               to={to}
               activeOptions={{ exact: to === "/" }}
-              activeProps={{ className: "text-primary" }}
+              activeProps={{ className: "text-primary [&>span]:bg-primary/15" }}
               inactiveProps={{ className: "text-muted-foreground" }}
-              className="flex flex-col items-center gap-1 py-3 text-[11px] font-medium transition active:scale-95"
+              className="flex flex-col items-center gap-0.5 py-2 text-[11px] font-medium transition active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             >
-              <Icon size={20} />
+              <span className="rounded-full px-4 py-1 transition-colors">
+                <Icon size={20} aria-hidden="true" />
+              </span>
               {label}
             </Link>
           </li>
