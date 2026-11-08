@@ -19,6 +19,8 @@ export interface FunFactContext {
   location?: LocationRow | undefined;
   /** The world's Untappd average for this beer. */
   world?: number | undefined;
+  /** Hand-written facts about the brewery, from the log. */
+  trivia?: string[] | undefined;
 }
 
 export interface FunFact {
@@ -59,8 +61,11 @@ function shareBelow(value: number, values: number[]) {
 
 export function funFacts(beer: Beer, ctx: FunFactContext): FunFact[] {
   const out: FunFact[] = [];
-  const { beers, brewery, facts, location, world } = ctx;
+  const { beers, brewery, facts, world, trivia } = ctx;
   const rating = Number(beer.rating);
+
+  // The brewery's own story.
+  for (const t of trivia ?? []) out.push({ emoji: "📜", text: t });
 
   // What it is.
   if (facts?.sub) {
@@ -80,17 +85,33 @@ export function funFacts(beer: Beer, ctx: FunFactContext): FunFact[] {
     out.push({ emoji: "🌾", text: `Brewed with ${list(facts.adjuncts)}.` });
   }
 
-  // How far it came.
-  if (brewery && location) {
-    const km = distanceKm(brewery, location);
-    out.push(
-      km < 50
-        ? { emoji: "🏠", text: `Drunk within 50 km of the brewery in ${brewery.location}.` }
-        : {
-            emoji: "✈️",
-            text: `Travelled about ${n(km)} km (${n(km / KM_PER_MI)} mi) from ${brewery.location} to the glass in ${location.city}.`,
-          },
-    );
+  // Where and when it was poured.
+  const sameCity = beers.filter((b) => b.city === beer.city);
+  if (beer.city && sameCity.length > 1) {
+    const cityRatings = sameCity.map((b) => Number(b.rating));
+    if (placeOf(rating, cityRatings) === 1)
+      out.push({ emoji: "📍", text: `The best pour of ${sameCity.length} in ${beer.city}.` });
+    else
+      out.push({ emoji: "📍", text: `One of ${sameCity.length} beers reviewed in ${beer.city}.` });
+  }
+  const firstOfOrigin = beers
+    .filter((b) => b.origin_cc === beer.origin_cc && !b.retro)
+    .sort((x, y) => String(x.drank_on).localeCompare(String(y.drank_on)))[0];
+  if (
+    firstOfOrigin &&
+    firstOfOrigin.id === beer.id &&
+    beers.some((b) => b.origin_cc === beer.origin_cc && b.id !== beer.id)
+  )
+    out.push({ emoji: "🛂", text: `The first dated review from its home country.` });
+  const sameMethod = beers.filter((b) => b.method === beer.method);
+  if (beer.method && sameMethod.length > 1) {
+    const avg = sameMethod.reduce((s, b) => s + Number(b.rating), 0) / sameMethod.length;
+    const d = rating - avg;
+    if (Math.abs(d) >= 0.25)
+      out.push({
+        emoji: "🍻",
+        text: `${Math.abs(d).toFixed(2)} ${d > 0 ? "above" : "below"} the average ${beer.method.toLowerCase()} pour (${avg.toFixed(2)}).`,
+      });
   }
 
   // Against the world.

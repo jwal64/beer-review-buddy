@@ -564,9 +564,9 @@ check("facts are worked out from the data, and only when it is there", () => {
   eq(full.includes("The strongest beer in the log, at 9%."), true, "strongest");
   eq(full.includes("B also makes Mid in the log."), true, "siblings");
   eq(
-    full.some((t) => t.startsWith("Travelled about 1,112 km")),
-    true,
-    "distance",
+    full.some((t) => /Travelled|km/.test(t)),
+    false,
+    "no travel-distance fact",
   );
   eq(!full.some((t) => /calories/.test(t)), true, "a null figure is no fact");
   eq(Math.round(distanceKm({ lat: 0, lng: 0 }, { lat: 0, lng: 1 })), 111, "a degree of longitude");
