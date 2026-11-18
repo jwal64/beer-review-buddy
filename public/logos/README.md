@@ -597,3 +597,10 @@ is the label cropped from the owner's own Untappd screenshot of the check-in
 (the red-and-gold `Miller HIGH LIFE` label on white), upscaled to 256px. It is
 the brand's real artwork, just soft; it is listed under `kept`. Replace it
 under a new filename if a sharper original can be fetched.
+
+## Murphy's Irish Stout
+
+No source reaches a Murphy's mark from here, so `murphys-irish-stout.svg` is
+**drawn**, not the brand's artwork: a black roundel with the wordmark, the
+"James J. Murphy" script and a simplified crest, after the Untappd label. Swap
+in the real mark when one can be fetched (under a new filename).

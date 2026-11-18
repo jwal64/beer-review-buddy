@@ -143,10 +143,11 @@ export const beers: Review[] = [
   {beer:"Kruidige Winterbok",                   style:"Lager",          origin:"NL",    abv:7.5,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Palm Spéciale",                        style:"Pale Ale",       origin:"BE",    abv:5.2,method:"Draft", city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Labatt Blue",                         style:"Pilsner",        origin:"CA",    abv:5.0,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.50,isNew:true, month:"Oct",monthN:10,year:2026},
-  // NOV 2026 (3 reviews)
+  // NOV 2026 (4 reviews)
   {beer:"Shock Top Belgian White",               style:"Wheat Beer",     origin:"US",    abv:5.2,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Nov",monthN:11,year:2026},
   {beer:"Yuengling Traditional Lager",          style:"Lager",          origin:"US",    abv:4.4,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.25,isNew:true, month:"Nov",monthN:11,year:2026},
   {beer:"High Life",                            style:"Lager",          origin:"US",    abv:4.6,method:"Bottle",city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.25,isNew:true, month:"Nov",monthN:11,year:2026},
+  {beer:"Murphy's Irish Stout",                 style:"Stout",          origin:"IE",    abv:4.0,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:4.00,isNew:true, month:"Nov",monthN:11,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -233,6 +234,7 @@ export const breweries: Brewery[] = [
   {name:"Kona Brewing Company",              location:"Kailua-Kona, Hawaii",                     country:"USA",               cc:"US",    lang:"en",beers:"Big Wave Golden Ale",                                                                      lat:19.6406,lng:-155.9969,ratings:[3.75]},
   {name:"Blue Moon Brewing Company",         location:"Denver, Colorado",                        country:"USA",               cc:"US",    lang:"en",beers:"Blue Moon",                                                                                lat:39.7392,lng:-104.9903,ratings:[3.50]},
   {name:"Smithwick's (St. Francis Abbey)",   location:"Kilkenny, Leinster",                      country:"Ireland",           cc:"IE",    lang:"en",beers:"Smithwick's",                                                                              lat:52.6541,lng:-7.2448,  ratings:[2.75]},
+  {name:"Murphy's (Heineken Ireland)",         location:"Cork, Munster",                           country:"Ireland",           cc:"IE",    lang:"en",beers:"Murphy's Irish Stout",                                                                     lat:51.9040,lng:-8.4797,  ratings:[4.00]},
   {name:"Captain Lawrence Brewing Company",  location:"Elmsford, New York",                      country:"USA",               cc:"US",    lang:"en",beers:"Hop Commander",                                                                            lat:41.0540,lng:-73.8201, ratings:[3.00]},
   {name:"Paulaner Brauerei",                 location:"Munich, Bavaria",                         country:"Germany",           cc:"DE",    lang:"de",beers:"Paulaner Hefe-Weißbier · Paulaner Münchner Hell",                                                                   lat:48.1234,lng:11.5808,  ratings:[4.00,3.00]},
   {name:"Compañía Cervecera de Puerto Rico", location:"Mayagüez, Puerto Rico",                   country:"Puerto Rico",       cc:"PR",    lang:"es",beers:"Medalla Light · Magna",                                                                    lat:18.2011,lng:-67.1397, ratings:[4.00,3.00]},
@@ -381,6 +383,7 @@ export const BRAND_DOMAINS: Record<string, BrandDomain> = {
 "Belhaven Scottish Stout":"belhaven.co.uk",
 "Singha":"singhabeer.com",
 "Smithwick's":["smithwicks.com","smithwicks.ie"],
+"Murphy's Irish Stout":"murphysirishstout.com",
 "Sol":["cervezasol.com","solbeer.com"],
 "Spaten Oktoberfest Ur-Märzen / Winter":["spatenbraeu.de","spaten.de"],
 "Stella Artois":"stellaartois.com",
@@ -500,8 +503,8 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Medalla Light":"logos/medalla-light.webp",
 "Menabrea":"logos/menabrea.webp",
 "Michelob Ultra":"logos/michelob-ultra.webp",
-"High Life":"logos/miller-high-life-label.webp",
 "Miller Lite":"logos/miller-lite.webp",
+"High Life":"logos/miller-high-life-label.webp",
 "Modelo Especial":"logos/modelo-especial.webp",
 "Modelo Oro":"logos/modelo-oro.webp",
 "Mythos":"logos/mythos.webp",
@@ -539,6 +542,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Shock Top Belgian White":"logos/shock-top-belgian-white.webp",
 "Singha":"logos/singha.svg",
 "Smithwick's":"logos/smithwicks.svg",
+"Murphy's Irish Stout":"logos/murphys-irish-stout.svg",
 "Sol":"logos/sol.svg",
 "Spaten Oktoberfest Ur-Märzen / Winter":"logos/spaten-oktoberfest-ur-marzen-winter.webp",
 "Steinlager Classic":"logos/steinlager-classic.webp",
@@ -664,6 +668,7 @@ export const BEER_FACTS: Record<string, BeerFacts> = {
 "Samuel Adams Summer Ale":{sub:"American Wheat Ale",color:"Gold",body:"Light",ibu:null,cal:null,adjuncts:["wheat","lemon zest","grains of paradise"]},
 "Sapporo Premium":{sub:"Japanese Lager",color:"Gold",body:"Light",ibu:12,cal:140,adjuncts:[]},
 "Smithwick's":{sub:"Irish Red Ale",color:"Amber",body:"Medium",ibu:null,cal:null,adjuncts:[]},
+"Murphy's Irish Stout":{sub:"Irish Dry Stout",color:"Dark",body:"Light",ibu:null,cal:null,adjuncts:[]},
 "Spaten Oktoberfest Ur-Märzen / Winter":{sub:"Märzen / Festbier",color:"Gold",body:"Medium",ibu:null,cal:185,adjuncts:[]},
 "Stella Artois":{sub:"International Pale Lager",color:"Gold",body:"Medium",ibu:null,cal:151,adjuncts:["maize"]},
 "Stiegl Goldbräu":{sub:"Märzen / Festbier",color:"Gold",body:"Medium",ibu:20,cal:153,adjuncts:[]},
