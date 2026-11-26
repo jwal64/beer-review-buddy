@@ -983,6 +983,10 @@
     {
       "beer": "High Life",
       "file": "logos/miller-high-life-label.webp"
+    },
+    {
+      "beer": "Fat Tire Ale",
+      "file": "logos/fat-tire-ale.webp"
     }
   ],
   "missing": []

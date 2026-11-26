@@ -143,11 +143,12 @@ export const beers: Review[] = [
   {beer:"Kruidige Winterbok",                   style:"Lager",          origin:"NL",    abv:7.5,method:"Bottle",city:"Hengelo",        region:"Overijssel",          country:"Netherlands",cc:"NL",rating:4.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Palm Spéciale",                        style:"Pale Ale",       origin:"BE",    abv:5.2,method:"Draft", city:"White Plains",   region:"New York",            country:"USA",        cc:"US",rating:3.00,isNew:true, month:"Oct",monthN:10,year:2026},
   {beer:"Labatt Blue",                         style:"Pilsner",        origin:"CA",    abv:5.0,method:"Bottle",city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:3.50,isNew:true, month:"Oct",monthN:10,year:2026},
-  // NOV 2026 (4 reviews)
+  // NOV 2026 (5 reviews)
   {beer:"Shock Top Belgian White",               style:"Wheat Beer",     origin:"US",    abv:5.2,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.50,isNew:true, month:"Nov",monthN:11,year:2026},
   {beer:"Yuengling Traditional Lager",          style:"Lager",          origin:"US",    abv:4.4,method:"Draft", city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.25,isNew:true, month:"Nov",monthN:11,year:2026},
   {beer:"High Life",                            style:"Lager",          origin:"US",    abv:4.6,method:"Bottle",city:"New York",       region:"New York",            country:"USA",        cc:"US",rating:2.25,isNew:true, month:"Nov",monthN:11,year:2026},
   {beer:"Murphy's Irish Stout",                 style:"Stout",          origin:"IE",    abv:4.0,method:"Can",   city:"New Rochelle",   region:"New York",            country:"USA",        cc:"US",rating:4.00,isNew:true, month:"Nov",monthN:11,year:2026},
+  {beer:"Fat Tire Ale",                         style:"Pale Ale",       origin:"US",    abv:5.2,method:"Bottle",city:"Eastchester",    region:"New York",            country:"USA",        cc:"US",rating:3.50,isNew:true, month:"Nov",monthN:11,year:2026},
 ];
 
 // ── CONSUMPTION LOCATIONS — every city a review was logged in
@@ -266,6 +267,7 @@ export const breweries: Brewery[] = [
   {name:"Labatt Brewing Company", location:"London, Ontario", country:"Canada", cc:"CA", lang:"en", beers:"Labatt Blue", lat:42.9811, lng:-81.2420, ratings:[3.50]},
   {name:"Kiuchi Brewery",                    location:"Naka, Ibaraki",                           country:"Japan",             cc:"JP",    lang:"ja",beers:"Hitachino Nest White Ale",                                  nativeName:"常陸野ネスト ホワイトエール", lat:36.4686,lng:140.4681, ratings:[5.00]},
   {name:"Holsten-Brauerei", location:"Hamburg, Hamburg", country:"Germany", cc:"DE", lang:"de", beers:"Duckstein Weizen", lat:53.4790, lng:9.9110, ratings:[4.75]},
+  {name:"New Belgium Brewing Company", location:"Fort Collins, Colorado", country:"USA", cc:"US", lang:"en", beers:"Fat Tire Ale", lat:40.5932, lng:-105.0687, ratings:[3.50]},
 ];
 
 // ══════════════════════════════════════════════════════════════
@@ -384,6 +386,7 @@ export const BRAND_DOMAINS: Record<string, BrandDomain> = {
 "Singha":"singhabeer.com",
 "Smithwick's":["smithwicks.com","smithwicks.ie"],
 "Murphy's Irish Stout":"murphysirishstout.com",
+"Fat Tire Ale":"newbelgium.com",
 "Sol":["cervezasol.com","solbeer.com"],
 "Spaten Oktoberfest Ur-Märzen / Winter":["spatenbraeu.de","spaten.de"],
 "Stella Artois":"stellaartois.com",
@@ -543,6 +546,7 @@ export const BRAND_LOGOS: Record<string, string> = {
 "Singha":"logos/singha.svg",
 "Smithwick's":"logos/smithwicks.svg",
 "Murphy's Irish Stout":"logos/murphys-irish-stout.svg",
+"Fat Tire Ale":"logos/fat-tire-ale.webp",
 "Sol":"logos/sol.svg",
 "Spaten Oktoberfest Ur-Märzen / Winter":"logos/spaten-oktoberfest-ur-marzen-winter.webp",
 "Steinlager Classic":"logos/steinlager-classic.webp",
@@ -669,6 +673,7 @@ export const BEER_FACTS: Record<string, BeerFacts> = {
 "Sapporo Premium":{sub:"Japanese Lager",color:"Gold",body:"Light",ibu:12,cal:140,adjuncts:[]},
 "Smithwick's":{sub:"Irish Red Ale",color:"Amber",body:"Medium",ibu:null,cal:null,adjuncts:[]},
 "Murphy's Irish Stout":{sub:"Irish Dry Stout",color:"Dark",body:"Light",ibu:null,cal:null,adjuncts:[]},
+"Fat Tire Ale":{sub:"Golden Ale",color:"Gold",body:"Medium",ibu:15,cal:140,adjuncts:["raw barley"]},
 "Spaten Oktoberfest Ur-Märzen / Winter":{sub:"Märzen / Festbier",color:"Gold",body:"Medium",ibu:null,cal:185,adjuncts:[]},
 "Stella Artois":{sub:"International Pale Lager",color:"Gold",body:"Medium",ibu:null,cal:151,adjuncts:["maize"]},
 "Stiegl Goldbräu":{sub:"Märzen / Festbier",color:"Gold",body:"Medium",ibu:20,cal:153,adjuncts:[]},
@@ -707,7 +712,7 @@ export const UNTAPPD_GLOBAL_AVGS: Record<string, number> = {
   "Stiegl Goldbräu":3.35,"Modelo Oro":3.45,"Super Bock":3.41,
   "Estrella Jalisco":3.20,"Rolling Rock Extra Pale":3.05,"Birra Moretti":3.58,
   "Erdinger Weißbier":3.78,"Miller Lite":2.51,"Pacífico Clara":3.65,
-  "Narragansett Lager":3.23,"Big Wave Golden Ale":3.52,"Belhaven Scottish Stout":3.45,
+  "Narragansett Lager":3.23,"Big Wave Golden Ale":3.52,"Fat Tire Ale":3.58,"Belhaven Scottish Stout":3.45,
   "Samuel Adams Summer Ale":3.50,"Hitachino Nest White Ale":3.60,
   "Toasted Lager":3.51,"Othmar Blond":3.50,
 };
